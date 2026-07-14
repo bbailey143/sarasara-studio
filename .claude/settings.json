@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s \"https://api.github.com/repos/bigbarnstudiosales-design/brush-concept/git/trees/40aec54649dd9f629b79734a5135b1992bc902b7?recursive=1\")",
+      "Bash(cp /tmp/tree.json __TRACKED_VAR__/tree.json)",
+      "Bash(python3 -c ' *)",
+      "Read(//tmp/**)",
+      "Bash(mkdir -p /tmp/brush-concept)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/bigbarnstudiosales-design/brush-concept/40aec54649dd9f629b79734a5135b1992bc902b7/ARCHITECTURE.md\" -o /tmp/brush-concept/ARCHITECTURE.md)",
+      "Read(//tmp/brush-concept/**)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/bigbarnstudiosales-design/brush-concept/40aec54649dd9f629b79734a5135b1992bc902b7/README.md\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/bigbarnstudiosales-design/brush-concept/40aec54649dd9f629b79734a5135b1992bc902b7/InfoBase/README.md\")"
+    ]
+  }
+}
