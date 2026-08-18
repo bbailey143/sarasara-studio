@@ -8,6 +8,7 @@
     watercolor:{
       id:'material.watercolor.diagnostic.v0.2',version:'0.2.0',
       state:{'COMP-001':.88,'COMP-003':.12,'STATE-001':'suspension','TRAN-001':.19,'TRAN-002':.055,'DEPO-001':.74,'SUBI-001':.28,'SUBI-003':.64,'EVOL-001':.0032,'EVOL-003':.016},
+      display:{pigment_visibility_gain:2.6,note:'Diagnostic preview gain only; does not alter physical pigment mass.'},
       models:MODELS,provenance:[{status:'stand-in',note:'Artist-calibrated diagnostic values; not measured production constants.'}]
     },
     charcoal:{
@@ -71,7 +72,7 @@
         const j=i*4,water=this.water[i],mobile=this.mobile[i],deposit=this.deposited[i],pigment=mobile+deposit,paperNoise=this.tooth(i%this.w,Math.floor(i/this.w));
         let pr=249-(paperNoise-.5)*4,pg=245-(paperNoise-.5)*3,pb=235-(paperNoise-.5)*2;
         if(dry){const a=1-Math.exp(-pigment*2.5);data[j]=pr*(1-a)+32*a;data[j+1]=pg*(1-a)+28*a;data[j+2]=pb*(1-a)+24*a}
-        else{const a=Math.min(.78,1-Math.exp(-pigment*.78)),wetGlow=Math.min(.045,water*.018);data[j]=pr*(1-a)+44*a;data[j+1]=pg*(1-a)+105*a;data[j+2]=pb*(1-a)+158*a;data[j]=data[j]*(1-wetGlow)+220*wetGlow;data[j+1]=data[j+1]*(1-wetGlow)+236*wetGlow;data[j+2]=data[j+2]*(1-wetGlow)+245*wetGlow}
+        else{const gain=this.profile.display?.pigment_visibility_gain||1,a=Math.min(.74,1-Math.exp(-pigment*.78*gain)),wetGlow=Math.min(.045,water*.018);data[j]=pr*(1-a)+44*a;data[j+1]=pg*(1-a)+105*a;data[j+2]=pb*(1-a)+158*a;data[j]=data[j]*(1-wetGlow)+220*wetGlow;data[j+1]=data[j+1]*(1-wetGlow)+236*wetGlow;data[j+2]=data[j+2]*(1-wetGlow)+245*wetGlow}
         data[j+3]=255;
       }
       this.sctx.putImageData(this.image,0,0);target.save();target.imageSmoothingEnabled=true;target.clearRect(0,0,canvas.width,canvas.height);target.drawImage(this.surface,0,0,canvas.width,canvas.height);target.restore();

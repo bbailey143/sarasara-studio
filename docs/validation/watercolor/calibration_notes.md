@@ -25,3 +25,10 @@ Every accepted calibration note should record material recipe, substrate, enviro
 - Rejected behavior: drying darkened and became opaque, reading as acrylic rather than watercolor.
 - Insufficient behavior: pigment movement toward the rim was too slight to perceive.
 - Required correction: lighten the wash during drying, retain transparency, strengthen wet outward pigment transport, and keep rim concentration modest.
+
+### 2026-08-18 — Shared-solver visibility adjustment
+
+- Artist finding: the watercolor was too light to observe transport reliably.
+- Adjustment: increase diagnostic pigment visibility while retaining a transparent ceiling.
+- Physics impact: none; carrier and pigment masses, transport, absorption, settling, and evaporation are unchanged.
+- Validation status: artist review required to confirm that movement is now readable without making the wash feel opaque.
