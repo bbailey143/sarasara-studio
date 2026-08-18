@@ -1,0 +1,55 @@
+test_suite:
+  name: Sarasara canonical vocabulary torture tests
+  version: 0.1.0
+  purpose: >-
+    Test whether one property vocabulary can describe a mobile particulate
+    wash and a brittle particulate solid without medium-specific properties.
+  architecture_gate:
+    pass_condition: Every required phenomenon maps to existing canonical IDs.
+    fail_condition: A case requires a property named specialWatercolorThing, charcoalMode, or an equivalent private escape hatch.
+    structural_result: pass
+    physical_result: pending_engine_and_artist_validation
+  evidence_labels: [schema_covered, calibration_required, artist_review_required]
+
+cases:
+  watercolor:
+    display_name: Watercolor wash
+    material_profile: {phase: suspension, carrier: liquid, dominant_transport: advection_and_capillarity}
+    required_behaviors:
+      - {id: WC-001, phenomenon: suspended particles, canonical_ids: [PART-001, PART-002, COMP-003], expectation: Particle load remains distinct from the carrier., status: schema_covered}
+      - {id: WC-002, phenomenon: low viscosity carrier, canonical_ids: [RHEO-001, COMP-001], expectation: The carrier can move without inventing a separate watercolor flow property., status: schema_covered}
+      - {id: WC-003, phenomenon: surface tension, canonical_ids: [INTF-001], expectation: Surface tension participates in wetting and capillary behavior., status: schema_covered}
+      - {id: WC-004, phenomenon: wetting and contact angle, canonical_ids: [INTF-002, INTF-003, SUBI-004], expectation: The same liquid can wet different substrates differently., status: schema_covered}
+      - {id: WC-005, phenomenon: capillary uptake, canonical_ids: [TRAN-003, SUBI-002, SUBI-003], expectation: Pore geometry and interface conditions drive uptake., status: schema_covered}
+      - {id: WC-006, phenomenon: substrate absorption, canonical_ids: [SUBI-002, SUBI-003, TRAN-002], expectation: Paper receives liquid through its own structure rather than through a watercolor-only flag., status: schema_covered}
+      - {id: WC-007, phenomenon: diffusion, canonical_ids: [TRAN-001], expectation: Microscopic dispersion is named separately from bulk movement., status: schema_covered}
+      - {id: WC-008, phenomenon: advection, canonical_ids: [TRAN-004], expectation: Water and suspended pigment can share a velocity field., status: schema_covered}
+      - {id: WC-009, phenomenon: evaporation, canonical_ids: [EVOL-001, STATE-002], expectation: Drying depends on environment and material state., status: schema_covered}
+      - {id: WC-010, phenomenon: sedimentation, canonical_ids: [EVOL-003, PART-001, PART-002, RHEO-001], expectation: Settling responds to particles and carrier, not a granulation slider., status: schema_covered}
+      - {id: WC-011, phenomenon: granulation, canonical_ids: [PART-001, PART-002, PART-004, EVOL-003, TRAN-003, SUBI-001], expectation: Granulation is a composite result with visible causes., status: schema_covered}
+      - {id: WC-012, phenomenon: staining, canonical_ids: [REAC-002, SUBI-004, DEPO-003], expectation: Retention and release are pairwise and time-dependent., status: calibration_required}
+      - {id: WC-013, phenomenon: reactivation, canonical_ids: [REAC-001, REAC-002, REAC-003, REAC-004], expectation: A settled layer can become mobile through named conditions., status: schema_covered}
+      - {id: WC-014, phenomenon: drying-edge accumulation, canonical_ids: [EVOL-001, STATE-003, DEPO-004], expectation: A drying boundary changes local transport and packing., status: calibration_required}
+      - {id: WC-015, phenomenon: subtractive and scattering optics, canonical_ids: [OPT-001, OPT-002, OPT-004], expectation: Appearance follows spectra and layer/substrate conditions., status: schema_covered}
+      - {id: WC-016, phenomenon: wet-into-wet color crossing, canonical_ids: [TRAN-004, DEPO-001, OPT-001, OPT-002], expectation: Two wet materials can occupy one shared mixture without a second watercolor store., status: artist_review_required}
+
+  charcoal:
+    display_name: Charcoal mark
+    material_profile: {phase: brittle_solid, carrier: none_or_minimal, dominant_transport: contact_and_particle_detachment}
+    required_behaviors:
+      - {id: CH-001, phenomenon: brittle solid, canonical_ids: [STATE-001, RHEO-004], expectation: The mark can hold a solid structure rather than requiring a liquid phase., status: schema_covered}
+      - {id: CH-002, phenomenon: fracture, canonical_ids: [TRIB-003, RHEO-004], expectation: Broken particles arise from stress and material resistance., status: schema_covered}
+      - {id: CH-003, phenomenon: abrasion, canonical_ids: [TRIB-004, TRIB-002], expectation: Rubbing can remove material through contact wear., status: schema_covered}
+      - {id: CH-004, phenomenon: friction, canonical_ids: [TRIB-001, TRIB-002], expectation: Static and sliding contact are distinct., status: schema_covered}
+      - {id: CH-005, phenomenon: particle detachment, canonical_ids: [DEPO-003, DEPO-002, TRIB-004], expectation: Particles leave the source only under a contact condition., status: schema_covered}
+      - {id: CH-006, phenomenon: particle-size distribution, canonical_ids: [PART-001, PART-003], expectation: Dust and marks can differ by size and shape populations., status: schema_covered}
+      - {id: CH-007, phenomenon: substrate tooth, canonical_ids: [SUBI-001, SUBI-002], expectation: Roughness and pores affect capture and breakup., status: schema_covered}
+      - {id: CH-008, phenomenon: mechanical anchoring, canonical_ids: [SUBI-001, SUBI-002, DEPO-001, DEPO-004], expectation: Captured particles remain through geometry and contact, not a charcoal mode., status: calibration_required}
+      - {id: CH-009, phenomenon: cohesion, canonical_ids: [TRIB-003, DEPO-003], expectation: Cohesive fragments resist detachment until a threshold is crossed., status: calibration_required}
+      - {id: CH-010, phenomenon: adhesion, canonical_ids: [SUBI-004, DEPO-003], expectation: Material/substrate pairing affects retention., status: calibration_required}
+      - {id: CH-011, phenomenon: dusting, canonical_ids: [PART-001, DEPO-002, DEPO-003], expectation: Fine detached particles can be deposited without inventing a new family., status: artist_review_required}
+      - {id: CH-012, phenomenon: smearing, canonical_ids: [TRAN-004, TRIB-002, DEPO-001], expectation: Sliding contact transports existing particles across the surface., status: artist_review_required}
+      - {id: CH-013, phenomenon: lifting, canonical_ids: [REAC-003, REAC-004, DEPO-003], expectation: A later contact can remove or redistribute an earlier mark., status: artist_review_required}
+      - {id: CH-014, phenomenon: compression, canonical_ids: [RHEO-004, TRIB-001, DEPO-001], expectation: Normal load changes contact and packing., status: calibration_required}
+      - {id: CH-015, phenomenon: burnishing, canonical_ids: [TRIB-002, DEPO-004, OPT-004], expectation: Repeated pressure can change packing and appearance without adding pigment., status: artist_review_required}
+      - {id: CH-016, phenomenon: particulate optics, canonical_ids: [OPT-001, OPT-002, OPT-004, PART-001], expectation: Mark appearance follows particle population and spectra., status: schema_covered}
