@@ -32,3 +32,11 @@ Every accepted calibration note should record material recipe, substrate, enviro
 - Adjustment: increase diagnostic pigment visibility while retaining a transparent ceiling.
 - Physics impact: none; carrier and pigment masses, transport, absorption, settling, and evaporation are unchanged.
 - Validation status: artist review required to confirm that movement is now readable without making the wash feel opaque.
+
+### 2026-08-18 — Transport separation
+
+- Artist finding: even at maximum diagnostic visibility, post-stroke pigment movement was too slight and visually flat.
+- Architectural correction: separate pigment load, brush water, and initial paper dampness.
+- Transport correction: pigment is carried conservatively by water flux; a small separate dispersion term remains explicit.
+- New test: pigment load at zero applies clean water without inventing pigment.
+- Validation status: artist review required for wet-on-dry, wet-on-damp, and clean-water disturbance.

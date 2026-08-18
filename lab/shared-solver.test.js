@@ -8,7 +8,8 @@ const {SharedSolver,PROFILES}=window.SarasaraLab;
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 
 const wet=new SharedSolver(48,24,PROFILES.watercolor);
-wet.depositSegment(20,40,80,40,120,60,.6,1,.5);
+wet.clear(.3);
+wet.depositSegment(20,40,80,40,120,60,.6,.7,.85,.5);
 const wetBefore=wet.metrics();
 wet.setDisplayGain(8);
 const wetAfterDisplayChange=wet.metrics();
@@ -20,8 +21,24 @@ assert(wetAfter.water<wetBefore.water,'watercolor carrier must evaporate or abso
 assert(wetAfter.deposited_pigment>0,'mobile watercolor pigment must settle');
 assert(wetAfter.pigment_conservation_error<.01,'pigment transport must remain conservative');
 
+const cleanWater=new SharedSolver(48,24,PROFILES.watercolor);
+cleanWater.depositSegment(20,40,80,40,120,60,.6,0,1,.5);
+const cleanWaterState=cleanWater.metrics();
+assert(cleanWaterState.water>0,'clean-water gesture must deposit carrier');
+assert(cleanWaterState.mobile_pigment===0&&cleanWaterState.deposited_pigment===0,'clean-water gesture must not invent pigment');
+
+const prewet=new SharedSolver(48,24,PROFILES.watercolor);
+prewet.clear(.8);
+assert(prewet.metrics().wet_area_fraction===1,'paper dampness must prepare the full substrate');
+
+const lowWater=new SharedSolver(48,24,PROFILES.watercolor),highWater=new SharedSolver(48,24,PROFILES.watercolor);
+lowWater.depositSegment(50,30,70,30,120,60,.5,.6,.1,.5);
+highWater.depositSegment(50,30,70,30,120,60,.5,.6,1,.5);
+for(let i=0;i<90;i++){lowWater.step(1/60);highWater.step(1/60)}
+assert(highWater.metrics().wet_area_fraction>lowWater.metrics().wet_area_fraction,'more brush water must create a larger wet region');
+
 const dry=new SharedSolver(48,24,PROFILES.charcoal);
-dry.depositSegment(20,40,80,40,120,60,.7,.5,1.3);
+dry.depositSegment(20,40,80,40,120,60,.7,.5,0,1.3);
 const dryState=dry.metrics();
 assert(dryState.water===0,'charcoal profile must not deposit carrier');
 assert(dryState.deposited_pigment>0,'charcoal profile must deposit dry particles');

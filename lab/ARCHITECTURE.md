@@ -12,6 +12,8 @@ Each substrate cell stores:
 - carrier absorbed by the substrate;
 - deterministic surface tooth.
 
+The lab exposes pigment load, brush water, and initial paper dampness separately. A zero-pigment, high-water gesture is therefore clean water using the same contact transaction rather than a separate bloom tool.
+
 ## Canonical property inputs
 
 The profiles in `shared-solver.js` use canonical IDs from `PROPERTY_REGISTRY.yaml`:
@@ -41,4 +43,4 @@ Each saved review records the material profile, named models, state measurements
 
 ## Current limits
 
-This is a small CPU grid intended to expose behavior for review. It is not the production Rust/GPU solver. Capillary flow, spectral color, clean-water blooms, granulation, brush reservoirs, and measured paper profiles remain future work. Any visible conclusion still requires artist approval.
+This is a small CPU grid intended to expose behavior for review. It is not the production Rust/GPU solver. Spectral color, granulation, brush reservoirs, measured paper profiles, and artist-accepted clean-water blooms remain future work. Any visible conclusion still requires artist approval.

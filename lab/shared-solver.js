@@ -29,7 +29,7 @@
     constructor(width,height,profile){this.w=width;this.h=height;this.n=width*height;this.surface=document.createElement('canvas');this.surface.width=width;this.surface.height=height;this.sctx=this.surface.getContext('2d');this.image=this.sctx.createImageData(width,height);this.setProfile(profile)}
     setProfile(profile){this.profile=validateProfile(profile);this.p=profile.state;this.displayGain=profile.display?.pigment_visibility_gain||1;this.water=new Float32Array(this.n);this.mobile=new Float32Array(this.n);this.deposited=new Float32Array(this.n);this.absorbed=new Float32Array(this.n);this.nextWater=new Float32Array(this.n);this.nextMobile=new Float32Array(this.n);this.initialPigment=0;this.lostPigment=0;this.dryBoost=1;this.elapsed=0}
     setDisplayGain(value){this.displayGain=Math.max(1,Math.min(12,Number(value)||1))}
-    clear(){this.water.fill(0);this.mobile.fill(0);this.deposited.fill(0);this.absorbed.fill(0);this.initialPigment=0;this.lostPigment=0;this.dryBoost=1;this.elapsed=0}
+    clear(substrateDampness=0){const initialWater=this.p['COMP-001']>.02?Math.max(0,Math.min(1,substrateDampness))*.12:0;this.water.fill(initialWater);this.mobile.fill(0);this.deposited.fill(0);this.absorbed.fill(0);this.initialPigment=0;this.lostPigment=0;this.dryBoost=1;this.elapsed=0}
     tooth(x,y){return Math.max(0,Math.min(1,(Math.sin(x*.73+y*1.31)+Math.sin(x*.19-y*.41)+2)/4))}
     addDisk(cx,cy,radius,water,pigment,pressure,speed){
       const dry=this.p['COMP-001']<.02,rough=this.p['SUBI-001'];
@@ -43,17 +43,17 @@
       }
       this.initialPigment+=addedPigment;
     }
-    depositSegment(ax,ay,bx,by,canvasW,canvasH,pressure,load,speed){
+    depositSegment(ax,ay,bx,by,canvasW,canvasH,pressure,pigmentLoad,brushWater,speed){
       const sx=this.w/canvasW,sy=this.h/canvasH,x0=ax*sx,y0=ay*sy,x1=bx*sx,y1=by*sy,d=Math.hypot(x1-x0,y1-y0),steps=Math.max(1,Math.ceil(d/.65));
-      const carrier=this.p['COMP-001'],pigmentFraction=this.p['COMP-003'],radius=(1.2+pressure*2.6+load*1.8),water=(.06+load*.28)*carrier,pigment=(.018+pressure*.045)*(pigmentFraction||1);
+      const carrier=this.p['COMP-001'],pigmentFraction=this.p['COMP-003'],radius=(1.2+pressure*2.6+brushWater*1.8),water=(.02+brushWater*.34)*carrier,pigment=(.012+pressure*.04)*(pigmentFraction||1)*pigmentLoad;
       for(let s=0;s<=steps;s++){const t=s/steps;this.addDisk(x0+(x1-x0)*t,y0+(y1-y0)*t,radius,water,pigment,pressure,speed)}
     }
     step(dt){
       this.elapsed+=dt;const wet=this.p['COMP-001']>.02;if(!wet)return;
-      const D=this.p['TRAN-001'],uptake=this.p['TRAN-002']*this.p['SUBI-003'],evap=this.p['EVOL-001']*this.dryBoost,settle=this.p['EVOL-003'];
+      const D=this.p['TRAN-001'],uptake=this.p['TRAN-002']*this.p['SUBI-003'],evap=this.p['EVOL-001']*this.dryBoost*dt*2,settle=this.p['EVOL-003'];
       const w=this.w,h=this.h,W=this.water,M=this.mobile,NW=this.nextWater,NM=this.nextMobile,DP=this.deposited,AB=this.absorbed;
       NW.set(W);NM.set(M);
-      const exchange=(i,j)=>{const fw=D*(W[j]-W[i])*.105;NW[i]+=fw;NW[j]-=fw;const wetness=Math.min(1,(W[i]+W[j])*.5),fm=D*(M[j]-M[i])*(.035+.09*wetness);NM[i]+=fm;NM[j]-=fm};
+      const exchange=(i,j)=>{const fw=D*(W[j]-W[i])*.18;NW[i]+=fw;NW[j]-=fw;let fm=0;if(fw>0&&W[j]>.0001)fm=fw*(M[j]/W[j])*.86;else if(fw<0&&W[i]>.0001)fm=fw*(M[i]/W[i])*.86;const dispersion=D*(M[j]-M[i])*.008;fm+=dispersion;NM[i]+=fm;NM[j]-=fm};
       for(let y=0;y<h;y++)for(let x=0;x<w;x++){const i=y*w+x;if(x<w-1)exchange(i,i+1);if(y<h-1)exchange(i,i+w)}
       for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++){
         const i=y*w+x,avgW=(W[i-1]+W[i+1]+W[i-w]+W[i+w])*.25,outward=Math.max(0,W[i]-avgW),edgeSettle=Math.min(Math.max(0,NM[i]),Math.max(0,NM[i])*(settle+outward*.055));NM[i]-=edgeSettle;DP[i]+=edgeSettle;
@@ -66,7 +66,7 @@
       if(this.dryBoost>1)this.dryBoost=Math.max(1,this.dryBoost-dt*4);
     }
     dry(){this.dryBoost=35}
-    metrics(){let water=0,mobile=0,deposited=0,absorbed=0;for(let i=0;i<this.n;i++){water+=this.water[i];mobile+=this.mobile[i];deposited+=this.deposited[i];absorbed+=this.absorbed[i]}const pigment=mobile+deposited,error=this.initialPigment?Math.abs(this.initialPigment-pigment-this.lostPigment)/this.initialPigment:0;return{water,mobile_pigment:mobile,deposited_pigment:deposited,absorbed_water:absorbed,pigment_conservation_error:error}}
+    metrics(){let water=0,mobile=0,deposited=0,absorbed=0,wetCells=0;for(let i=0;i<this.n;i++){water+=this.water[i];mobile+=this.mobile[i];deposited+=this.deposited[i];absorbed+=this.absorbed[i];if(this.water[i]>.008)wetCells++}const pigment=mobile+deposited,error=this.initialPigment?Math.abs(this.initialPigment-pigment-this.lostPigment)/this.initialPigment:0;return{water,wet_area_fraction:wetCells/this.n,mobile_pigment:mobile,deposited_pigment:deposited,absorbed_water:absorbed,pigment_conservation_error:error}}
     render(target,canvas){
       const data=this.image.data,dry=this.p['COMP-001']<.02;
       for(let i=0;i<this.n;i++){
