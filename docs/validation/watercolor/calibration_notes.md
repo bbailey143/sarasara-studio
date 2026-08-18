@@ -40,3 +40,12 @@ Every accepted calibration note should record material recipe, substrate, enviro
 - Transport correction: pigment is carried conservatively by water flux; a small separate dispersion term remains explicit.
 - New test: pigment load at zero applies clean water without inventing pigment.
 - Validation status: artist review required for wet-on-dry, wet-on-damp, and clean-water disturbance.
+
+### 2026-08-18 — Separated-control artist review
+
+- Artist rating: **Unconvincing**
+- Decision: **Recalibrate**
+- Observed at low pigment and brush-water settings on dry paper: the dry mark was invisible even at maximum diagnostic visibility.
+- Wet-on-damp response: still insufficiently mobile.
+- Clean-water disturbance: no convincing displacement or bloom.
+- Required correction: substantially increase and validate carrier-flow magnitude and pigment coupling before asking for another realism approval.
