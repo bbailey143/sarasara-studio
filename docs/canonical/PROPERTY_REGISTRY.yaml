@@ -1,0 +1,627 @@
+registry:
+  name: Sarasara Canonical Property Registry
+  version: 0.1.0
+  status: foundation_seed
+  purpose: >-
+    Shared physical vocabulary for material, applicator, substrate, and
+    environment contracts. It does not prescribe an implementation language,
+    a painting engine, or a product control panel.
+  rules:
+    - Stable IDs are never reused for a different physical meaning.
+    - Artist-facing controls may combine properties but do not replace them.
+    - Pairwise and derived values must name their inputs instead of posing as intrinsic material facts.
+    - A named medium may select values and models; it may not add a private property family.
+  allowed_scopes: [intrinsic, state_dependent, pairwise, interaction_derived]
+  allowed_representations: [scalar, curve, distribution, spectrum, category, model, derived]
+  evidence_statuses: [seed, literature_backed, measured, calibrated, deprecated]
+
+property_families:
+  COMP: {name: Composition, question: What is present, and in what proportion?}
+  STATE: {name: Phase and State, question: What condition is the material in now?}
+  RHEO: {name: Mechanical and Rheology, question: How does it deform or flow?}
+  TRIB: {name: Tribology Wear and Fracture, question: How does solid contact remove or reshape it?}
+  PART: {name: Particles, question: What are the dispersed or detached solids like?}
+  INTF: {name: Interfacial Physics, question: What happens at a material boundary?}
+  TRAN: {name: Transport, question: How does mass or momentum move?}
+  DEPO: {name: Transfer and Deposition, question: What leaves an applicator and remains on a surface?}
+  SUBI: {name: Substrate Interaction, question: What can the receiving surface accept or hold?}
+  EVOL: {name: Evolution Drying and Cure, question: How does the material change with time?}
+  REAC: {name: Reactivation, question: How can a dried or settled layer become mobile again?}
+  OPT: {name: Optics, question: How does the layer absorb scatter or return light?}
+
+defaults: &common
+  evidence: {status: seed, note: 'Canonical seed; literature, measurement, or calibration is required before production use.'}
+  ui_mapping: {exposure: indirect, note: 'Usually controlled through a recipe, environment, or artist macro rather than one raw slider.'}
+
+properties:
+  - <<: *common
+    id: COMP-001
+    name: carrier_mass_fraction
+    display_name: Carrier Mass Fraction
+    definition: Mass fraction of the mobile carrier phase in the material mixture.
+    symbol: w_c
+    classification: {scope: state_dependent, representation: scalar}
+    unit: {canonical: 1, display: percent}
+    domain: {minimum: 0, maximum: 1}
+    applicability: {fluid: common, paste: common, plastic_solid: possible, brittle_solid: not_applicable}
+    dependencies: [total_material_mass, evaporation, absorption]
+    solver_owners: [mixture_state, transport_solver]
+    ui_mapping: {exposure: macro, label: Wetness or dilution, note: 'Never label this as a universal water amount.'}
+  - <<: *common
+    id: COMP-002
+    name: binder_mass_fraction
+    display_name: Binder Mass Fraction
+    definition: Mass fraction of binding material that provides cohesion after setting or drying.
+    symbol: w_b
+    classification: {scope: intrinsic, representation: scalar}
+    unit: {canonical: 1, display: percent}
+    domain: {minimum: 0, maximum: 1}
+    applicability: {fluid: possible, paste: common, plastic_solid: common, brittle_solid: possible}
+    dependencies: [recipe_total_mass]
+    solver_owners: [mixture_definition, cohesion_model, cure_model]
+  - <<: *common
+    id: COMP-003
+    name: pigment_mass_fraction
+    display_name: Pigment Mass Fraction
+    definition: Mass fraction of color-bearing particulate material in the mixture.
+    symbol: w_p
+    classification: {scope: intrinsic, representation: scalar}
+    unit: {canonical: 1, display: percent}
+    domain: {minimum: 0, maximum: 1}
+    applicability: {fluid: common, paste: common, plastic_solid: common, brittle_solid: possible}
+    dependencies: [recipe_total_mass]
+    solver_owners: [mixture_definition, particle_model, optical_model]
+  - <<: *common
+    id: COMP-004
+    name: volatile_mass_fraction
+    display_name: Volatile Mass Fraction
+    definition: Mass fraction of components able to leave the material under environmental conditions.
+    symbol: w_v
+    classification: {scope: state_dependent, representation: scalar}
+    unit: {canonical: 1, display: percent}
+    domain: {minimum: 0, maximum: 1}
+    applicability: {fluid: common, paste: common, plastic_solid: possible, brittle_solid: not_applicable}
+    dependencies: [carrier_mass_fraction, temperature, relative_humidity]
+    solver_owners: [mixture_state, evaporation_model]
+
+  - <<: *common
+    id: STATE-001
+    name: material_phase
+    display_name: Material Phase
+    definition: Dominant physical phase or mixture state currently governing behavior.
+    symbol: phase
+    classification: {scope: state_dependent, representation: category}
+    unit: {canonical: category, display: category}
+    domain: {allowed: [liquid, suspension, paste, gel, plastic_solid, brittle_solid, powder]}
+    applicability: {fluid: common, paste: common, plastic_solid: common, brittle_solid: common}
+    dependencies: [carrier_mass_fraction, structural_state]
+    solver_owners: [state_machine, model_selection]
+  - <<: *common
+    id: STATE-002
+    name: temperature
+    display_name: Temperature
+    definition: Thermodynamic temperature of the local material state.
+    symbol: T
+    classification: {scope: state_dependent, representation: scalar}
+    unit: {canonical: K, display: degrees_C}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: common, paste: common, plastic_solid: common, brittle_solid: common}
+    dependencies: [environment_temperature]
+    solver_owners: [thermal_state, rheology_model, evaporation_model]
+  - <<: *common
+    id: STATE-003
+    name: liquid_saturation
+    display_name: Liquid Saturation
+    definition: Fraction of locally available pore or layer volume occupied by liquid.
+    symbol: S_l
+    classification: {scope: state_dependent, representation: scalar}
+    unit: {canonical: 1, display: percent}
+    domain: {minimum: 0, maximum: 1}
+    applicability: {fluid: common, paste: common, plastic_solid: possible, brittle_solid: not_applicable}
+    dependencies: [carrier_mass_fraction, porosity, layer_thickness]
+    solver_owners: [surface_state, substrate_exchange]
+  - <<: *common
+    id: STATE-004
+    name: structural_state
+    display_name: Structural State
+    definition: Dimensionless internal order describing reversible structure build-up or breakdown.
+    symbol: lambda_s
+    classification: {scope: state_dependent, representation: scalar}
+    unit: {canonical: 1, display: normalized}
+    domain: {minimum: 0, maximum: 1}
+    applicability: {fluid: possible, paste: common, plastic_solid: possible, brittle_solid: not_applicable}
+    dependencies: [shear_history, rest_time, temperature]
+    solver_owners: [rheology_model, thixotropy_model]
+
+  - <<: *common
+    id: RHEO-001
+    name: dynamic_viscosity
+    display_name: Dynamic Viscosity
+    definition: Resistance of a fluid or suspension to shear flow at a stated condition.
+    symbol: eta
+    classification: {scope: state_dependent, representation: scalar}
+    unit: {canonical: Pa_s, display: Pa_s}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: common, paste: common, plastic_solid: possible, brittle_solid: not_applicable}
+    dependencies: [temperature, carrier_mass_fraction, shear_rate_response, structural_state]
+    solver_owners: [rheology_model, flow_solver, transfer_solver]
+    ui_mapping: {exposure: macro, label: Body or flow, note: 'A recipe-level macro may alter several rheology properties.'}
+  - <<: *common
+    id: RHEO-002
+    name: yield_stress
+    display_name: Yield Stress
+    definition: Minimum applied shear stress needed before sustained flow begins.
+    symbol: tau_0
+    classification: {scope: state_dependent, representation: scalar}
+    unit: {canonical: Pa, display: Pa}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: optional, paste: common, plastic_solid: possible, brittle_solid: not_applicable}
+    dependencies: [temperature, solid_fraction, binder_mass_fraction, structural_state]
+    solver_owners: [rheology_model, flow_solver, transfer_solver]
+  - <<: *common
+    id: RHEO-003
+    name: shear_rate_response
+    display_name: Shear-rate Response
+    definition: Relationship between shear rate and apparent viscosity or shear stress.
+    symbol: eta(gamma_dot)
+    classification: {scope: state_dependent, representation: curve}
+    unit: {canonical: Pa_s, display: curve}
+    domain: {input_minimum: 0, input_maximum: null, output_minimum: 0}
+    applicability: {fluid: common, paste: common, plastic_solid: possible, brittle_solid: not_applicable}
+    dependencies: [temperature, composition, structural_state]
+    solver_owners: [constitutive_model, flow_solver]
+  - <<: *common
+    id: RHEO-004
+    name: elastic_modulus
+    display_name: Elastic Modulus
+    definition: Slope relating recoverable deformation to applied stress in the selected loading regime.
+    symbol: E
+    classification: {scope: state_dependent, representation: scalar}
+    unit: {canonical: Pa, display: Pa}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: optional, paste: possible, plastic_solid: common, brittle_solid: common}
+    dependencies: [phase, temperature, cure_fraction, liquid_saturation]
+    solver_owners: [solid_mechanics_model, contact_solver]
+
+  - <<: *common
+    id: TRIB-001
+    name: static_friction_coefficient
+    display_name: Static Friction Coefficient
+    definition: Ratio of tangential force to normal force at the onset of relative sliding.
+    symbol: mu_s
+    classification: {scope: pairwise, representation: scalar}
+    unit: {canonical: 1, display: dimensionless}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: optional, paste: possible, plastic_solid: common, brittle_solid: common}
+    dependencies: [material_phase, applicator_surface, substrate_surface, normal_load]
+    solver_owners: [contact_solver, transfer_solver]
+  - <<: *common
+    id: TRIB-002
+    name: kinetic_friction_coefficient
+    display_name: Kinetic Friction Coefficient
+    definition: Ratio of tangential force to normal force during relative sliding.
+    symbol: mu_k
+    classification: {scope: pairwise, representation: scalar}
+    unit: {canonical: 1, display: dimensionless}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: optional, paste: possible, plastic_solid: common, brittle_solid: common}
+    dependencies: [sliding_speed, material_phase, applicator_surface, substrate_surface]
+    solver_owners: [contact_solver, smear_solver]
+  - <<: *common
+    id: TRIB-003
+    name: fracture_toughness
+    display_name: Fracture Toughness
+    definition: Resistance to crack growth under the selected fracture mode.
+    symbol: K_IC
+    classification: {scope: state_dependent, representation: scalar}
+    unit: {canonical: Pa_sqrt_m, display: Pa_sqrt_m}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: not_applicable, paste: possible, plastic_solid: possible, brittle_solid: common}
+    dependencies: [cure_fraction, liquid_saturation, binder_mass_fraction]
+    solver_owners: [fracture_model, particle_detachment_model]
+  - <<: *common
+    id: TRIB-004
+    name: abrasion_resistance
+    display_name: Abrasion Resistance
+    definition: Resistance of a layer or solid to material loss under rubbing contact.
+    symbol: A_r
+    classification: {scope: interaction_derived, representation: model}
+    unit: {canonical: model_specific, display: model_specific}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: optional, paste: possible, plastic_solid: common, brittle_solid: common}
+    dependencies: [hardness, cohesion, friction, normal_load, sliding_distance]
+    solver_owners: [wear_model, contact_solver]
+
+  - <<: *common
+    id: PART-001
+    name: particle_diameter_distribution
+    display_name: Particle Diameter Distribution
+    definition: Distribution of equivalent particle diameters for a defined population.
+    symbol: d_p
+    classification: {scope: intrinsic, representation: distribution}
+    unit: {canonical: m, display: um}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: common, paste: common, plastic_solid: common, brittle_solid: common}
+    dependencies: [particle_population_definition]
+    solver_owners: [particle_model, settling_model, optical_model]
+  - <<: *common
+    id: PART-002
+    name: particle_density
+    display_name: Particle Density
+    definition: Mass per volume of a particle material, excluding surrounding carrier.
+    symbol: rho_p
+    classification: {scope: intrinsic, representation: scalar}
+    unit: {canonical: kg_m3, display: kg_m3}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: common, paste: common, plastic_solid: common, brittle_solid: common}
+    dependencies: []
+    solver_owners: [particle_model, settling_model, packing_model]
+  - <<: *common
+    id: PART-003
+    name: particle_shape_factor
+    display_name: Particle Shape Factor
+    definition: Dimensionless descriptor of departure from a reference spherical particle shape.
+    symbol: psi_p
+    classification: {scope: intrinsic, representation: scalar}
+    unit: {canonical: 1, display: dimensionless}
+    domain: {minimum: 0, maximum: 1}
+    applicability: {fluid: common, paste: common, plastic_solid: common, brittle_solid: common}
+    dependencies: [particle_population_definition]
+    solver_owners: [particle_model, packing_model, optical_model]
+  - <<: *common
+    id: PART-004
+    name: flocculation_tendency
+    display_name: Flocculation Tendency
+    definition: Propensity of dispersed particles to form reversible clusters under stated conditions.
+    symbol: F_f
+    classification: {scope: state_dependent, representation: scalar}
+    unit: {canonical: 1, display: normalized}
+    domain: {minimum: 0, maximum: 1}
+    applicability: {fluid: common, paste: common, plastic_solid: possible, brittle_solid: not_applicable}
+    dependencies: [ionic_strength, pH, carrier_viscosity, particle_surface_chemistry]
+    solver_owners: [particle_model, settling_model, optical_model]
+
+  - <<: *common
+    id: INTF-001
+    name: surface_tension
+    display_name: Surface Tension
+    definition: Excess energy per area of a liquid interface with its surrounding phase.
+    symbol: gamma
+    classification: {scope: state_dependent, representation: scalar}
+    unit: {canonical: N_m, display: N_m}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: common, paste: common, plastic_solid: not_applicable, brittle_solid: not_applicable}
+    dependencies: [temperature, surfactant_concentration, carrier_composition]
+    solver_owners: [interface_model, capillary_model, transfer_solver]
+  - <<: *common
+    id: INTF-002
+    name: advancing_contact_angle
+    display_name: Advancing Contact Angle
+    definition: Contact angle measured while a liquid front advances over a specified receiving surface.
+    symbol: theta_a
+    classification: {scope: pairwise, representation: scalar}
+    unit: {canonical: rad, display: degrees}
+    domain: {minimum: 0, maximum: 3.141592653589793}
+    applicability: {fluid: common, paste: possible, plastic_solid: not_applicable, brittle_solid: not_applicable}
+    dependencies: [material_surface_tension, substrate_surface_energy, surface_condition]
+    solver_owners: [wetting_model, capillary_model]
+  - <<: *common
+    id: INTF-003
+    name: receding_contact_angle
+    display_name: Receding Contact Angle
+    definition: Contact angle measured while a liquid front withdraws from a specified surface.
+    symbol: theta_r
+    classification: {scope: pairwise, representation: scalar}
+    unit: {canonical: rad, display: degrees}
+    domain: {minimum: 0, maximum: 3.141592653589793}
+    applicability: {fluid: common, paste: possible, plastic_solid: not_applicable, brittle_solid: not_applicable}
+    dependencies: [material_surface_tension, substrate_surface_energy, surface_condition]
+    solver_owners: [wetting_model, pinning_model]
+  - <<: *common
+    id: INTF-004
+    name: interfacial_tension
+    display_name: Interfacial Tension
+    definition: Excess energy per area at the boundary between two specified immiscible phases.
+    symbol: gamma_12
+    classification: {scope: pairwise, representation: scalar}
+    unit: {canonical: N_m, display: N_m}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: possible, paste: possible, plastic_solid: not_applicable, brittle_solid: not_applicable}
+    dependencies: [phase_1_composition, phase_2_composition, temperature]
+    solver_owners: [interface_model, emulsion_model]
+
+  - <<: *common
+    id: TRAN-001
+    name: diffusion_coefficient
+    display_name: Diffusion Coefficient
+    definition: Proportionality between a concentration gradient and diffusive flux for a named species and medium.
+    symbol: D
+    classification: {scope: state_dependent, representation: scalar}
+    unit: {canonical: m2_s, display: m2_s}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: common, paste: common, plastic_solid: possible, brittle_solid: possible}
+    dependencies: [temperature, viscosity, porosity, species]
+    solver_owners: [transport_solver, substrate_exchange]
+  - <<: *common
+    id: TRAN-002
+    name: permeability
+    display_name: Permeability
+    definition: Ability of a porous region to transmit fluid under a pressure gradient.
+    symbol: k
+    classification: {scope: intrinsic, representation: scalar}
+    unit: {canonical: m2, display: m2}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: not_applicable, paste: not_applicable, plastic_solid: possible, brittle_solid: possible}
+    dependencies: [pore_geometry, saturation]
+    solver_owners: [porous_transport_model, substrate_exchange]
+  - <<: *common
+    id: TRAN-003
+    name: capillary_pressure
+    display_name: Capillary Pressure
+    definition: Pressure difference across a curved liquid interface in a specified pore or surface geometry.
+    symbol: p_c
+    classification: {scope: interaction_derived, representation: model}
+    unit: {canonical: Pa, display: Pa}
+    domain: {minimum: null, maximum: null}
+    applicability: {fluid: common, paste: possible, plastic_solid: not_applicable, brittle_solid: not_applicable}
+    dependencies: [surface_tension, contact_angle, pore_radius, curvature]
+    solver_owners: [capillary_model, porous_transport_model]
+  - <<: *common
+    id: TRAN-004
+    name: advection_velocity
+    display_name: Advection Velocity
+    definition: Local velocity carrying a mobile phase or suspended species through space.
+    symbol: u
+    classification: {scope: interaction_derived, representation: derived}
+    unit: {canonical: m_s, display: m_s}
+    domain: {minimum: null, maximum: null}
+    applicability: {fluid: common, paste: common, plastic_solid: not_applicable, brittle_solid: not_applicable}
+    dependencies: [pressure_gradient, viscosity, gravity, geometry]
+    solver_owners: [flow_solver, transport_solver]
+
+  - <<: *common
+    id: DEPO-001
+    name: transfer_efficiency
+    display_name: Transfer Efficiency
+    definition: Fraction of material available at contact that is transferred to the receiving surface.
+    symbol: eta_t
+    classification: {scope: interaction_derived, representation: scalar}
+    unit: {canonical: 1, display: percent}
+    domain: {minimum: 0, maximum: 1}
+    applicability: {fluid: common, paste: common, plastic_solid: common, brittle_solid: common}
+    dependencies: [applicator_load, pressure, speed, contact_topology, substrate_condition]
+    solver_owners: [transfer_solver, contact_solver]
+    ui_mapping: {exposure: diagnostic, label: Transfer, note: 'Shows result of contact; it is not a stored recipe knob.'}
+  - <<: *common
+    id: DEPO-002
+    name: deposited_mass_flux
+    display_name: Deposited Mass Flux
+    definition: Mass deposited per unit area per unit time onto a specified receiving surface.
+    symbol: j_d
+    classification: {scope: interaction_derived, representation: derived}
+    unit: {canonical: kg_m2_s, display: kg_m2_s}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: common, paste: common, plastic_solid: common, brittle_solid: common}
+    dependencies: [transfer_efficiency, applicator_load, contact_area, stroke_speed]
+    solver_owners: [transfer_solver, layer_builder]
+  - <<: *common
+    id: DEPO-003
+    name: detachment_threshold
+    display_name: Detachment Threshold
+    definition: Minimum contact loading or shear condition at which material begins to leave its source.
+    symbol: tau_d
+    classification: {scope: pairwise, representation: scalar}
+    unit: {canonical: Pa, display: Pa}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: possible, paste: common, plastic_solid: common, brittle_solid: common}
+    dependencies: [cohesion, adhesion_to_source, normal_load, contact_geometry]
+    solver_owners: [transfer_solver, detachment_model]
+  - <<: *common
+    id: DEPO-004
+    name: deposited_packing_fraction
+    display_name: Deposited Packing Fraction
+    definition: Fraction of deposited layer volume occupied by solids.
+    symbol: phi_d
+    classification: {scope: state_dependent, representation: scalar}
+    unit: {canonical: 1, display: percent}
+    domain: {minimum: 0, maximum: 1}
+    applicability: {fluid: common, paste: common, plastic_solid: common, brittle_solid: common}
+    dependencies: [particle_distribution, binder_fraction, liquid_saturation]
+    solver_owners: [layer_builder, packing_model, optical_model]
+
+  - <<: *common
+    id: SUBI-001
+    name: surface_roughness
+    display_name: Surface Roughness
+    definition: Scale-qualified variation in substrate surface height.
+    symbol: R_q
+    classification: {scope: intrinsic, representation: scalar}
+    unit: {canonical: m, display: um}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: common, paste: common, plastic_solid: common, brittle_solid: common}
+    dependencies: [measurement_scale]
+    solver_owners: [contact_solver, wetting_model, mechanical_anchoring_model]
+    ui_mapping: {exposure: recipe, label: Tooth, note: 'Artist-facing tooth can map to roughness and pore geometry.'}
+  - <<: *common
+    id: SUBI-002
+    name: pore_size_distribution
+    display_name: Pore Size Distribution
+    definition: Distribution of connected pore radii or equivalent diameters in a substrate.
+    symbol: r_p
+    classification: {scope: intrinsic, representation: distribution}
+    unit: {canonical: m, display: um}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: common, paste: common, plastic_solid: possible, brittle_solid: possible}
+    dependencies: [substrate_definition]
+    solver_owners: [porous_transport_model, capillary_model]
+  - <<: *common
+    id: SUBI-003
+    name: porosity
+    display_name: Porosity
+    definition: Fraction of bulk substrate volume that is void space.
+    symbol: epsilon
+    classification: {scope: intrinsic, representation: scalar}
+    unit: {canonical: 1, display: percent}
+    domain: {minimum: 0, maximum: 1}
+    applicability: {fluid: common, paste: common, plastic_solid: common, brittle_solid: common}
+    dependencies: [substrate_definition]
+    solver_owners: [porous_transport_model, substrate_exchange]
+  - <<: *common
+    id: SUBI-004
+    name: substrate_surface_energy
+    display_name: Substrate Surface Energy
+    definition: Surface free energy of the receiving surface under a specified condition.
+    symbol: gamma_s
+    classification: {scope: state_dependent, representation: scalar}
+    unit: {canonical: J_m2, display: mN_m}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: common, paste: common, plastic_solid: common, brittle_solid: common}
+    dependencies: [surface_treatment, contamination, moisture_condition]
+    solver_owners: [wetting_model, adhesion_model]
+
+  - <<: *common
+    id: EVOL-001
+    name: evaporation_flux
+    display_name: Evaporation Flux
+    definition: Mass of volatile material leaving a surface per area per time.
+    symbol: J_e
+    classification: {scope: interaction_derived, representation: model}
+    unit: {canonical: kg_m2_s, display: kg_m2_s}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: common, paste: common, plastic_solid: possible, brittle_solid: not_applicable}
+    dependencies: [temperature, relative_humidity, airflow, surface_area, volatile_mass_fraction]
+    solver_owners: [evaporation_model, mixture_state]
+  - <<: *common
+    id: EVOL-002
+    name: cure_fraction
+    display_name: Cure Fraction
+    definition: Fractional progress of an irreversible setting or curing process.
+    symbol: alpha_c
+    classification: {scope: state_dependent, representation: scalar}
+    unit: {canonical: 1, display: percent}
+    domain: {minimum: 0, maximum: 1}
+    applicability: {fluid: possible, paste: common, plastic_solid: common, brittle_solid: possible}
+    dependencies: [time, temperature, oxygen, curing_agent]
+    solver_owners: [cure_model, rheology_model, solid_mechanics_model]
+  - <<: *common
+    id: EVOL-003
+    name: settling_velocity
+    display_name: Settling Velocity
+    definition: Relative velocity of a particle population moving under gravity through its carrier.
+    symbol: v_s
+    classification: {scope: interaction_derived, representation: derived}
+    unit: {canonical: m_s, display: m_s}
+    domain: {minimum: null, maximum: null}
+    applicability: {fluid: common, paste: possible, plastic_solid: not_applicable, brittle_solid: not_applicable}
+    dependencies: [particle_diameter_distribution, particle_density, carrier_density, dynamic_viscosity, gravity]
+    solver_owners: [settling_model, particle_model]
+  - <<: *common
+    id: EVOL-004
+    name: shrinkage_strain
+    display_name: Shrinkage Strain
+    definition: Relative dimensional change caused by drying curing or solvent loss.
+    symbol: epsilon_sh
+    classification: {scope: state_dependent, representation: scalar}
+    unit: {canonical: 1, display: percent}
+    domain: {minimum: null, maximum: 0}
+    applicability: {fluid: possible, paste: common, plastic_solid: common, brittle_solid: possible}
+    dependencies: [volatile_mass_fraction, cure_fraction, substrate_constraint]
+    solver_owners: [drying_model, stress_model]
+
+  - <<: *common
+    id: REAC-001
+    name: rewetting_uptake_rate
+    display_name: Rewetting Uptake Rate
+    definition: Rate at which a dried or porous layer takes up a specified reactivation liquid.
+    symbol: q_rw
+    classification: {scope: pairwise, representation: scalar}
+    unit: {canonical: kg_m2_s, display: kg_m2_s}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: possible, paste: possible, plastic_solid: common, brittle_solid: possible}
+    dependencies: [liquid_identity, porosity, contact_angle, cure_fraction, layer_age]
+    solver_owners: [reactivation_model, porous_transport_model]
+  - <<: *common
+    id: REAC-002
+    name: dissolution_release_fraction
+    display_name: Dissolution Release Fraction
+    definition: Fraction of a dried layer that can dissolve or disperse into a specified liquid over a stated interval.
+    symbol: f_rel
+    classification: {scope: pairwise, representation: scalar}
+    unit: {canonical: 1, display: percent}
+    domain: {minimum: 0, maximum: 1}
+    applicability: {fluid: possible, paste: possible, plastic_solid: common, brittle_solid: possible}
+    dependencies: [liquid_identity, layer_age, cure_fraction, binder_chemistry]
+    solver_owners: [reactivation_model, mixture_state]
+  - <<: *common
+    id: REAC-003
+    name: redispersion_rate
+    display_name: Redispersion Rate
+    definition: Rate at which settled or dried particles re-enter a mobile suspension under a specified action.
+    symbol: r_rd
+    classification: {scope: interaction_derived, representation: model}
+    unit: {canonical: s-1, display: s-1}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: common, paste: possible, plastic_solid: possible, brittle_solid: not_applicable}
+    dependencies: [liquid_saturation, shear_input, flocculation_tendency, binder_state]
+    solver_owners: [reactivation_model, particle_model]
+  - <<: *common
+    id: REAC-004
+    name: reactivation_threshold
+    display_name: Reactivation Threshold
+    definition: Minimum rewetting, force, or chemical condition needed to make a previously stable layer mobile.
+    symbol: X_reac
+    classification: {scope: pairwise, representation: model}
+    unit: {canonical: model_specific, display: model_specific}
+    domain: {minimum: 0, maximum: null}
+    applicability: {fluid: possible, paste: possible, plastic_solid: common, brittle_solid: possible}
+    dependencies: [layer_age, cure_fraction, rewetting_uptake_rate, applied_shear]
+    solver_owners: [reactivation_model, transfer_solver]
+
+  - <<: *common
+    id: OPT-001
+    name: spectral_absorption
+    display_name: Spectral Absorption
+    definition: Wavelength-dependent absorption parameter for the selected optical model.
+    symbol: K(lambda)
+    classification: {scope: intrinsic, representation: spectrum}
+    unit: {canonical: model_specific, display: spectrum}
+    domain: {wavelength_minimum_nm: 360, wavelength_maximum_nm: 830, value_minimum: 0}
+    applicability: {fluid: common, paste: common, plastic_solid: common, brittle_solid: common}
+    dependencies: [optical_model, pigment_population]
+    solver_owners: [optical_model]
+  - <<: *common
+    id: OPT-002
+    name: spectral_scattering
+    display_name: Spectral Scattering
+    definition: Wavelength-dependent scattering parameter for the selected optical model.
+    symbol: S(lambda)
+    classification: {scope: intrinsic, representation: spectrum}
+    unit: {canonical: model_specific, display: spectrum}
+    domain: {wavelength_minimum_nm: 360, wavelength_maximum_nm: 830, value_minimum: 0}
+    applicability: {fluid: common, paste: common, plastic_solid: common, brittle_solid: common}
+    dependencies: [optical_model, particle_diameter_distribution, refractive_index]
+    solver_owners: [optical_model]
+  - <<: *common
+    id: OPT-003
+    name: refractive_index
+    display_name: Refractive Index
+    definition: Ratio governing the phase velocity of light in a named component or effective mixture.
+    symbol: n
+    classification: {scope: state_dependent, representation: spectrum}
+    unit: {canonical: 1, display: spectrum_or_scalar}
+    domain: {minimum: 1, maximum: null}
+    applicability: {fluid: common, paste: common, plastic_solid: common, brittle_solid: common}
+    dependencies: [wavelength, temperature, composition]
+    solver_owners: [optical_model, interface_model]
+  - <<: *common
+    id: OPT-004
+    name: spectral_reflectance
+    display_name: Spectral Reflectance
+    definition: Wavelength-dependent fraction of incident light returned from a defined layer and viewing condition.
+    symbol: R(lambda)
+    classification: {scope: interaction_derived, representation: spectrum}
+    unit: {canonical: 1, display: spectrum}
+    domain: {wavelength_minimum_nm: 360, wavelength_maximum_nm: 830, value_minimum: 0, value_maximum: 1}
+    applicability: {fluid: common, paste: common, plastic_solid: common, brittle_solid: common}
+    dependencies: [spectral_absorption, spectral_scattering, layer_thickness, substrate_reflectance, illumination_geometry]
+    solver_owners: [optical_model]
