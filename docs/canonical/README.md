@@ -1,6 +1,6 @@
 # Canonical vocabulary
 
-This folder will hold the authoritative dictionary for Sarasara.
+This folder holds the authoritative dictionary for Sarasara. Read [`PROPERTY_FAMILIES.md`](PROPERTY_FAMILIES.md) before adding a new property or prefix, then add the property itself to [`PROPERTY_REGISTRY.yaml`](PROPERTY_REGISTRY.yaml).
 
 The first registry will assign stable identifiers across these families:
 
