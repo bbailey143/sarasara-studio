@@ -11,5 +11,17 @@ Calibration is subordinate to the reference behaviors and artist review. Do not 
 | Wet crossing and subtractive mixture | Artist review | Pending prototype | Judge color and boundary disappearance together. |
 | Bloom center retention | Artist review + mass conservation | Pending prototype | Track total mass and center share separately. |
 | Failure envelope | Artist review | Pending prototype | Include puddling, cauliflower blooms, overworking, and drybrush. |
+| Diagnostic drying cue | Artist review 2026-08-18 | Rejected | Drying became dark and opaque like acrylic; replace with lighter transparent drying and restrained rim concentration. |
 
 Every accepted calibration note should record material recipe, substrate, environment, brush/load, input gesture, measured output, and artist verdict.
+
+## Artist calibration history
+
+### 2026-08-18 — Watercolor diagnostic pass
+
+- Artist rating: **Unconvincing**
+- Decision: **Recalibrate**
+- Accepted behavior to preserve: pressure response.
+- Rejected behavior: drying darkened and became opaque, reading as acrylic rather than watercolor.
+- Insufficient behavior: pigment movement toward the rim was too slight to perceive.
+- Required correction: lighten the wash during drying, retain transparency, strengthen wet outward pigment transport, and keep rim concentration modest.
