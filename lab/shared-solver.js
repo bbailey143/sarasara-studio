@@ -27,7 +27,8 @@
 
   class SharedSolver{
     constructor(width,height,profile){this.w=width;this.h=height;this.n=width*height;this.surface=document.createElement('canvas');this.surface.width=width;this.surface.height=height;this.sctx=this.surface.getContext('2d');this.image=this.sctx.createImageData(width,height);this.setProfile(profile)}
-    setProfile(profile){this.profile=validateProfile(profile);this.p=profile.state;this.water=new Float32Array(this.n);this.mobile=new Float32Array(this.n);this.deposited=new Float32Array(this.n);this.absorbed=new Float32Array(this.n);this.nextWater=new Float32Array(this.n);this.nextMobile=new Float32Array(this.n);this.initialPigment=0;this.lostPigment=0;this.dryBoost=1;this.elapsed=0}
+    setProfile(profile){this.profile=validateProfile(profile);this.p=profile.state;this.displayGain=profile.display?.pigment_visibility_gain||1;this.water=new Float32Array(this.n);this.mobile=new Float32Array(this.n);this.deposited=new Float32Array(this.n);this.absorbed=new Float32Array(this.n);this.nextWater=new Float32Array(this.n);this.nextMobile=new Float32Array(this.n);this.initialPigment=0;this.lostPigment=0;this.dryBoost=1;this.elapsed=0}
+    setDisplayGain(value){this.displayGain=Math.max(1,Math.min(12,Number(value)||1))}
     clear(){this.water.fill(0);this.mobile.fill(0);this.deposited.fill(0);this.absorbed.fill(0);this.initialPigment=0;this.lostPigment=0;this.dryBoost=1;this.elapsed=0}
     tooth(x,y){return Math.max(0,Math.min(1,(Math.sin(x*.73+y*1.31)+Math.sin(x*.19-y*.41)+2)/4))}
     addDisk(cx,cy,radius,water,pigment,pressure,speed){
@@ -72,7 +73,7 @@
         const j=i*4,water=this.water[i],mobile=this.mobile[i],deposit=this.deposited[i],pigment=mobile+deposit,paperNoise=this.tooth(i%this.w,Math.floor(i/this.w));
         let pr=249-(paperNoise-.5)*4,pg=245-(paperNoise-.5)*3,pb=235-(paperNoise-.5)*2;
         if(dry){const a=1-Math.exp(-pigment*2.5);data[j]=pr*(1-a)+32*a;data[j+1]=pg*(1-a)+28*a;data[j+2]=pb*(1-a)+24*a}
-        else{const gain=this.profile.display?.pigment_visibility_gain||1,a=Math.min(.74,1-Math.exp(-pigment*.78*gain)),wetGlow=Math.min(.045,water*.018);data[j]=pr*(1-a)+44*a;data[j+1]=pg*(1-a)+105*a;data[j+2]=pb*(1-a)+158*a;data[j]=data[j]*(1-wetGlow)+220*wetGlow;data[j+1]=data[j+1]*(1-wetGlow)+236*wetGlow;data[j+2]=data[j+2]*(1-wetGlow)+245*wetGlow}
+        else{const a=Math.min(.74,1-Math.exp(-pigment*.78*this.displayGain)),wetGlow=Math.min(.045,water*.018);data[j]=pr*(1-a)+44*a;data[j+1]=pg*(1-a)+105*a;data[j+2]=pb*(1-a)+158*a;data[j]=data[j]*(1-wetGlow)+220*wetGlow;data[j+1]=data[j+1]*(1-wetGlow)+236*wetGlow;data[j+2]=data[j+2]*(1-wetGlow)+245*wetGlow}
         data[j+3]=255;
       }
       this.sctx.putImageData(this.image,0,0);target.save();target.imageSmoothingEnabled=true;target.clearRect(0,0,canvas.width,canvas.height);target.drawImage(this.surface,0,0,canvas.width,canvas.height);target.restore();
