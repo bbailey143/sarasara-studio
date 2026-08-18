@@ -1,6 +1,6 @@
 # Applicator and brush-contact extract
 
-**Source:** [`specs/brush-engine-spec.md`](https://github.com/bbailey143/sarasara-studio/blob/archive/legacy-main/specs/brush-engine-spec.md)  
+**Source:** [`specs/brush-engine-spec.md`](https://github.com/bbailey143/sarasara-studio/blob/archive/legacy-main/specs/brush-engine-spec.md)
 **Classification:** accepted contract concept; implementation details remain historical.
 
 ## Central lesson

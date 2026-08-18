@@ -1,6 +1,6 @@
 # Oil and paste rheology extract
 
-**Source:** [`specs/oil-engine-spec.md`](https://github.com/bbailey143/sarasara-studio/blob/archive/legacy-main/specs/oil-engine-spec.md)  
+**Source:** [`specs/oil-engine-spec.md`](https://github.com/bbailey143/sarasara-studio/blob/archive/legacy-main/specs/oil-engine-spec.md)
 **Classification:** accepted model-family evidence; calibration remains open.
 
 ## Two defining contrasts

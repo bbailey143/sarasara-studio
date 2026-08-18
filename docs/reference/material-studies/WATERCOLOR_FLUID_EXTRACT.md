@@ -1,6 +1,6 @@
 # Watercolor fluid and wet-paper extract
 
-**Sources:** [`specs/watercolor-engine-spec.md`](https://github.com/bbailey143/sarasara-studio/blob/archive/legacy-main/specs/watercolor-engine-spec.md), [`WATERCOLOR-FLUID-RECOVERY.md`](https://github.com/bbailey143/sarasara-studio/blob/archive/legacy-main/WATERCOLOR-FLUID-RECOVERY.md), and [`WATERCOLOR-REDESIGN.md`](https://github.com/bbailey143/sarasara-studio/blob/archive/legacy-main/WATERCOLOR-REDESIGN.md).  
+**Sources:** [`specs/watercolor-engine-spec.md`](https://github.com/bbailey143/sarasara-studio/blob/archive/legacy-main/specs/watercolor-engine-spec.md), [`WATERCOLOR-FLUID-RECOVERY.md`](https://github.com/bbailey143/sarasara-studio/blob/archive/legacy-main/WATERCOLOR-FLUID-RECOVERY.md), and [`WATERCOLOR-REDESIGN.md`](https://github.com/bbailey143/sarasara-studio/blob/archive/legacy-main/WATERCOLOR-REDESIGN.md).
 **Classification:** accepted physical concepts plus explicit historical rejection.
 
 ## Accepted behavior

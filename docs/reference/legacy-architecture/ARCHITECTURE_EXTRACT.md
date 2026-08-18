@@ -1,6 +1,6 @@
 # Legacy architecture extract
 
-**Source:** [`ARCHITECTURE.md`](https://github.com/bbailey143/sarasara-studio/blob/archive/legacy-main/ARCHITECTURE.md) in the preserved archive.  
+**Source:** [`ARCHITECTURE.md`](https://github.com/bbailey143/sarasara-studio/blob/archive/legacy-main/ARCHITECTURE.md) in the preserved archive.
 **Classification:** accepted boundary evidence, rewritten for vNext.
 
 ## What the old architecture got right

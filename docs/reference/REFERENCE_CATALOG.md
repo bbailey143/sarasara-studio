@@ -1,6 +1,6 @@
 # Legacy research catalog and Step 3 triage
 
-**Source archive:** [`archive/legacy-main`](https://github.com/bbailey143/sarasara-studio/tree/archive/legacy-main)  
+**Source archive:** [`archive/legacy-main`](https://github.com/bbailey143/sarasara-studio/tree/archive/legacy-main)
 **Purpose:** turn the old Sarasara work into evidence for the canonical vocabulary without copying its implementation history into vNext.
 
 ## Reading labels

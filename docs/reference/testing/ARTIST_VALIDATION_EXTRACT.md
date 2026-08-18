@@ -1,6 +1,6 @@
 # Artist-validation extract
 
-**Sources:** [`ROADMAP.md`](https://github.com/bbailey143/sarasara-studio/blob/archive/legacy-main/ROADMAP.md), [`WATERCOLOR-FLUID-RECOVERY.md`](https://github.com/bbailey143/sarasara-studio/blob/archive/legacy-main/WATERCOLOR-FLUID-RECOVERY.md), and the archived `TestingArtifacts/` notes.  
+**Sources:** [`ROADMAP.md`](https://github.com/bbailey143/sarasara-studio/blob/archive/legacy-main/ROADMAP.md), [`WATERCOLOR-FLUID-RECOVERY.md`](https://github.com/bbailey143/sarasara-studio/blob/archive/legacy-main/WATERCOLOR-FLUID-RECOVERY.md), and the archived `TestingArtifacts/` notes.
 **Classification:** reference behavior and acceptance evidence, not physical constants.
 
 ## Behaviors worth carrying forward
