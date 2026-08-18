@@ -13,3 +13,5 @@ The two-material architecture check is documented in [`TORTURE_TESTS.md`](TORTUR
 The cross-participant relationships are documented in [`INTERACTION_MATRIX.md`](INTERACTION_MATRIX.md) and [`INTERACTION_MATRIX.yaml`](INTERACTION_MATRIX.yaml).
 
 The named equations and constitutive choices are documented in [`MODEL_REGISTRY.md`](MODEL_REGISTRY.md) and [`MODEL_REGISTRY.yaml`](MODEL_REGISTRY.yaml). Models with perceptual consequences require artist-eye validation.
+
+The language-neutral implementation boundary is [`SCHEMA_CONTRACT.md`](SCHEMA_CONTRACT.md). Future Rust types, test fixtures, or other implementations must obey it rather than inventing parallel property meanings.

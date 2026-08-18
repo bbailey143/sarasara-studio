@@ -45,3 +45,5 @@ Whenever a scientific conclusion predicts something an artist can see or feel, a
 - **Blocked:** evidence, a working prototype, or artist access is missing. Blocked is not a pass.
 
 Watercolor and charcoal each have their own reference behaviors, physics test plan, artist review sheet, and calibration notes in the sibling folders.
+
+The first runnable prototype should follow [`DIAGNOSTIC_LAB_CONTRACT.md`](DIAGNOSTIC_LAB_CONTRACT.md). It must expose the physical observation, the measurement, and the artist approval record together.
