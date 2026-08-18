@@ -6,7 +6,7 @@
 
   const PROFILES={
     watercolor:{
-      id:'material.watercolor.diagnostic.v0.3',version:'0.3.0',
+      id:'material.watercolor.diagnostic.v0.4',version:'0.4.0',
       state:{'COMP-001':.88,'COMP-003':.12,'STATE-001':'suspension','TRAN-001':.48,'TRAN-002':.055,'DEPO-001':.74,'SUBI-001':.28,'SUBI-003':.64,'EVOL-001':.0032,'EVOL-003':.016,'REAC-001':.22,'REAC-002':.58,'REAC-003':.18,'REAC-004':.025},
       display:{pigment_visibility_gain:2.6,note:'Diagnostic preview gain only; does not alter physical pigment mass.'},
       models:MODELS,provenance:[{status:'stand-in',note:'Artist-calibrated diagnostic values; not measured production constants.'}]
@@ -45,7 +45,8 @@
     }
     depositSegment(ax,ay,bx,by,canvasW,canvasH,pressure,pigmentLoad,brushWater,speed){
       const sx=this.w/canvasW,sy=this.h/canvasH,x0=ax*sx,y0=ay*sy,x1=bx*sx,y1=by*sy,d=Math.hypot(x1-x0,y1-y0),steps=Math.max(1,Math.ceil(d/.65));
-      const carrier=this.p['COMP-001'],pigmentFraction=this.p['COMP-003'],radius=(1.2+pressure*2.6+brushWater*1.8),water=(.02+brushWater*.34)*carrier,pigment=(.012+pressure*.04)*(pigmentFraction||1)*pigmentLoad;
+      const carrier=this.p['COMP-001'],pigmentFraction=this.p['COMP-003'],radius=(1.2+pressure*2.6+brushWater*1.8),water=(.02+brushWater*.34)*carrier;
+      const availablePigment=carrier>.02?(.05+pressure*.16)*pigmentFraction:(.012+pressure*.04)*(pigmentFraction||1),pigment=availablePigment*pigmentLoad;
       for(let s=0;s<=steps;s++){const t=s/steps;this.addDisk(x0+(x1-x0)*t,y0+(y1-y0)*t,radius,water,pigment,pressure,speed)}
     }
     step(dt){

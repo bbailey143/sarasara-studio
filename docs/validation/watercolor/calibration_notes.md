@@ -72,3 +72,12 @@ Every accepted calibration note should record material recipe, substrate, enviro
 - Decision field in the exported review: **Pending**.
 - Gate interpretation: provisional artist approval for fluid action only. Do not claim final watercolor acceptance, and do not substantially retune carrier movement while addressing pigment unless a later artist comparison rejects it.
 - Next focused question: identify whether the pigment problem is primarily color/visibility, suspended movement, edge accumulation, settling pattern, or dried appearance before changing its physical parameters.
+
+### 2026-08-18 — Watercolor diagnostic v0.4 pigment-load correction
+
+- Artist diagnosis: the wash is too pale because the brush deposits far too little pigment.
+- Correction: increase actual pigment available during wet-suspension contact by approximately four times at the reviewed pressure; do not increase the diagnostic visibility multiplier to disguise the shortage.
+- Preserved behavior: carrier delivery, transport, paper uptake, evaporation, settling timing, and reactivation parameters are unchanged from v0.3.
+- Architectural basis: this is the `applicator_load` input to the shared contact/transfer model, not a watercolor-only visual effect. Dry-powder delivery retains its prior scale.
+- Automated guardrail: changing pigment load changes pigment mass proportionally while matched gestures deliver identical carrier mass.
+- Validation status: **artist review required** for believable concentration, transparency, motion, and dried appearance. The v0.3 fluid-action approval remains provisional and should be rechecked for accidental visual regression.

@@ -14,6 +14,8 @@ Each substrate cell stores:
 
 The lab exposes pigment load, brush water, and initial paper dampness separately. A zero-pigment, high-water gesture is therefore clean water using the same contact transaction rather than a separate bloom tool.
 
+The pigment-load control represents pigment available at the applicator contact. Its mapping to deposited mass is state-aware: a suspension and a dry powder use the same contact model but different available-mass scales. This keeps watercolor concentration adjustable without changing carrier delivery or altering the already reviewed charcoal profile.
+
 ## Canonical property inputs
 
 The profiles in `shared-solver.js` use canonical IDs from `PROPERTY_REGISTRY.yaml`:
