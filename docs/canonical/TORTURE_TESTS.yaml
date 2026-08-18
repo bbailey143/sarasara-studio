@@ -4,11 +4,19 @@ test_suite:
   purpose: >-
     Test whether one property vocabulary can describe a mobile particulate
     wash and a brittle particulate solid without medium-specific properties.
-  architecture_gate:
-    pass_condition: Every required phenomenon maps to existing canonical IDs.
-    fail_condition: A case requires a property named specialWatercolorThing, charcoalMode, or an equivalent private escape hatch.
-    structural_result: pass
-    physical_result: pending_engine_and_artist_validation
+  gates:
+    schema_torture_test:
+      pass_condition: Every required phenomenon maps to existing canonical IDs.
+      fail_condition: A case requires a property named specialWatercolorThing, charcoalMode, or an equivalent private escape hatch.
+      result: pass
+    behavioral_prototype_test:
+      pass_condition: A minimal diagnostic solver reproduces the listed observable phenomena with conservation and traceable inputs.
+      result: pending
+    artist_reality_test:
+      pass_condition: A practicing artist recognizes the medium without being told what is being simulated.
+      minimum_v0_1: recognizable_without_prompting
+      result: mandatory_pending
+  graduation_rule: No medium graduates from experimental to canonical without physics validation and artist validation.
   evidence_labels: [schema_covered, calibration_required, artist_review_required]
 
 cases:

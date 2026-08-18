@@ -4,11 +4,26 @@ These are the two deliberately different materials used to challenge the canonic
 
 The machine-readable cases live in [`TORTURE_TESTS.yaml`](TORTURE_TESTS.yaml). They are a contract for the future reference laboratory, not a claim that the painting engine already passes them.
 
-## Architecture result
+## Three validation gates
 
-**Structural result: PASS.** Every required phenomenon maps to existing canonical IDs. Neither case needs a private `specialWatercolorThing`, `charcoalMode`, or equivalent medium-only family.
+### Gate 1 — Schema torture test
 
-**Physical result: PENDING.** The future physics laboratory must run the cases with measured or explicitly provisional values, and an artist must inspect the resulting behavior on the target device. “Schema covered” means the vocabulary can name the cause; it does not mean the simulation is correct or visually accepted.
+**PASS for v0.1.** Every required phenomenon maps to existing canonical IDs. Neither case needs a private `specialWatercolorThing`, `charcoalMode`, or equivalent medium-only family. The full mapping is in [`TORTURE_TESTS.yaml`](TORTURE_TESTS.yaml).
+
+### Gate 2 — Behavioral prototype test
+
+**PENDING.** Once the minimal diagnostic solver exists, it must reproduce observable phenomena such as damp-paper spread, pigment/carrier separation, drying edges, tooth capture, valley skipping, pressure-dependent deposition, and particle relocation. These tests belong in the dedicated [`docs/validation/`](../validation/) lab plans; they are not product artwork tests.
+
+### Gate 3 — Artist reality test
+
+**MANDATORY and PENDING.** A practicing artist must recognize the intended medium without being told what is being simulated. The review must cover pressure, speed, loading, run-out, layering, substrate response, irregularity, continuous wetness or brittleness, expressive gestures, and believable failure. “Indistinguishable” is not required for v0.1; “recognizable without prompting” is the minimum.
+
+The validation records live in:
+
+- [`docs/validation/watercolor/`](../validation/watercolor/)
+- [`docs/validation/charcoal/`](../validation/charcoal/)
+
+No medium graduates from experimental to canonical without passing both the physics gate and the artist gate.
 
 ## How to read the statuses
 
