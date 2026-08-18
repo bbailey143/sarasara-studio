@@ -9,3 +9,5 @@ The first registry will assign stable identifiers across these families:
 Each entry will define its physical meaning, representation, canonical unit, valid domain, dependencies, applicability, solver consumers, artist-facing mappings, and provenance. A property is not a slider by default; artist controls may later map to several physical properties.
 
 The two-material architecture check is documented in [`TORTURE_TESTS.md`](TORTURE_TESTS.md) and [`TORTURE_TESTS.yaml`](TORTURE_TESTS.yaml).
+
+The cross-participant relationships are documented in [`INTERACTION_MATRIX.md`](INTERACTION_MATRIX.md) and [`INTERACTION_MATRIX.yaml`](INTERACTION_MATRIX.yaml).

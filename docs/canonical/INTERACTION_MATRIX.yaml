@@ -1,0 +1,134 @@
+interaction_matrix:
+  name: Sarasara material interaction matrix
+  version: 0.1.0
+  purpose: >-
+    Describe which material, applicator, substrate, and environment inputs
+    combine to produce a state or event result. This prevents interaction
+    results from being stored as duplicated intrinsic properties.
+  participants: [material, applicator, substrate, environment]
+  classifications:
+    intrinsic: A property of one participant without a current event.
+    state_dependent: A property that changes with condition or history.
+    pairwise: A property defined by two named participants meeting.
+    interaction_derived: A result computed from several inputs during an event.
+  entries:
+    - id: IM-001
+      name: transfer_efficiency
+      input_groups: [material, applicator, substrate]
+      material_inputs: [COMP-001, COMP-003, RHEO-001, RHEO-002, STATE-003]
+      applicator_inputs: [contact_area, normal_load, tangential_speed, contact_duration]
+      substrate_inputs: [SUBI-001, SUBI-002, INTF-002, INTF-003]
+      environment_inputs: [STATE-002, relative_humidity]
+      output: DEPO-001
+      classification: interaction_derived
+      relationship: Transfer = F(Material, Applicator, Substrate, Environment)
+    - id: IM-002
+      name: deposited_mass_flux
+      input_groups: [material, applicator, substrate]
+      material_inputs: [COMP-003, STATE-003, DEPO-001]
+      applicator_inputs: [contact_area, stroke_speed, normal_load]
+      substrate_inputs: [SUBI-001, SUBI-002]
+      environment_inputs: []
+      output: DEPO-002
+      classification: interaction_derived
+      relationship: DepositedFlux = F(TransferEfficiency, ContactArea, StrokeSpeed)
+    - id: IM-003
+      name: flow_velocity
+      input_groups: [material, substrate, environment]
+      material_inputs: [RHEO-001, RHEO-002, RHEO-003, STATE-003]
+      applicator_inputs: [none_after_contact]
+      substrate_inputs: [SUBI-001, SUBI-002, SUBI-003, TRAN-002]
+      environment_inputs: [gravity, STATE-002]
+      output: TRAN-004
+      classification: interaction_derived
+      relationship: Flow = F(Material, Substrate, Gravity, Temperature)
+    - id: IM-004
+      name: drying_rate
+      input_groups: [material, substrate, environment]
+      material_inputs: [COMP-001, COMP-004, STATE-003, INTF-001]
+      applicator_inputs: [layer_thickness]
+      substrate_inputs: [SUBI-002, SUBI-003, SUBI-004]
+      environment_inputs: [STATE-002, relative_humidity, airflow]
+      output: EVOL-001
+      classification: interaction_derived
+      relationship: Drying = F(Material, Substrate, Temperature, Humidity, Airflow)
+    - id: IM-005
+      name: wetting_angle
+      input_groups: [material, substrate]
+      material_inputs: [INTF-001, INTF-004, STATE-002]
+      applicator_inputs: [contact_speed]
+      substrate_inputs: [SUBI-004, surface_condition]
+      environment_inputs: [relative_humidity]
+      output: [INTF-002, INTF-003]
+      classification: pairwise
+      relationship: ContactAngle = F(MaterialSurface, SubstrateSurface, Condition)
+    - id: IM-006
+      name: capillary_uptake
+      input_groups: [material, substrate, environment]
+      material_inputs: [INTF-001, INTF-002, RHEO-001, STATE-003]
+      applicator_inputs: [contact_area]
+      substrate_inputs: [SUBI-002, SUBI-003, TRAN-002]
+      environment_inputs: [STATE-002, gravity]
+      output: TRAN-003
+      classification: interaction_derived
+      relationship: CapillaryPressure = F(SurfaceTension, ContactAngle, PoreGeometry)
+    - id: IM-007
+      name: settling_velocity
+      input_groups: [material, environment]
+      material_inputs: [PART-001, PART-002, PART-003, RHEO-001, STATE-001]
+      applicator_inputs: [none_after_deposition]
+      substrate_inputs: [SUBI-002, SUBI-003]
+      environment_inputs: [gravity, STATE-002]
+      output: EVOL-003
+      classification: interaction_derived
+      relationship: Settling = F(ParticlePopulation, Carrier, Gravity, PoreGeometry)
+    - id: IM-008
+      name: wear_and_fracture
+      input_groups: [material, applicator, substrate]
+      material_inputs: [TRIB-003, TRIB-004, RHEO-004, STATE-001]
+      applicator_inputs: [normal_load, tangential_speed, contact_duration]
+      substrate_inputs: [SUBI-001, SUBI-002]
+      environment_inputs: [STATE-002]
+      output: [TRIB-004, DEPO-003]
+      classification: interaction_derived
+      relationship: Wear = F(MaterialResistance, ApplicatorLoad, SubstrateTooth, Motion)
+    - id: IM-009
+      name: smudge_transport
+      input_groups: [material, applicator, substrate]
+      material_inputs: [PART-001, STATE-001, DEPO-004, TRIB-002]
+      applicator_inputs: [normal_load, tangential_speed, contact_area]
+      substrate_inputs: [SUBI-001, SUBI-004]
+      environment_inputs: []
+      output: [TRAN-004, DEPO-001]
+      classification: interaction_derived
+      relationship: Smear = F(DepositedMaterial, Friction, Load, Motion, Substrate)
+    - id: IM-010
+      name: mechanical_anchoring
+      input_groups: [material, applicator, substrate]
+      material_inputs: [PART-001, PART-003, DEPO-003, DEPO-004]
+      applicator_inputs: [normal_load, contact_area, contact_duration]
+      substrate_inputs: [SUBI-001, SUBI-002, SUBI-004]
+      environment_inputs: [STATE-002, relative_humidity]
+      output: DEPO-001
+      classification: interaction_derived
+      relationship: Anchoring = F(ParticleShape, SurfaceGeometry, Load, Adhesion)
+    - id: IM-011
+      name: reactivation
+      input_groups: [material, substrate, environment]
+      material_inputs: [REAC-001, REAC-002, REAC-003, REAC-004, EVOL-002]
+      applicator_inputs: [normal_load, tangential_speed, contact_area]
+      substrate_inputs: [SUBI-002, SUBI-003, SUBI-004]
+      environment_inputs: [STATE-002, relative_humidity]
+      output: [REAC-003, DEPO-001, TRAN-004]
+      classification: interaction_derived
+      relationship: Reactivation = F(LayerAge, Liquid, Substrate, AppliedAction, Environment)
+    - id: IM-012
+      name: spectral_appearance
+      input_groups: [material, substrate, environment]
+      material_inputs: [OPT-001, OPT-002, OPT-003, DEPO-004]
+      applicator_inputs: [layer_thickness, packing_history]
+      substrate_inputs: [substrate_reflectance, SUBI-001]
+      environment_inputs: [illumination_geometry, STATE-002]
+      output: OPT-004
+      classification: interaction_derived
+      relationship: Reflectance = F(Absorption, Scattering, Thickness, Substrate, Illumination)
