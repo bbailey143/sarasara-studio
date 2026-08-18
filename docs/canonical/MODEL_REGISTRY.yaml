@@ -1,0 +1,148 @@
+model_registry:
+  name: Sarasara Equation and Constitutive Model Registry
+  version: 0.1.0
+  status: reference_seed
+  purpose: >-
+    Keep equations and constitutive choices separate from canonical properties.
+    A property says what is being described; a model says how selected inputs
+    relate under stated assumptions.
+  model_rules:
+    - A model may consume canonical properties but may not invent hidden medium-only properties.
+    - One property may be served by several models with different applicability and evidence.
+    - Every model must declare assumptions, valid domain, outputs, and failure modes.
+    - If a model predicts something an artist can see or feel, artist validation is mandatory.
+  validation_layers: [physics_validation, reference_observation_validation, artist_validation]
+
+models:
+  - id: MODEL-RHEO-001
+    name: newtonian_viscosity
+    family: RHEO
+    summary: Constant-viscosity flow for a fluid whose stress is proportional to shear rate.
+    equation: 'tau = eta * gamma_dot'
+    inputs: [RHEO-001, STATE-002, STATE-003]
+    outputs: [RHEO-001, TRAN-004]
+    assumptions: [single_phase_or_effective_mixture, no_yield_threshold, local_isothermal]
+    applicability: {fluid: common, paste: possible, plastic_solid: not_applicable, brittle_solid: not_applicable}
+    failure_modes: [shear_thinning, yield_behavior, particle_structure, temperature_gradient]
+    validation: {physics: required, reference_observation: useful, artist_eye: required_when_flow_is_visible}
+  - id: MODEL-RHEO-002
+    name: power_law_shear_response
+    family: RHEO
+    summary: Shear-dependent apparent viscosity for thinning or thickening flow.
+    equation: 'eta = K * gamma_dot ^ (n - 1)'
+    inputs: [RHEO-003, STATE-002, STATE-004]
+    outputs: [RHEO-001, TRAN-004]
+    assumptions: [local_constitutive_response, fitted_consistency_and_index]
+    applicability: {fluid: common, paste: common, plastic_solid: possible, brittle_solid: not_applicable}
+    failure_modes: [yield_threshold, thixotropic_hysteresis, suspension_settling]
+    validation: {physics: required, reference_observation: required, artist_eye: required_when_pressure_or_speed_changes_flow}
+  - id: MODEL-RHEO-003
+    name: herschel_bulkley
+    family: RHEO
+    summary: Yield-gated shear response for a material that holds shape below a threshold.
+    equation: 'tau = tau_0 + K * gamma_dot ^ n when tau > tau_0; flow = 0 otherwise'
+    inputs: [RHEO-002, RHEO-003, STATE-002, STATE-004]
+    outputs: [RHEO-001, TRAN-004, EVOL-002]
+    assumptions: [continuum_layer, local_yield_gate, fitted_consistency_and_index]
+    applicability: {fluid: possible, paste: common, plastic_solid: common, brittle_solid: possible}
+    failure_modes: [fracture, thixotropic_memory, granular_slip, thin_layer_breakdown]
+    validation: {physics: required, reference_observation: required, artist_eye: required_for_hold_slump_and_drag}
+  - id: MODEL-TRIB-001
+    name: coulomb_contact_friction
+    family: TRIB
+    summary: Tangential resistance proportional to normal load at a contact.
+    equation: 'F_friction <= mu_s * N; F_friction = mu_k * N during sliding'
+    inputs: [TRIB-001, TRIB-002, normal_load, tangential_speed]
+    outputs: [DEPO-001, TRAN-004, TRIB-004]
+    assumptions: [contact_pair_is_defined, load_is_nonnegative]
+    applicability: {fluid: possible, paste: common, plastic_solid: common, brittle_solid: common}
+    failure_modes: [lubricated_contact, adhesion_dominance, ploughing_wear, velocity_dependence]
+    validation: {physics: required, reference_observation: required, artist_eye: required_for_drag_and_smear}
+  - id: MODEL-TRAN-001
+    name: fickian_diffusion
+    family: TRAN
+    summary: Flux down a concentration gradient for a named species or mobile property.
+    equation: 'J = -D * grad(c)'
+    inputs: [TRAN-001, concentration, STATE-002]
+    outputs: [TRAN-004, STATE-003]
+    assumptions: [continuum_concentration, local_diffusion_coefficient, no_bulk_advection_in_equation]
+    applicability: {fluid: common, paste: possible, plastic_solid: possible, brittle_solid: possible}
+    failure_modes: [advection_dominance, non_fickian_transport, particle_clustering, oil_policy_zero_diffusion]
+    validation: {physics: required, reference_observation: useful, artist_eye: required_when_diffusion_changes_visible_mix}
+  - id: MODEL-TRAN-002
+    name: lucas_washburn_capillary_penetration
+    family: TRAN
+    summary: Approximate penetration of a liquid into a cylindrical or effective pore.
+    equation: 'L^2 = (gamma * r * cos(theta) / (2 * eta)) * t'
+    inputs: [INTF-001, INTF-002, RHEO-001, SUBI-002, STATE-002]
+    outputs: [TRAN-003, STATE-003]
+    assumptions: [effective_pore_radius, wetting_front, negligible_gravity_at_short_time]
+    applicability: {fluid: common, paste: possible, plastic_solid: not_applicable, brittle_solid: not_applicable}
+    failure_modes: [pore_distribution, swelling, evaporation, non_cylindrical_network]
+    validation: {physics: required, reference_observation: required, artist_eye: required_for_absorption_and_spread}
+  - id: MODEL-TRAN-003
+    name: conservative_advection_diffusion
+    family: TRAN
+    summary: Conservative transport combining resolved velocity with bounded microscopic dispersion.
+    equation: 'dc/dt + div(u*c) = div(D*grad(c))'
+    inputs: [TRAN-001, TRAN-004, STATE-003]
+    outputs: [TRAN-004, DEPO-004, OPT-001, OPT-002]
+    assumptions: [mass_conserving_flux, resolved_velocity, bounded_diffusion]
+    applicability: {fluid: common, paste: possible, plastic_solid: possible, brittle_solid: not_applicable}
+    failure_modes: [numerical_smearing, double_transport, unbounded_source_term]
+    validation: {physics: required, reference_observation: required, artist_eye: required_for_wet_union_and_smear}
+  - id: MODEL-PART-001
+    name: stokes_settling
+    family: PART
+    summary: Low-Reynolds-number settling approximation for small particles in a viscous carrier.
+    equation: 'v_s = 2 * r^2 * (rho_p - rho_c) * g / (9 * eta)'
+    inputs: [PART-001, PART-002, RHEO-001, EVOL-003, STATE-002]
+    outputs: [EVOL-003, DEPO-004]
+    assumptions: [small_sphere, low_reynolds_number, dilute_population, unbounded_or_effective_medium]
+    applicability: {fluid: common, paste: possible, plastic_solid: not_applicable, brittle_solid: not_applicable}
+    failure_modes: [flocculation, hindered_settling, non_spherical_particles, pore_confinement]
+    validation: {physics: required, reference_observation: required, artist_eye: required_for_granulation_and_edge_settling}
+  - id: MODEL-DEPO-001
+    name: contact_exchange
+    family: DEPO
+    summary: Bounded exchange between an applicator reservoir and a contacted material/substrate region.
+    equation: 'delta_m = transfer_efficiency * available_mass * contact_kernel'
+    inputs: [DEPO-001, DEPO-003, COMP-001, COMP-003, STATE-003, normal_load, contact_area]
+    outputs: [DEPO-002, DEPO-004, STATE-003]
+    assumptions: [single_contact_transaction, bounded_exchange, extensive_mass_and_spectrum]
+    applicability: {fluid: common, paste: common, plastic_solid: common, brittle_solid: common}
+    failure_modes: [double_counted_contact, radius_dependent_mass_creation, missing_reservoir_state]
+    validation: {physics: required, reference_observation: required, artist_eye: required_for_loading_runout_and_pressure}
+  - id: MODEL-EVOL-001
+    name: evaporation_boundary_flux
+    family: EVOL
+    summary: Volatile mass loss at a material/environment boundary.
+    equation: 'J_e = f(temperature, relative_humidity, airflow, surface_state, volatile_fraction)'
+    inputs: [EVOL-001, COMP-004, STATE-002, STATE-003, surface_area, relative_humidity, airflow]
+    outputs: [EVOL-001, STATE-003, EVOL-002]
+    assumptions: [defined_surface, volatile_species, environmental_boundary_condition]
+    applicability: {fluid: common, paste: common, plastic_solid: possible, brittle_solid: not_applicable}
+    failure_modes: [skin_formation, substrate_absorption, airflow_change, temperature_gradient]
+    validation: {physics: required, reference_observation: required, artist_eye: required_for_working_time_and_dryback}
+  - id: MODEL-OPT-001
+    name: kubelka_munk_diffuse_layer
+    family: OPT
+    summary: Diffuse-layer absorption and scattering model for spectral mixture appearance.
+    equation: 'K_mix(lambda) = sum(c_p*K_p(lambda)); S_mix(lambda) = sum(c_p*S_p(lambda))'
+    inputs: [OPT-001, OPT-002, DEPO-004, layer_thickness, substrate_reflectance]
+    outputs: [OPT-004]
+    assumptions: [diffuse_layer, effective_mixture, stated_illumination_and_view]
+    applicability: {fluid: common, paste: common, plastic_solid: common, brittle_solid: common}
+    failure_modes: [thin_transparent_layer, directional_gloss, fluorescence, unresolved_particle_geometry]
+    validation: {physics: required, reference_observation: required, artist_eye: required_for_color_depth_and_dryback}
+  - id: MODEL-REAC-001
+    name: rewetting_release
+    family: REAC
+    summary: Release or redispersion of a settled layer when liquid and applied action exceed its resistance.
+    equation: 'release = f(rewetting_uptake, dissolution_fraction, applied_shear, layer_age, cure_fraction)'
+    inputs: [REAC-001, REAC-002, REAC-003, REAC-004, EVOL-002, applied_shear]
+    outputs: [REAC-003, DEPO-001, TRAN-004]
+    assumptions: [layer_history_is_available, release_is_bounded, protected_layer_can_remain]
+    applicability: {fluid: possible, paste: possible, plastic_solid: common, brittle_solid: possible}
+    failure_modes: [instant_total_release, permanent_locking, substrate_damage, history_loss]
+    validation: {physics: required, reference_observation: required, artist_eye: required_for_lifting_rewetting_and_overworking}

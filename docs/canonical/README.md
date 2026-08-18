@@ -11,3 +11,5 @@ Each entry will define its physical meaning, representation, canonical unit, val
 The two-material architecture check is documented in [`TORTURE_TESTS.md`](TORTURE_TESTS.md) and [`TORTURE_TESTS.yaml`](TORTURE_TESTS.yaml).
 
 The cross-participant relationships are documented in [`INTERACTION_MATRIX.md`](INTERACTION_MATRIX.md) and [`INTERACTION_MATRIX.yaml`](INTERACTION_MATRIX.yaml).
+
+The named equations and constitutive choices are documented in [`MODEL_REGISTRY.md`](MODEL_REGISTRY.md) and [`MODEL_REGISTRY.yaml`](MODEL_REGISTRY.yaml). Models with perceptual consequences require artist-eye validation.

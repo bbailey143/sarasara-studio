@@ -33,6 +33,10 @@ Does a practicing artist recognize the medium without being told what is being s
 
 “Indistinguishable” is not required for v0.1. The minimum useful result is **recognizable without prompting**, with a written note explaining what remains wrong.
 
+## Scientific conclusions with an artist-visible consequence
+
+Whenever a scientific conclusion predicts something an artist can see or feel, artist verification is a required step. This includes spread, wetness, settling, drying, loading, depletion, drag, tooth capture, smudging, lifting, burnishing, color depth, and believable failure. A mathematically defensible result is not accepted as complete if the artist experience contradicts it.
+
 ## Review outcomes
 
 - **Accept:** all required gates pass for the stated scope.
