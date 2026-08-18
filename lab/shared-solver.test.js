@@ -19,6 +19,7 @@ const wetAfter=wet.metrics();
 assert(wetBefore.water>0,'watercolor must deposit carrier');
 assert(wetAfter.water<wetBefore.water,'watercolor carrier must evaporate or absorb');
 assert(wetAfter.deposited_pigment>0,'mobile watercolor pigment must settle');
+assert(wetAfter.pigment_area_fraction>wetBefore.pigment_area_fraction,'water flux must expand the visible pigment region');
 assert(wetAfter.pigment_conservation_error<.01,'pigment transport must remain conservative');
 
 const cleanWater=new SharedSolver(48,24,PROFILES.watercolor);
@@ -36,6 +37,17 @@ lowWater.depositSegment(50,30,70,30,120,60,.5,.6,.1,.5);
 highWater.depositSegment(50,30,70,30,120,60,.5,.6,1,.5);
 for(let i=0;i<90;i++){lowWater.step(1/60);highWater.step(1/60)}
 assert(highWater.metrics().wet_area_fraction>lowWater.metrics().wet_area_fraction,'more brush water must create a larger wet region');
+
+const rewet=new SharedSolver(48,24,PROFILES.watercolor);
+rewet.depositSegment(35,30,85,30,120,60,.5,.8,.25,.5);
+rewet.dry();for(let i=0;i<240;i++)rewet.step(1/60);
+const settled=rewet.metrics(),pigmentBeforeWater=rewet.initialPigment;
+rewet.depositSegment(35,30,85,30,120,60,.5,0,1,.5);
+for(let i=0;i<30;i++)rewet.step(1/60);
+const reactivated=rewet.metrics();
+assert(reactivated.mobile_pigment>settled.mobile_pigment,'clean water must remobilize settled watercolor pigment');
+assert(rewet.initialPigment===pigmentBeforeWater,'clean water must not add pigment mass');
+assert(reactivated.pigment_conservation_error<.01,'clean-water reactivation must conserve pigment');
 
 const dry=new SharedSolver(48,24,PROFILES.charcoal);
 dry.depositSegment(20,40,80,40,120,60,.7,.5,0,1.3);

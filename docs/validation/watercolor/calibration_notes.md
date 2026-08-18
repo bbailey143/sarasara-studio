@@ -49,3 +49,14 @@ Every accepted calibration note should record material recipe, substrate, enviro
 - Wet-on-damp response: still insufficiently mobile.
 - Clean-water disturbance: no convincing displacement or bloom.
 - Required correction: substantially increase and validate carrier-flow magnitude and pigment coupling before asking for another realism approval.
+
+### 2026-08-18 — Watercolor diagnostic v0.3 physics pass
+
+- Material profile: `material.watercolor.diagnostic.v0.3`.
+- Carrier correction: increase the stand-in transport coefficient and neighbor-to-neighbor water exchange so damp-paper spreading becomes observable during a short review.
+- Pigment correction: couple mobile pigment more tightly to water flux and reduce independent pigment diffusion.
+- Settling correction: apply settling over elapsed time instead of removing a large fraction every frame; retain a smaller water-gradient contribution for drying-edge formation.
+- Reactivation correction: sufficiently wet clean-water contact releases a conservative fraction of deposited pigment back into the mobile state using `REAC-001` through `REAC-004` and `MODEL-REAC-001`.
+- Added observation: the lab reports pigment-covered area separately from wet area, so carrier movement cannot be mistaken for pigment movement.
+- Automated evidence: water expands the pigment region, clean water adds no pigment, reactivation increases mobile pigment, and pigment conservation remains within one percent.
+- Validation status: **artist review required**. These checks show that the mechanisms operate; they do not establish that the speed, amount, edge character, or feel is convincing.

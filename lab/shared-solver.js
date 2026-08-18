@@ -1,19 +1,19 @@
 (function(global){
   'use strict';
 
-  const REQUIRED=['COMP-001','COMP-003','STATE-001','TRAN-001','TRAN-002','DEPO-001','SUBI-001','SUBI-003','EVOL-001','EVOL-003'];
-  const MODELS=['MODEL-TRAN-001','MODEL-TRAN-002','MODEL-TRAN-003','MODEL-DEPO-001','MODEL-EVOL-001','MODEL-PART-001'];
+  const REQUIRED=['COMP-001','COMP-003','STATE-001','TRAN-001','TRAN-002','DEPO-001','SUBI-001','SUBI-003','EVOL-001','EVOL-003','REAC-001','REAC-002','REAC-003','REAC-004'];
+  const MODELS=['MODEL-TRAN-001','MODEL-TRAN-002','MODEL-TRAN-003','MODEL-DEPO-001','MODEL-EVOL-001','MODEL-PART-001','MODEL-REAC-001'];
 
   const PROFILES={
     watercolor:{
-      id:'material.watercolor.diagnostic.v0.2',version:'0.2.0',
-      state:{'COMP-001':.88,'COMP-003':.12,'STATE-001':'suspension','TRAN-001':.19,'TRAN-002':.055,'DEPO-001':.74,'SUBI-001':.28,'SUBI-003':.64,'EVOL-001':.0032,'EVOL-003':.016},
+      id:'material.watercolor.diagnostic.v0.3',version:'0.3.0',
+      state:{'COMP-001':.88,'COMP-003':.12,'STATE-001':'suspension','TRAN-001':.48,'TRAN-002':.055,'DEPO-001':.74,'SUBI-001':.28,'SUBI-003':.64,'EVOL-001':.0032,'EVOL-003':.016,'REAC-001':.22,'REAC-002':.58,'REAC-003':.18,'REAC-004':.025},
       display:{pigment_visibility_gain:2.6,note:'Diagnostic preview gain only; does not alter physical pigment mass.'},
       models:MODELS,provenance:[{status:'stand-in',note:'Artist-calibrated diagnostic values; not measured production constants.'}]
     },
     charcoal:{
       id:'material.charcoal.diagnostic.v0.2',version:'0.2.0',
-      state:{'COMP-001':0,'COMP-003':1,'STATE-001':'powder','TRAN-001':0,'TRAN-002':0,'DEPO-001':.68,'SUBI-001':.82,'SUBI-003':.45,'EVOL-001':0,'EVOL-003':0},
+      state:{'COMP-001':0,'COMP-003':1,'STATE-001':'powder','TRAN-001':0,'TRAN-002':0,'DEPO-001':.68,'SUBI-001':.82,'SUBI-003':.45,'EVOL-001':0,'EVOL-003':0,'REAC-001':0,'REAC-002':0,'REAC-003':0,'REAC-004':1},
       models:['MODEL-DEPO-001'],provenance:[{status:'stand-in',note:'Artist-recognizable diagnostic profile; further calibration required.'}]
     }
   };
@@ -50,23 +50,24 @@
     }
     step(dt){
       this.elapsed+=dt;const wet=this.p['COMP-001']>.02;if(!wet)return;
-      const D=this.p['TRAN-001'],uptake=this.p['TRAN-002']*this.p['SUBI-003'],evap=this.p['EVOL-001']*this.dryBoost*dt*2,settle=this.p['EVOL-003'];
+      const D=this.p['TRAN-001'],uptake=this.p['TRAN-002']*this.p['SUBI-003'],evap=this.p['EVOL-001']*this.dryBoost*dt*2,settle=this.p['EVOL-003'],rewetRate=this.p['REAC-001'],releaseFraction=this.p['REAC-002'],redispersion=this.p['REAC-003'],reactivationThreshold=this.p['REAC-004'];
       const w=this.w,h=this.h,W=this.water,M=this.mobile,NW=this.nextWater,NM=this.nextMobile,DP=this.deposited,AB=this.absorbed;
       NW.set(W);NM.set(M);
-      const exchange=(i,j)=>{const fw=D*(W[j]-W[i])*.18;NW[i]+=fw;NW[j]-=fw;let fm=0;if(fw>0&&W[j]>.0001)fm=fw*(M[j]/W[j])*.86;else if(fw<0&&W[i]>.0001)fm=fw*(M[i]/W[i])*.86;const dispersion=D*(M[j]-M[i])*.008;fm+=dispersion;NM[i]+=fm;NM[j]-=fm};
+      const exchange=(i,j)=>{const fw=D*(W[j]-W[i])*.24;NW[i]+=fw;NW[j]-=fw;let fm=0;if(fw>0&&W[j]>.0001)fm=fw*(M[j]/W[j])*.98;else if(fw<0&&W[i]>.0001)fm=fw*(M[i]/W[i])*.98;const dispersion=D*(M[j]-M[i])*.006;fm+=dispersion;NM[i]+=fm;NM[j]-=fm};
       for(let y=0;y<h;y++)for(let x=0;x<w;x++){const i=y*w+x;if(x<w-1)exchange(i,i+1);if(y<h-1)exchange(i,i+w)}
       for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++){
-        const i=y*w+x,avgW=(W[i-1]+W[i+1]+W[i-w]+W[i+w])*.25,outward=Math.max(0,W[i]-avgW),edgeSettle=Math.min(Math.max(0,NM[i]),Math.max(0,NM[i])*(settle+outward*.055));NM[i]-=edgeSettle;DP[i]+=edgeSettle;
+        const i=y*w+x,avgW=(W[i-1]+W[i+1]+W[i-w]+W[i+w])*.25,outward=Math.max(0,W[i]-avgW),edgeSettle=Math.min(Math.max(0,NM[i]),Math.max(0,NM[i])*(settle*dt*2+outward*.02));NM[i]-=edgeSettle;DP[i]+=edgeSettle;
       }
       for(let i=0;i<this.n;i++){
         let water=Math.max(0,NW[i]);const absorbed=Math.min(water,water*uptake*.018);water=Math.max(0,water-absorbed-evap);AB[i]=Math.min(1,AB[i]+absorbed);let mobile=Math.max(0,NM[i]);
+        if(water>reactivationThreshold&&DP[i]>0){const wetExcess=water-reactivationThreshold,release=Math.min(DP[i],DP[i]*wetExcess*rewetRate*releaseFraction*redispersion*6);DP[i]-=release;mobile+=release}
         if(water<.025&&mobile>0){const fall=Math.min(mobile,mobile*(.08+(1-water/.025)*.22));mobile-=fall;DP[i]+=fall}
         W[i]=water;M[i]=mobile;
       }
       if(this.dryBoost>1)this.dryBoost=Math.max(1,this.dryBoost-dt*4);
     }
     dry(){this.dryBoost=35}
-    metrics(){let water=0,mobile=0,deposited=0,absorbed=0,wetCells=0;for(let i=0;i<this.n;i++){water+=this.water[i];mobile+=this.mobile[i];deposited+=this.deposited[i];absorbed+=this.absorbed[i];if(this.water[i]>.008)wetCells++}const pigment=mobile+deposited,error=this.initialPigment?Math.abs(this.initialPigment-pigment-this.lostPigment)/this.initialPigment:0;return{water,wet_area_fraction:wetCells/this.n,mobile_pigment:mobile,deposited_pigment:deposited,absorbed_water:absorbed,pigment_conservation_error:error}}
+    metrics(){let water=0,mobile=0,deposited=0,absorbed=0,wetCells=0,pigmentCells=0;for(let i=0;i<this.n;i++){water+=this.water[i];mobile+=this.mobile[i];deposited+=this.deposited[i];absorbed+=this.absorbed[i];if(this.water[i]>.008)wetCells++;if(this.mobile[i]+this.deposited[i]>.0001)pigmentCells++}const pigment=mobile+deposited,error=this.initialPigment?Math.abs(this.initialPigment-pigment-this.lostPigment)/this.initialPigment:0;return{water,wet_area_fraction:wetCells/this.n,pigment_area_fraction:pigmentCells/this.n,mobile_pigment:mobile,deposited_pigment:deposited,absorbed_water:absorbed,pigment_conservation_error:error}}
     render(target,canvas){
       const data=this.image.data,dry=this.p['COMP-001']<.02;
       for(let i=0;i<this.n;i++){

@@ -27,7 +27,11 @@ The profiles in `shared-solver.js` use canonical IDs from `PROPERTY_REGISTRY.yam
 - `SUBI-001` surface roughness;
 - `SUBI-003` porosity;
 - `EVOL-001` evaporation flux;
-- `EVOL-003` settling velocity.
+- `EVOL-003` settling velocity;
+- `REAC-001` rewetting sensitivity;
+- `REAC-002` dissolution/release fraction;
+- `REAC-003` redispersion coefficient;
+- `REAC-004` reactivation threshold.
 
 Profiles are validated before drawing. Their current values are explicitly labeled `stand-in`; they are artist-calibrated diagnostic values, not measured production constants.
 
@@ -37,10 +41,13 @@ Profiles are validated before drawing. Their current values are explicitly label
 - carrier dispersion uses `MODEL-TRAN-001` and `MODEL-TRAN-003`;
 - porous uptake approximates `MODEL-TRAN-002`;
 - evaporation uses `MODEL-EVOL-001`;
-- pigment settling is a diagnostic approximation associated with `MODEL-PART-001`.
+- pigment settling is a time-scaled diagnostic approximation associated with `MODEL-PART-001`;
+- clean-water release uses `MODEL-REAC-001` and returns deposited pigment to the mobile state without adding pigment mass.
+
+Water movement is computed first. Pigment then follows that water flux according to the local pigment-to-water ratio, with only a small separate dispersion term. This keeps visible spreading tied to carrier movement instead of making pigment expand on its own.
 
 Each saved review records the material profile, named models, state measurements, and pigment-conservation error beside the artist verdict.
 
 ## Current limits
 
-This is a small CPU grid intended to expose behavior for review. It is not the production Rust/GPU solver. Spectral color, granulation, brush reservoirs, measured paper profiles, and artist-accepted clean-water blooms remain future work. Any visible conclusion still requires artist approval.
+This is a small CPU grid intended to expose behavior for review. It is not the production Rust/GPU solver. Spectral color, granulation, brush reservoirs, measured paper profiles, and artist-accepted clean-water blooms remain future work. The v0.3 values deliberately make transport easier to observe, but they remain stand-ins. Any visible conclusion still requires artist approval.
