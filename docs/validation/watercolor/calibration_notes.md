@@ -60,3 +60,15 @@ Every accepted calibration note should record material recipe, substrate, enviro
 - Added observation: the lab reports pigment-covered area separately from wet area, so carrier movement cannot be mistaken for pigment movement.
 - Automated evidence: water expands the pigment region, clean water adds no pigment, reactivation increases mobile pigment, and pigment conservation remains within one percent.
 - Validation status: **artist review required**. These checks show that the mechanisms operate; they do not establish that the speed, amount, edge character, or feel is convincing.
+
+### 2026-08-18 — Watercolor diagnostic v0.3 artist review (`WC-LAB-1787095264270`)
+
+- Artist rating: **Recognizable**.
+- Artist observation: “Lots of really good fluid action.”
+- Accepted behavior to preserve: the carrier movement is recognizable enough for this diagnostic stage.
+- Remaining concern: pigment behavior is now the weak point.
+- Review conditions: pigment load `1.00`, brush water `1.00`, paper dampness `0.25`, pressure `0.55`, speed `1.00`, diagnostic visibility `9.80`.
+- Recorded result: pigment covered `45.84%` of the grid after drying; pigment conservation error was below `0.001%`.
+- Decision field in the exported review: **Pending**.
+- Gate interpretation: provisional artist approval for fluid action only. Do not claim final watercolor acceptance, and do not substantially retune carrier movement while addressing pigment unless a later artist comparison rejects it.
+- Next focused question: identify whether the pigment problem is primarily color/visibility, suspended movement, edge accumulation, settling pattern, or dried appearance before changing its physical parameters.
