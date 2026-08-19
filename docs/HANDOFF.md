@@ -83,8 +83,9 @@ The user should be able to start another AI with one sentence:
 - Verified result on 2026-08-18: `shared solver checks passed`.
 - Verified command: `git diff --check`
 - Result before creating this handoff: passed with no whitespace errors.
-- Starting commit: `50d0738` (`docs: accept watercolor diagnostic architecture`).
-- At the start of this handoff, `vnext-bootstrap` was 7 commits ahead of `origin/vnext-bootstrap` and the working tree was clean.
+- The baton was introduced in local commit `f1be021` (`docs: add durable AI handoff baton`).
+- The current local branch contains nine unpublished commits: seven earlier implementation/documentation commits plus two handoff commits.
+- A push was attempted but the approval safeguard rejected it because publishing would send the baton together with seven earlier local commits. Explicit user approval to push all current `vnext-bootstrap` commits to `https://github.com/bbailey143/sarasara-studio.git` is still required.
 - Do not call the branch published until `git status --short --branch` confirms it is no longer ahead.
 
 ## Current objective
@@ -194,8 +195,8 @@ Perform a **validation-status reconciliation pass** before changing simulation b
 
 ## IN FLIGHT
 
-- Creation of this handoff and the README pointer. No simulation changes are in flight.
-- Seven previously completed commits were local-only at the start of this handoff. Verify and push the branch when authorized.
+- Nothing is half-implemented. No simulation changes are in flight.
+- This baton and the README pointer are committed locally. Both handoff commits and the seven previously completed commits remain unpublished until the user explicitly approves that complete push destination and scope.
 
 ## Recently completed
 
@@ -213,7 +214,7 @@ Perform a **validation-status reconciliation pass** before changing simulation b
 - Charcoal artist evidence may exist in exported JSON files outside the repository, but it has not been established as canonical in the present docs.
 - The lab has no production brush reservoir, spectral color, measured papers, full particle fracture/dust system, or production renderer.
 - Rust is the intended production direction, but production implementation must wait until the shared foundation survives the stated validation scope.
-- The current branch may still be ahead of GitHub; verify rather than assume.
+- GitHub publication is blocked pending explicit approval to push all current `vnext-bootstrap` commits to the configured Sarasara repository. Verify the branch count before asking because later local commits may change it.
 
 ## Do NOT
 
