@@ -94,3 +94,12 @@ Each accepted calibration note should record material recipe, substrate, environ
 - Artist response: “Pastel paper is gold!”
 - Accepted relationship: the sample-guided fine fibrous surface and existing loose-particle smudge behavior work together convincingly at low pressure.
 - Scope limit: this record does not compare Draw contact at light and firm pressure, so CH-P-01 and CH-P-02 remain artist-pending. Light Cream remains unreviewed.
+
+### 2026-08-18 — Direct artist clarification closes Pastel Paper draw tests
+
+- The artist clarified that all prescribed Pastel Paper tests were completed; only one representative iteration was exported.
+- Accepted: Pastel White light Draw at pressure `0.25`, matched firm Draw at `0.75`, matched Light Cream comparison, and fibrous-paper smudging.
+- CH-P-01 tooth/fiber capture and CH-P-02 pressure progression advance to **artist accepted for the Pastel Paper v0.2 diagnostic scope**.
+- White and Light Cream are accepted as physical twins whose ground tone differs without changing charcoal behavior.
+- Evidence boundary: only the smudge iteration has a saved JSON/image/measurement record. The matched Draw and color-twin approval is a direct artist statement and must not be misrepresented as separately exported trials.
+- Next calibration target: CH-P-03 / CH-P-04 coarse/fine fracture and bounded dusting with a conserved particle source; do not add decorative random flecks.

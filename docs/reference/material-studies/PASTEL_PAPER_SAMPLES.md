@@ -40,4 +40,4 @@ Automated checks may establish that:
 - firm contact reaches more shallow gaps;
 - smudging remains conservative.
 
-Only artist review can establish that the scale looks like pastel paper and that charcoal catches, skips, drags, and smudges believably. No sample-guided pastel profile is canonical yet.
+Artist review has established that the scale looks like pastel paper and that charcoal catches, skips, responds to pressure, and smudges believably for the v0.2 diagnostic scope. The artist also approved White/Cream behavior parity, clarifying that all prescribed tests were performed although only one representative JSON was exported. The profiles are still not canonical production papers because the photographs do not measure physical height, friction, or particle capture.

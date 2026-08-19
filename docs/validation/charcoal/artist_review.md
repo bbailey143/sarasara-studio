@@ -126,3 +126,14 @@ The archived Rough profile remains available for wet-media comparison and is no 
 - **Artist note:** “Pastel paper is gold!”
 
 This accepts the sample-guided Pastel White surface as an artist-convincing ground for the reviewed smudge and confirms that the already accepted loose-particle motion survives at low pressure on the new fibrous paper. It does **not** complete CH-P-01 or CH-P-02: the saved action was Smudge, not Draw, and there is no matched firm-pressure drawing record. Pastel Light Cream also remains unreviewed.
+
+## Direct artist follow-up — complete Pastel Paper pass
+
+- **Source:** Conversation follow-up after `CH-LAB-1787110275815`; no additional exported JSON was supplied.
+- **Clarification:** The artist completed every prescribed comparison and exported only one representative iteration.
+- **Reviewed scope:** Pastel White Draw at pressure `0.25`; matched Pastel White Draw at `0.75`; matched Pastel Light Cream comparison; dense-mark smudging on the fibrous paper.
+- **Decision:** **Accept for the complete Pastel Paper v0.2 diagnostic scope.**
+
+The artist approves the fine-fiber appearance, light-pressure peak/fiber capture, progressive firm-pressure reach into shallow gaps, White/Cream behavior parity, and preservation of the accepted smudge motion. The prior paragraph remains as the correct interpretation of the JSON by itself; this direct statement supplies the missing artist evidence and closes CH-P-01 and CH-P-02 for this experimental substrate scope.
+
+This is not final charcoal-medium or production-paper approval. Coarse/fine fracture populations, bounded dusting, lift, burnishing, and failure-range behavior remain open.
