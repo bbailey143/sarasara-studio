@@ -97,3 +97,18 @@ This record does not decide CH-P-01 or CH-P-02: Plain White is intentionally fla
 - **Paper verdict:** **Recalibrate** — ridges and valleys appeared severely zoomed-in and much larger than in the previous application, making the paper difficult to judge.
 
 The v0.1 implementation had inverted the archived grain-scale direction. Substrate v0.2 corrects that mapping and makes the tooth substantially finer while leaving material and smudge physics unchanged. CH-P-01 / CH-P-02 artist approval remains pending until the corrected Rough paper is reviewed.
+
+## Recorded review — CH-LAB-1787107972495
+
+- **Date:** 2026-08-18
+- **Material/build:** `material.charcoal.diagnostic.v0.4`
+- **Substrate:** `substrate.paper.rough.archive-seed.v0.2` — now labeled **Rough Watercolor Paper**
+- **Action:** Smudge existing material
+- **Settings:** pressure `1.00`, speed `1.00`, diagnostic visibility `1.00`; the saved inactive pigment-load, brush-water, and paper-dampness values were `0.70`, `0.75`, and `0.25`.
+- **Rating:** **Good**
+- **Decision:** **Accept for the smudge-motion scope; reject this paper for charcoal evaluation**
+- **Saved evidence:** pigment area `26.00%`, deposited pigment `2992.55`, loose pigment effectively settled at save time, cumulative relocated pigment `5991.20`, conservation error `0.00032%`.
+
+The charcoal behavior remained good, so CH-P-05's limited acceptance stands. The artist again found the paper ugly and its peaks and valleys too dramatic, noting that this Rough preset was created for watercolor and was less exaggerated there. That is a substrate verdict, not a failure of charcoal smudging.
+
+The archived Rough profile remains available for wet-media comparison and is no longer the charcoal recommendation. Charcoal now defaults to an experimental **Fine-Tooth Drawing Paper** candidate with smaller, shallower, more frequent tooth. That candidate has passed automated relationship checks but requires a fresh artist review before CH-P-01 or CH-P-02 can graduate.

@@ -4,10 +4,10 @@ Charcoal calibration must preserve the difference between the source tool, detac
 
 | Parameter or relationship | Evidence source | Current status | Next action |
 | --- | --- | --- | --- |
-| Tooth capture versus pressure | Matched gestures on smooth and toothy substrates | Automated height-band relationship verified; artist pending | Compare Plain and Rough marks, then light and firm pressure on Rough. |
+| Tooth capture versus pressure | Matched gestures on smooth and toothy substrates | Fine-Tooth automated height-band relationship verified; artist pending | Compare light and firm marks on Fine-Tooth Drawing Paper. |
 | Coarse/fine particle breakup | Material-specific particle evidence | Seed only | Measure or bound the size populations. |
 | Dusting versus main deposition | Controlled loading and speed scene | Unmeasured | Track detached particle mass separately. |
-| Smudge relocation | Automated source/destination ledger plus artist gesture review | v0.4 artist accepted for smudge motion; substrate scope remains open | Preserve the accepted motion while comparing it on better tooth/absorbency profiles. |
+| Smudge relocation | Automated source/destination ledger plus artist gesture review | v0.4 artist accepted for smudge motion on Plain White and Rough Watercolor Paper | Preserve the accepted motion on Fine-Tooth Drawing Paper. |
 | Lift response | Adhesion/cohesion and artist review | Pending prototype | Test gentle lift, hard lift, and repeated lift. |
 | Burnishing rejection | Repeated pressure scene | Pending prototype | Record packing, optical change, and fresh capture reduction. |
 | Failure envelope | Artist review | Pending prototype | Include broken deposition, dusting, and over-burnished rejection. |
@@ -66,3 +66,12 @@ Each accepted calibration note should record material recipe, substrate, environ
 - Correction: substrate profiles advance to v0.2 and use inverse grain scale with a higher diagnostic sampling density. Tooth amplitude and all charcoal material/smudge parameters remain unchanged.
 - Automated guard: Rough must show at least 25 midline tooth crossings over the 300-cell field and more than twice the Hot Press crossing count; all height-band, uptake, smudge, and conservation checks must still pass.
 - Artist status: **re-review required** for corrected paper scale and naturalness.
+
+### 2026-08-18 — CH-LAB-1787107972495 paper/material verdict split
+
+- Artist verdict on charcoal v0.4 smudging: **Good / Accept for the existing smudge-motion scope**.
+- Conditions: Rough v0.2, smudge, pressure `1.00`, speed `1.00`, pigment area `26.00%`, deposited pigment `2992.55`, relocated pigment `5991.20`, conservation error `0.00032%`.
+- Separate paper verdict: **reject Rough as the charcoal evaluation sheet**. Its relief remained ugly and too dramatic; it originated as a watercolor preset and is better retained for that purpose.
+- Architecture decision: do not tune the watercolor Rough profile until it serves charcoal. Add an independent experimental **Fine-Tooth Drawing Paper** substrate with smaller, shallower, more frequent grain and leave the shared material/contact system unchanged.
+- Automated evidence on Fine-Tooth: its peak-to-valley range is lower than Rough Watercolor Paper; its grain changes direction more frequently; light contact favors raised fibers; firmer contact increases deposition in valleys; smudge conservation and settling checks still pass.
+- Artist status: **required**. Those checks establish the intended relationships, not whether the sheet looks like drawing paper or makes charcoal feel right.
