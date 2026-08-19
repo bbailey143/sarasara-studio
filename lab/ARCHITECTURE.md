@@ -9,7 +9,7 @@ Each substrate cell stores:
 - mobile carrier;
 - mobile pigment;
 - deposited pigment;
-- carrier absorbed by the substrate;
+- carrier held as paper saturation, separately from mobile surface water;
 - deterministic surface tooth.
 
 The lab exposes pigment load, brush water, and initial paper dampness separately. A zero-pigment, high-water gesture is therefore clean water using the same contact transaction rather than a separate bloom tool.
@@ -17,6 +17,8 @@ The lab exposes pigment load, brush water, and initial paper dampness separately
 The pigment-load control represents pigment available at the applicator contact. Its mapping to deposited mass is state-aware: a suspension and a dry powder use the same contact model but different available-mass scales. This keeps watercolor concentration adjustable without changing carrier delivery or altering the already reviewed charcoal profile.
 
 Watercolor contact is continuous across moisture levels. Brush moisture and existing paper moisture combine into one contact-wetness value. At its dry end, surface tooth and pressure determine which cells receive directly deposited pigment; as moisture increases, the same contact progressively becomes continuous and transfers more pigment into the mobile suspension. There is no named dry-brush mode or hidden carrier at zero brush water.
+
+The v0.6 damp interval follows relationships recovered from the archived watercolor reference. The artist-facing brush-water control maps nonlinearly to delivered surface carrier, while `STATE-003`-like paper saturation remains a separate slower store. Paper-held water supports only partial mobility. At lower surface-water levels, `SUBI-001` tooth restricts connected carrier flow and mechanically retains part of the pigment; abundant surface water progressively overwhelms that resistance and recovers the previously reviewed full-wet transport. The archive's exact constants are evidence, not copied production truth.
 
 ## Canonical property inputs
 

@@ -103,3 +103,13 @@ Every accepted calibration note should record material recipe, substrate, enviro
 - Gate interpretation: the dry-brush endpoint receives provisional artist approval; the brush-water scaling concern remains open, but this run cannot isolate it from maximum paper wetness.
 - Required matched retest: clear at paper dampness `0.00`, then compare brush water `0.00`, `0.35`, and `1.00` with the same pressure, speed, pigment load, and stroke. A second series at paper dampness `0.25` may then test interaction with a lightly damp sheet.
 - Change policy: do not retune the previously recognized full-wet carrier motion until the matched test shows excessive spread with paper dampness held constant.
+
+### 2026-08-18 — Archived-paper comparison and v0.6 damp-stroke correction
+
+- Artist clarification after matched retest: the first report overstated the spread, but the underlying problem remained. No available setting produced one dark, semi-wet stroke; moderate brush water became a rounded, weakly pigmented swell.
+- Artist hypothesis: insufficient substrate absorption, friction, or pigment retention; archived watercolor settings were identified as relevant prior evidence.
+- Archive finding: the earlier engine separated mobile surface water from capillary paper saturation, limited saturation-only mobility, used paper capacity and valley-biased capillary conductance, retained a mechanically caught pigment fraction, and calibrated pigment independently from carrier.
+- Correction: paper dampness now initializes paper-held saturation rather than flooding the surface. Moderate brush-water settings deliver carrier on a nonlinear scale, paper absorbs surface carrier into a slower store, low-water transport is resisted by paper tooth, and part of damp-contact pigment remains deposited.
+- Preserved limit: at abundant surface water, tooth resistance fades and the v0.3/v0.5 full-wet carrier coefficient is recovered.
+- Automated guardrails: paper dampness creates saturation without a surface puddle; paper absorbs carrier from a damp stroke; a `0.35` damp stroke covers less area than a `1.00` wash; damp contact retains pigment; and pigment conservation remains required.
+- Validation status: **artist review required**. The key target is a dark, semi-wet stroke at brush water near `0.35` that stays stroke-shaped while remaining visibly damp. Full-wet fluid action must also be rechecked for regression.

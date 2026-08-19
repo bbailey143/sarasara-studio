@@ -46,12 +46,23 @@ assert(heavyDryBrush.metrics().deposited_pigment>lightDryBrush.metrics().deposit
 const prewet=new SharedSolver(48,24,PROFILES.watercolor);
 prewet.clear(.8);
 assert(prewet.metrics().wet_area_fraction===1,'paper dampness must prepare the full substrate');
+assert(prewet.metrics().water===0&&prewet.metrics().absorbed_water>0,'paper dampness must initialize paper-held moisture rather than a surface puddle');
 
 const lowWater=new SharedSolver(48,24,PROFILES.watercolor),highWater=new SharedSolver(48,24,PROFILES.watercolor);
 lowWater.depositSegment(50,30,70,30,120,60,.5,.6,.1,.5);
 highWater.depositSegment(50,30,70,30,120,60,.5,.6,1,.5);
 for(let i=0;i<90;i++){lowWater.step(1/60);highWater.step(1/60)}
 assert(highWater.metrics().wet_area_fraction>lowWater.metrics().wet_area_fraction,'more brush water must create a larger wet region');
+
+const dampStroke=new SharedSolver(48,24,PROFILES.watercolor),washStroke=new SharedSolver(48,24,PROFILES.watercolor);
+dampStroke.depositSegment(35,30,85,30,120,60,.55,1,.35,1);
+washStroke.depositSegment(35,30,85,30,120,60,.55,1,1,1);
+const dampSurfaceBefore=dampStroke.metrics().water,dampPaperBefore=dampStroke.metrics().absorbed_water;
+for(let i=0;i<120;i++){dampStroke.step(1/60);washStroke.step(1/60)}
+const dampResult=dampStroke.metrics(),washResult=washStroke.metrics();
+assert(dampResult.water<dampSurfaceBefore&&dampResult.absorbed_water>dampPaperBefore,'paper must take up surface carrier during a damp stroke');
+assert(dampResult.pigment_area_fraction<washResult.pigment_area_fraction,'a damp stroke must remain more concentrated than a fully wet wash');
+assert(dampResult.deposited_pigment>0,'paper contact must retain some damp-stroke pigment');
 
 const quarterLoad=new SharedSolver(48,24,PROFILES.watercolor),fullLoad=new SharedSolver(48,24,PROFILES.watercolor);
 quarterLoad.depositSegment(20,30,100,30,120,60,.55,.25,1,1);
