@@ -82,11 +82,12 @@ The user should be able to start another AI with one sentence:
 - Verified command: `node lab/shared-solver.test.js`
 - Verified result on 2026-08-18: `shared solver checks passed`.
 - Verified command: `git diff --check`
-- Result before creating this handoff: passed with no whitespace errors.
+- Verified result on 2026-08-18 during the GitHub cleanup checkpoint: passed with no whitespace errors.
 - The baton was introduced in local commit `f1be021` (`docs: add durable AI handoff baton`).
-- The current local branch contains nine unpublished commits: seven earlier implementation/documentation commits plus two handoff commits.
-- A push was attempted but the approval safeguard rejected it because publishing would send the baton together with seven earlier local commits. Explicit user approval to push all current `vnext-bootstrap` commits to `https://github.com/bbailey143/sarasara-studio.git` is still required.
-- Do not call the branch published until `git status --short --branch` confirms it is no longer ahead.
+- The original nine-commit checkpoint was published through `bcc0e6b` on `origin/vnext-bootstrap`.
+- Archived AI guidance was restored exactly as root `CLAUDE.md` in commit `9c48cc6`.
+- The user explicitly authorized publishing every current `vnext-bootstrap` commit to `https://github.com/bbailey143/sarasara-studio.git` during this cleanup checkpoint.
+- Always verify publication with `git status --short --branch`; a clean published checkpoint shows no `ahead` count.
 
 ## Current objective
 
@@ -195,8 +196,7 @@ Perform a **validation-status reconciliation pass** before changing simulation b
 
 ## IN FLIGHT
 
-- Nothing is half-implemented. No simulation changes are in flight.
-- This baton and the README pointer are committed locally. Both handoff commits and the seven previously completed commits remain unpublished until the user explicitly approves that complete push destination and scope.
+- Nothing. No simulation or documentation work is half-implemented.
 
 ## Recently completed
 
@@ -207,6 +207,7 @@ Perform a **validation-status reconciliation pass** before changing simulation b
 - Restored distinct paper saturation, surface carrier, tooth resistance, porous uptake, and damp-contact pigment retention from the architectural lessons in the archive.
 - Added automated guards for conservation, clean water, dry contact, pressure response, paper dampness, carrier uptake, damp-versus-wet spread, pigment-load independence, reactivation, and dry charcoal deposition.
 - Recorded limited artist acceptance of watercolor v0.6 and confirmed the implementation still follows the shared abstract-medium architecture.
+- Restored the archived `OLDEYTIMEYCLAUDE.md` content exactly as root `CLAUDE.md`; it supplies Claude-specific caution, simplicity, surgical-change, and verification guidance alongside this model-neutral baton.
 
 ## Blocked and open questions
 
@@ -214,7 +215,6 @@ Perform a **validation-status reconciliation pass** before changing simulation b
 - Charcoal artist evidence may exist in exported JSON files outside the repository, but it has not been established as canonical in the present docs.
 - The lab has no production brush reservoir, spectral color, measured papers, full particle fracture/dust system, or production renderer.
 - Rust is the intended production direction, but production implementation must wait until the shared foundation survives the stated validation scope.
-- GitHub publication is blocked pending explicit approval to push all current `vnext-bootstrap` commits to the configured Sarasara repository. Verify the branch count before asking because later local commits may change it.
 
 ## Do NOT
 
