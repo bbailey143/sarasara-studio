@@ -92,3 +92,14 @@ Every accepted calibration note should record material recipe, substrate, enviro
 - Pressure consequence: greater pressure progressively reaches more paper valleys; low and moderate pressure leave more broken contact.
 - Automated guardrails: dry contact adds no carrier, deposits pigment directly, covers less paper than a wet wash, gains mobility continuously with moisture, and deposits more material under greater pressure.
 - Validation status: **artist review required** across at least dry `0.00`, damp `0.35`, and wet `1.00` brush-water settings. Preserve the previously approved full-wet fluid action.
+
+### 2026-08-18 — Watercolor v0.5 transition review (`WC-LAB-1787098813140`)
+
+- Artist rating: **Recognizable**; submitted decision: **Recalibrate**.
+- Provisional pass: “Dry brush looks okay.” Preserve the zero-water tooth-catching behavior pending a direct pressure comparison.
+- Artist concern: brush water `0.35` appeared far too fluid and spread across almost the entire visible area.
+- Review conditions for the saved result: pigment load `1.00`, brush water `0.35`, paper dampness `1.00`, pressure `0.53`, speed `1.00`, diagnostic visibility `4.60`.
+- Important confound: paper dampness `1.00` initializes the entire substrate at maximum diagnostic wetness. The shared moisture calculation therefore makes contact fully wet even when the brush-water control is only `0.35`.
+- Gate interpretation: the dry-brush endpoint receives provisional artist approval; the brush-water scaling concern remains open, but this run cannot isolate it from maximum paper wetness.
+- Required matched retest: clear at paper dampness `0.00`, then compare brush water `0.00`, `0.35`, and `1.00` with the same pressure, speed, pigment load, and stroke. A second series at paper dampness `0.25` may then test interaction with a lightly damp sheet.
+- Change policy: do not retune the previously recognized full-wet carrier motion until the matched test shows excessive spread with paper dampness held constant.
