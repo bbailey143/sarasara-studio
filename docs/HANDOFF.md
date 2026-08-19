@@ -91,6 +91,7 @@ The user should be able to start another AI with one sentence:
 - Fine-Tooth implementation and review history were published in commit `40f19f1` (`feat: add fine-tooth charcoal paper`).
 - Sample-guided Pastel White/Cream profiles were published in commit `00dff73` (`feat: calibrate pastel paper from artist samples`).
 - Pastel White artist acceptance was published in commit `e80f8d9` (`docs: accept pastel white charcoal smudge`).
+- Complete Pastel Paper approval and CH-P-03/04 handoff were published in commit `c2cd9c7` (`docs: accept complete pastel paper pass`).
 - Always verify publication with `git status --short --branch`; a clean published checkpoint shows no `ahead` count.
 
 ## Current objective
@@ -204,7 +205,7 @@ Build the smallest CH-P-03 / CH-P-04 **fracture and bounded dusting diagnostic**
 
 ## IN FLIGHT
 
-- The direct artist clarification is being recorded locally. After commit/push, no implementation is in flight; CH-P-03 / CH-P-04 is the next new task.
+- Nothing. CH-P-03 / CH-P-04 fracture and bounded dusting is the next new task.
 
 ## Recently completed
 
