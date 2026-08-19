@@ -148,6 +148,9 @@ assert(postSettleState.pigment_conservation_error<.01,'detached-particle travel 
 const deterministicA=fractureScene(.8,.72,1.35),deterministicB=fractureScene(.8,.72,1.35);for(let i=0;i<75;i++){deterministicA.step(1/60);deterministicB.step(1/60)}
 assert(JSON.stringify(deterministicA.metrics())===JSON.stringify(deterministicB.metrics())&&JSON.stringify(Array.from(deterministicA.fineDust))===JSON.stringify(Array.from(deterministicB.fineDust)),'identical fracture commands must reproduce identical particle state');
 
+const fineTravelAtFriction=friction=>{const profile=JSON.parse(JSON.stringify(PROFILES.charcoal));profile.state['TRIB-002']=friction;const solver=new SharedSolver(120,60,profile,SUBSTRATES.pastelWhite);solver.depositSegment(25,30,65,30,120,60,.85,1,0,1.6);const start=populationCentroidX(solver,solver.fineDust);for(let i=0;i<60;i++)solver.step(1/60);return populationCentroidX(solver,solver.fineDust)-start};
+assert(fineTravelAtFriction(.85)<fineTravelAtFriction(.15),'greater shared surface friction must visibly shorten fine-dust travel');
+
 const nonBrittleDryProfile=JSON.parse(JSON.stringify(PROFILES.charcoal));delete nonBrittleDryProfile.state['TRIB-003'];delete nonBrittleDryProfile.state['PART-001'];const nonBrittleDry=new SharedSolver(120,60,nonBrittleDryProfile,SUBSTRATES.pastelWhite);nonBrittleDry.depositSegment(25,30,65,30,120,60,.9,1,0,1.8);const nonBrittleState=nonBrittleDry.metrics();
 assert(nonBrittleState.coarse_fragment_created===0&&nonBrittleState.fine_dust_created===0,'a profile without a brittle particulate source must not create fragments or dust');
 assert(!/watercolor|charcoal/i.test(SharedSolver.prototype.fractureSplit.toString()+SharedSolver.prototype.stepDetachedPopulation.toString()),'fracture and dusting must not branch on a named medium');

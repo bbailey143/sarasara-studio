@@ -112,3 +112,14 @@ Each accepted calibration note should record material recipe, substrate, environ
 - Current fracture, abrasion, particle-size share, density, shape, travel, and settling values are normalized unmeasured stand-ins. They are calibration knobs, not scientific constants.
 - Automated evidence: greater matched loading/pressure/speed creates more coarse and fine material; fine dust travels farther; coarse fragments settle sooner; both populations settle after contact; blank contact and a profile without a brittle particulate source create zero particles; identical commands reproduce exactly; total pigment error stays below 1% including off-canvas loss.
 - Artist status: **required and pending**. The artist must decide whether the result reads as brittle crumbs and dust physically shed by the stroke, whether fine dust travels too far or too evenly, and whether any marks look like decorative spray.
+
+### 2026-08-18 — CH-LAB-1787112551932 and v0.5.1 friction response
+
+- Artist verdict on v0.5: **Good / Recalibrate**.
+- Reviewed action: strong smudge on Pastel Paper — White at pressure `0.85`, speed `1.60`, visibility `1.00`.
+- Artist diagnosis: the result was too light and wispy and felt as though it had almost zero friction.
+- Saved state: pigment area `33.27%`, deposited `3241.69`, coarse created `144.29`, fine dust created `235.42`, relocated `3033.75`, off-canvas loss `0.000044`, conservation error `0.00114%`.
+- Evidence boundary: the mass ledger passed, but the visible travel and density failed artist calibration. Because the saved action was Smudge, this review does not independently complete the prescribed Draw comparison.
+- v0.5.1 response: reduce fine-dust launch speed and lateral spread, increase the influence of shared kinetic friction and substrate roughness on fine-dust energy loss, and settle fine dust somewhat sooner. Do not alter the accepted loose-ridge smudge path or create a named charcoal branch.
+- New automated guard: increasing `TRIB-002` alone must shorten fine-dust travel while coarse fragments still travel less and settle faster than fine dust; all conservation and determinism checks remain required.
+- Artist status: **retest required**. The intended result should remain visibly dusty, but denser, more surface-bound, and less like a pale airborne veil.

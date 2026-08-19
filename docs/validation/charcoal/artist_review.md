@@ -153,3 +153,19 @@ Approve CH-P-03 / CH-P-04 only if all of these are true:
 - a blank smudge creates no crumbs or dust.
 
 Rate the visible result **Unconvincing**, **Recognizable**, **Good**, **Convincing**, or **Indistinguishable in behavior**, then choose **Accept**, **Recalibrate**, or **Revise model** and save the review JSON. Automated checks do not satisfy this artist gate.
+
+## Recorded review — CH-LAB-1787112551932
+
+- **Date:** 2026-08-18
+- **Material/build:** `material.charcoal.diagnostic.v0.5`
+- **Substrate:** `substrate.paper.pastel-white.reference-derived.experimental.v0.2` — Pastel Paper — White
+- **Action:** Smudge existing material
+- **Settings:** pressure `0.85`, speed `1.60`, diagnostic visibility `1.00`; pigment load `1.00` was inactive during smudging.
+- **Rating:** **Good**
+- **Decision:** **Recalibrate**
+- **Artist note:** “It's a little bit too light and wispy. It almost feels like there's 0 friction.”
+- **Saved evidence:** pigment area `33.27%`, deposited pigment `3241.69`, coarse fragments created `144.29`, fine dust created `235.42`, cumulative relocated pigment `3033.75`, off-canvas loss `0.000044`, conservation error `0.00114%`.
+
+The review supports the particle idea but rejects the v0.5 fine-dust travel/drag calibration. It does not close CH-P-03 or CH-P-04. The exported action was Smudge, so it specifically establishes that dust detached during strong later contact felt too pale, too dispersed, and insufficiently coupled to the Pastel Paper surface. It does not by itself judge the prescribed light-versus-strong Draw comparison.
+
+Charcoal v0.5.1 responds by reducing fine-particle launch and sideways spread, increasing fine-particle drag from shared `TRIB-002` friction and `SUBI-001` substrate roughness, and increasing fine-particle settling while retaining the required coarse-near/fine-far and coarse-fast/fine-slow relationships. A focused artist retest is required before acceptance.
