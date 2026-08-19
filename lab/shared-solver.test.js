@@ -4,13 +4,21 @@ global.window={};
 global.document={createElement(){return{width:0,height:0,getContext(){return{createImageData(w,h){return{data:new Uint8ClampedArray(w*h*4)}},putImageData(){}}}}}};
 require('./shared-solver.js');
 
-const {SharedSolver,PROFILES,SUBSTRATES}=window.SarasaraLab;
+const {SharedSolver,PROFILES,SUBSTRATES,DEFAULT_CALIBRATION,validateCalibration,interpolatePressure}=window.SarasaraLab;
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 
 assert(PROFILES.charcoal.id==='material.charcoal.diagnostic.v0.6','the loose-grain target must remain versioned for artist review history');
 assert(PROFILES.watercolor.state['SUBI-001']===undefined&&PROFILES.charcoal.state['SUBI-001']===undefined,'material profiles must not own intrinsic paper roughness');
 assert(SUBSTRATES.rough.texture.tooth===.85&&SUBSTRATES.coldPress.texture.capacity===.5,'archived paper seed values must remain traceable');
 assert(SUBSTRATES.rough.version==='0.2.0','corrected paper scale must remain versioned for artist review history');
+
+const defaultCalibrationSolver=new SharedSolver(24,12,PROFILES.charcoal,SUBSTRATES.pastelWhite);
+for(const pressure of [0,.1,.33,.5,.67,.9,1])assert(Math.abs(defaultCalibrationSolver.transformPressure(pressure)-pressure)<.000001,'the default linear calibration must preserve input pressure at '+pressure);
+const curvedCalibration=validateCalibration({curve:[{x:0,y:0},{x:.33,y:.16},{x:.67,y:.84},{x:1,y:1}],paperTexture:1,particleBreakup:1,smear:1,speed:1});
+let previous=-1;for(let index=0;index<=100;index++){const value=interpolatePressure(curvedCalibration.curve,index/100);assert(value>=previous-.000001,'pressure curve interpolation must remain monotonic');previous=value}
+assert(interpolatePressure(curvedCalibration.curve,0)===0&&interpolatePressure(curvedCalibration.curve,1)===1,'pressure curve endpoints must remain exactly zero and one');
+assert(JSON.parse(JSON.stringify(curvedCalibration)).curve.length===4,'artist calibration must be JSON serializable');
+assert(!/watercolor|charcoal/i.test(validateCalibration.toString()+interpolatePressure.toString()+SharedSolver.prototype.setCalibration.toString()+SharedSolver.prototype.transformPressure.toString()),'shared pressure calibration must not branch on a named medium');
 
 const plainTexture=new SharedSolver(48,24,PROFILES.charcoal,SUBSTRATES.plain),roughTexture=new SharedSolver(48,24,PROFILES.charcoal,SUBSTRATES.rough);
 const pastelTexture=new SharedSolver(48,24,PROFILES.charcoal,SUBSTRATES.pastelWhite),creamTexture=new SharedSolver(48,24,PROFILES.charcoal,SUBSTRATES.pastelCream);let plainMin=1,plainMax=0,roughMin=1,roughMax=0,pastelMin=1,pastelMax=0;for(let y=0;y<24;y++)for(let x=0;x<48;x++){const p=plainTexture.tooth(x,y),r=roughTexture.tooth(x,y),f=pastelTexture.tooth(x,y);plainMin=Math.min(plainMin,p);plainMax=Math.max(plainMax,p);roughMin=Math.min(roughMin,r);roughMax=Math.max(roughMax,r);pastelMin=Math.min(pastelMin,f);pastelMax=Math.max(pastelMax,f);assert(Math.abs(f-creamTexture.tooth(x,y))<.000001,'pastel paper color variants must share identical physical tooth')}
@@ -35,6 +43,14 @@ const pastelLight=new SharedSolver(48,24,PROFILES.charcoal,SUBSTRATES.pastelWhit
 const pastelLightPeak=toothBandAverage(pastelLight,.515,1.01),pastelLightValley=toothBandAverage(pastelLight,0,.485),pastelFirmValley=toothBandAverage(pastelFirm,0,.485);
 assert(pastelLightPeak>pastelLightValley,'light charcoal must still favor the small raised fibers of pastel paper');
 assert(pastelFirmValley>pastelLightValley,'firm charcoal must reach more shallow valleys on pastel paper');
+
+const calibratedDraw=(name,value)=>{const solver=new SharedSolver(72,36,PROFILES.charcoal,SUBSTRATES.pastelWhite),config=solver.getCalibration();config[name]=value;solver.setCalibration(config);for(let y=4;y<34;y+=4)solver.depositSegment(4,y,68,y,72,36,.62,.8,0,1.4);return solver};
+const lowTextureCalibration=calibratedDraw('paperTexture',0),highTextureCalibration=calibratedDraw('paperTexture',2);
+assert(highTextureCalibration.metrics().deposited_pigment>lowTextureCalibration.metrics().deposited_pigment,'greater paper-texture influence must let pressure reach more paper tooth');
+const lowBreakupCalibration=calibratedDraw('particleBreakup',0),highBreakupCalibration=calibratedDraw('particleBreakup',2),particleMass=solver=>solver.metrics().coarse_fragment_created+solver.metrics().fine_dust_created;
+assert(particleMass(highBreakupCalibration)>particleMass(lowBreakupCalibration),'greater particle-breakup influence must create more conserved fragments and dust');
+const lowSpeedCalibration=calibratedDraw('speed',0),highSpeedCalibration=calibratedDraw('speed',2);
+assert(particleMass(highSpeedCalibration)>particleMass(lowSpeedCalibration),'greater speed influence must strengthen gesture-speed breakup');
 
 const hotUptake=new SharedSolver(48,24,PROFILES.watercolor,SUBSTRATES.hotPress),roughUptake=new SharedSolver(48,24,PROFILES.watercolor,SUBSTRATES.rough);
 hotUptake.depositSegment(30,30,90,30,120,60,.55,.7,.7,.8);roughUptake.depositSegment(30,30,90,30,120,60,.55,.7,.7,.8);for(let i=0;i<120;i++){hotUptake.step(1/60);roughUptake.step(1/60)}
@@ -190,6 +206,10 @@ assert(settledState.pigment_conservation_error<.01,'post-contact motion and sett
 
 const smudgeMovedAtPressure=pressure=>{const solver=new SharedSolver(120,60,PROFILES.charcoal,SUBSTRATES.pastelWhite);solver.depositSegment(40,15,40,45,120,60,.75,.9,0,.8);return solver.smudgeSegment(35,30,68,30,120,60,pressure,.8)};
 assert(smudgeMovedAtPressure(.75)>smudgeMovedAtPressure(.25),'firmer smudge contact must relocate more existing pigment than light contact');
+const smudgeAtInfluence=value=>{const solver=new SharedSolver(120,60,PROFILES.charcoal,SUBSTRATES.pastelWhite),config=solver.getCalibration();solver.depositSegment(40,15,40,45,120,60,.75,.9,0,.8);config.smear=value;solver.setCalibration(config);return{moved:solver.smudgeSegment(35,30,68,30,120,60,.72,1.2),state:solver.metrics()}};
+const lowSmearInfluence=smudgeAtInfluence(0),highSmearInfluence=smudgeAtInfluence(2);
+assert(highSmearInfluence.moved>lowSmearInfluence.moved,'greater smear influence must relocate more existing material');
+assert(highSmearInfluence.state.pigment_conservation_error<.01,'artist-controlled smear influence must preserve pigment conservation');
 
 const pressureSmearScene=pressure=>{const solver=new SharedSolver(120,60,PROFILES.charcoal,SUBSTRATES.pastelWhite);solver.depositSegment(40,15,40,45,120,60,.75,.9,0,.8);const before=depositedInRect(solver,44,25,65,36);solver.smudgeSegment(35,30,68,30,120,60,pressure,1.6);return{solver,before,after:depositedInRect(solver,44,25,65,36)}};
 const moderateSmear=pressureSmearScene(.55),strongSmear=pressureSmearScene(.85);

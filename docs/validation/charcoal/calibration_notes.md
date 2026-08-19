@@ -1,5 +1,13 @@
 # Charcoal calibration notes
 
+### 2026-08-19 — direct artist pressure calibration workspace
+
+- Artist request: replace repeated engineer-tuned iterations with one visible curve and direct controls for pressure, speed, smearing, particulate breakup, and texture.
+- Lab response: a monotonic pressure curve now transforms raw stylus/fallback pressure before shared contact. Paper texture, particle breakup, smear, and speed influences range from `0` to `2`, with `1.00` preserving prior behavior.
+- Evidence record: curve and influence values persist locally, export with every review, and appear on history cards. Changes never retroactively alter existing pigment.
+- Architecture boundary: these are artist-controlled diagnostic calibration values routed through the shared solver—not measured constants, canonical material properties, or a charcoal-named branch.
+- Artist status: **pending direct calibration and approval** against the loose-grain target.
+
 Charcoal calibration must preserve the difference between the source tool, detached particles, substrate capture, and later smudging/lifting. A darker mark is not automatically a larger mass deposit.
 
 | Parameter or relationship | Evidence source | Current status | Next action |

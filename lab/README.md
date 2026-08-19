@@ -6,6 +6,12 @@ This is an observation prototype, not a validated production solver. Use it to e
 
 The current lab uses a small property-driven shared solver rather than separate named-medium engines. See [`ARCHITECTURE.md`](ARCHITECTURE.md) for its canonical property and model mapping.
 
+## Pressure behavior panel
+
+The card to the right of the drawing surface lets the artist tune pressure in place. Drag either brown handle, use the paired sliders for precise or keyboard adjustment, or start with **Linear**, **Soft**, or **Firm**. The dark dot shows current hand pressure and resulting material force. **Paper texture**, **Particle breakup**, **Smear**, and **Speed** range from `0` to `2`; `1.00` is the previously tested behavior.
+
+Changes affect the next contact and do not alter marks already on the paper. Calibration survives refreshes and is copied into every review JSON and history card. **Reset all** restores the original curve and influences. Treat these as an artist's diagnostic recipe, not measured science or a canonical medium definition.
+
 ## Loose, grainy charcoal target
 
 The current charcoal v0.6 target comes from the artist's labeled **Stamp / 1 Layer / Multi-Layer / Smudge** reference. See [`LOOSE_GRAIN_CHARCOAL_TARGET.md`](../docs/reference/material-studies/LOOSE_GRAIN_CHARCOAL_TARGET.md). Test those four behaviors before isolating smaller fracture questions: first contact should be broken and particulate, one layer should retain paper gaps, repeated layers should deepen without flattening, and smudging should create a lighter directional veil while preserving darker source structure.

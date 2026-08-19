@@ -81,6 +81,17 @@ Water movement is computed first. Pigment then follows that water flux according
 
 Each saved review records the material profile, named models, named interactions, selected contact action, state measurements, relocated-pigment count, and pigment-conservation error beside the artist verdict.
 
+## Artist-controlled pressure calibration
+
+The lab places an editable pressure response between raw hand/stylus pressure and the shared contact relationships. Fixed endpoints keep zero pressure at zero and full pressure reachable; two monotonic interior points shape everything between them. `setCalibration()`, `getCalibration()`, and `transformPressure()` keep drawing, smudging, saved evidence, and tests on the same path.
+
+- **Paper texture** changes how strongly transformed pressure reaches substrate tooth and valleys.
+- **Particle breakup** changes how strongly pressure contributes to conserved coarse fragments and fine dust.
+- **Smear** changes how strongly pressure relocates and anchors existing deposited material.
+- **Speed** changes how strongly gesture speed affects skipping, breakup, and smudge travel.
+
+`1.00` preserves the previously tested relationships. Calibration affects later contact only; existing surface state is never recomputed. These are artist-controlled diagnostic values, not canonical properties, named-medium branches, or measured scientific constants.
+
 ## Current limits
 
 This is a small CPU grid intended to expose behavior for review. It is not the production Rust/GPU solver. Spectral color, brush reservoirs, measured paper profiles, and artist-accepted clean-water blooms remain future work. The watercolor v0.6.1 patch preserves the accepted v0.6 material constants while paper physics now comes from an independent selected substrate. Charcoal v0.5 added mass-bounded coarse/fine fracture and dusting to the already accepted v0.4 loose-particle smudge motion; v0.5.1 increased shared fine-particle drag and settling. v0.5.2 added the shared high-load anchoring relationship. Charcoal v0.6 now targets the artist's loose, grainy **Stamp / 1 Layer / Multi-Layer / Smudge** reference by adding incomplete granular capture and population-specific optical density. That entire visible target, including the carried-forward pressure smear, requires fresh artist review. Grain scale, optical density, fracture shares, pressure anchoring, and travel/settling remain unmeasured stand-ins.

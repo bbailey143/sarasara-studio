@@ -4,6 +4,33 @@
   const MATERIAL_REQUIRED=['COMP-001','COMP-003','STATE-001','STATE-003','TRAN-001','DEPO-001','DEPO-004','TRIB-002','EVOL-001','EVOL-003','REAC-001','REAC-002','REAC-003','REAC-004'];
   const SUBSTRATE_REQUIRED=['TRAN-002','SUBI-001','SUBI-003'];
   const MODELS=['MODEL-TRAN-001','MODEL-TRAN-002','MODEL-TRAN-003','MODEL-DEPO-001','MODEL-EVOL-001','MODEL-PART-001','MODEL-REAC-001','MODEL-TRIB-001'];
+  const DEFAULT_CALIBRATION=Object.freeze({
+    curve:Object.freeze([{x:0,y:0},{x:.33,y:.33},{x:.67,y:.67},{x:1,y:1}]),
+    paperTexture:1,particleBreakup:1,smear:1,speed:1
+  });
+
+  function clamp01(value){return Math.max(0,Math.min(1,Number(value)||0))}
+  function calibrationCopy(source=DEFAULT_CALIBRATION){return{curve:source.curve.map(point=>({x:point.x,y:point.y})),paperTexture:source.paperTexture,particleBreakup:source.particleBreakup,smear:source.smear,speed:source.speed}}
+  function validateCalibration(value={}){
+    const source=value&&typeof value==='object'?value:{};
+    const proposed=Array.isArray(source.curve)&&source.curve.length===4?source.curve:DEFAULT_CALIBRATION.curve;
+    const curve=proposed.map((point,index)=>({x:clamp01(point?.x),y:clamp01(point?.y)}));
+    curve[0]={x:0,y:0};curve[3]={x:1,y:1};
+    curve[1].x=Math.max(.05,Math.min(.9,curve[1].x));
+    curve[2].x=Math.max(curve[1].x+.05,Math.min(.95,curve[2].x));
+    curve[1].y=Math.min(curve[1].y,curve[2].y);curve[2].y=Math.max(curve[1].y,curve[2].y);
+    const multiplier=name=>Math.max(0,Math.min(2,Number.isFinite(Number(source[name]))?Number(source[name]):DEFAULT_CALIBRATION[name]));
+    return{curve,paperTexture:multiplier('paperTexture'),particleBreakup:multiplier('particleBreakup'),smear:multiplier('smear'),speed:multiplier('speed')};
+  }
+  function interpolatePressure(curve,input){
+    const pressure=clamp01(input);let segment=curve.length-2;
+    for(let index=0;index<curve.length-1;index++)if(pressure<=curve[index+1].x){segment=index;break}
+    const spans=[],slopes=[];for(let index=0;index<curve.length-1;index++){spans[index]=Math.max(.0001,curve[index+1].x-curve[index].x);slopes[index]=(curve[index+1].y-curve[index].y)/spans[index]}
+    const tangents=new Array(curve.length);tangents[0]=slopes[0];tangents[curve.length-1]=slopes[slopes.length-1];for(let index=1;index<curve.length-1;index++)tangents[index]=slopes[index-1]*slopes[index]<=0?0:(slopes[index-1]+slopes[index])/2;
+    for(let index=0;index<slopes.length;index++){if(slopes[index]===0){tangents[index]=0;tangents[index+1]=0;continue}const a=tangents[index]/slopes[index],b=tangents[index+1]/slopes[index],magnitude=a*a+b*b;if(magnitude>9){const scale=3/Math.sqrt(magnitude);tangents[index]=scale*a*slopes[index];tangents[index+1]=scale*b*slopes[index]}}
+    const left=curve[segment],right=curve[segment+1],span=spans[segment],t=Math.max(0,Math.min(1,(pressure-left.x)/span)),t2=t*t,t3=t2*t;
+    return(2*t3-3*t2+1)*left.y+(t3-2*t2+t)*span*tangents[segment]+(-2*t3+3*t2)*right.y+(t3-t2)*span*tangents[segment+1];
+  }
 
   const SUBSTRATES={
     plain:{id:'substrate.paper.plain-white.archive-seed.v0.2',name:'Plain White',version:'0.2.0',state:{'TRAN-002':0,'SUBI-001':0,'SUBI-003':0},texture:{tooth:0,absorbency:0,sizing:1,capacity:0,dryBrushBreakup:0,seed:0,noiseScale:1,paperColor:'#ffffff'},provenance:[{status:'archive-seed',note:'Values preserved from the legacy Paper.plain preset; v0.2 corrects the shared grain-scale direction; not measured production constants.'}]},
@@ -37,13 +64,17 @@
   function validateSubstrate(substrate){const missing=SUBSTRATE_REQUIRED.filter(id=>substrate.state[id]===undefined);if(missing.length)throw new Error('Missing substrate properties: '+missing.join(', '));for(const id of SUBSTRATE_REQUIRED){const value=substrate.state[id];if(typeof value!=='number'||!Number.isFinite(value)||value<0)throw new Error('Invalid substrate value for '+id)}return substrate}
 
   class SharedSolver{
-    constructor(width,height,profile,substrate=SUBSTRATES.coldPress){this.w=width;this.h=height;this.n=width*height;this.surface=document.createElement('canvas');this.surface.width=width;this.surface.height=height;this.sctx=this.surface.getContext('2d');this.image=this.sctx.createImageData(width,height);this.substrate=validateSubstrate(substrate);this.s=substrate.state;this.buildPaperSurface();this.setProfile(profile)}
+    constructor(width,height,profile,substrate=SUBSTRATES.coldPress){this.w=width;this.h=height;this.n=width*height;this.surface=document.createElement('canvas');this.surface.width=width;this.surface.height=height;this.sctx=this.surface.getContext('2d');this.image=this.sctx.createImageData(width,height);this.calibration=calibrationCopy();this.substrate=validateSubstrate(substrate);this.s=substrate.state;this.buildPaperSurface();this.setProfile(profile)}
+    setCalibration(value){this.calibration=validateCalibration(value);return this.getCalibration()}
+    getCalibration(){return calibrationCopy(this.calibration)}
+    transformPressure(value){return interpolatePressure(this.calibration.curve,value)}
+    calibratedSpeed(value){return Math.max(.1,Math.min(2,.1+(Math.max(.1,Math.min(2,Number(value)||.1))-.1)*this.calibration.speed))}
     setProfile(profile){this.profile=validateProfile(profile);this.p=profile.state;this.displayGain=profile.display?.pigment_visibility_gain||1;this.water=new Float32Array(this.n);this.mobile=new Float32Array(this.n);this.deposited=new Float32Array(this.n);this.loose=new Float32Array(this.n);this.looseVx=new Float32Array(this.n);this.looseVy=new Float32Array(this.n);this.nextLoose=new Float32Array(this.n);this.nextLooseMx=new Float32Array(this.n);this.nextLooseMy=new Float32Array(this.n);this.coarse=new Float32Array(this.n);this.coarseVx=new Float32Array(this.n);this.coarseVy=new Float32Array(this.n);this.nextCoarse=new Float32Array(this.n);this.nextCoarseMx=new Float32Array(this.n);this.nextCoarseMy=new Float32Array(this.n);this.fineDust=new Float32Array(this.n);this.fineDustVx=new Float32Array(this.n);this.fineDustVy=new Float32Array(this.n);this.nextFineDust=new Float32Array(this.n);this.nextFineDustMx=new Float32Array(this.n);this.nextFineDustMy=new Float32Array(this.n);this.absorbed=new Float32Array(this.n);this.nextWater=new Float32Array(this.n);this.nextMobile=new Float32Array(this.n);this.initialPigment=0;this.lostPigment=0;this.relocatedPigment=0;this.pressureAnchoredPigment=0;this.sourceOfferedPigment=0;this.sourceRemainingPigment=0;this.coarseCreatedPigment=0;this.fineCreatedPigment=0;this.dryBoost=1;this.elapsed=0}
     setSubstrate(substrate){this.substrate=validateSubstrate(substrate);this.s=substrate.state;this.buildPaperSurface()}
     setDisplayGain(value){this.displayGain=Math.max(1,Math.min(12,Number(value)||1))}
     clear(substrateDampness=0){const saturation=this.p['COMP-001']>.02?Math.max(0,Math.min(1,substrateDampness))*this.s['SUBI-003']:0;this.water.fill(0);this.mobile.fill(0);this.deposited.fill(0);this.loose.fill(0);this.looseVx.fill(0);this.looseVy.fill(0);this.coarse.fill(0);this.coarseVx.fill(0);this.coarseVy.fill(0);this.fineDust.fill(0);this.fineDustVx.fill(0);this.fineDustVy.fill(0);this.absorbed.fill(saturation);this.initialPigment=0;this.lostPigment=0;this.relocatedPigment=0;this.pressureAnchoredPigment=0;this.sourceOfferedPigment=0;this.sourceRemainingPigment=0;this.coarseCreatedPigment=0;this.fineCreatedPigment=0;this.dryBoost=1;this.elapsed=0}
     hasBrittleParticleSource(){const phase=this.p['STATE-001'],distribution=this.p['PART-001'];return(phase==='powder'||phase==='brittle_solid')&&this.p['COMP-003']>0&&Number.isFinite(this.p['TRIB-003'])&&distribution&&typeof distribution==='object'}
-    fractureSplit(pressure,speed,tooth){if(!this.hasBrittleParticleSource())return{coarse:0,fine:0};const clamp=value=>Math.max(0,Math.min(1,value)),packing=clamp(this.p['DEPO-004']),toughness=clamp(this.p['TRIB-003']),abrasion=clamp(this.p['TRIB-004']),normal=clamp(pressure),sliding=clamp((speed-.1)/1.9),roughness=clamp(this.s['SUBI-001']),distribution=this.p['PART-001'],coarseShare=clamp(Number(distribution.coarse_fraction)||0),fineShare=clamp(Number(distribution.fine_fraction)||0),shareTotal=coarseShare+fineShare||1;const detached=clamp((1-toughness*.65)*(1-abrasion*.4)*(1-packing*.38)*(.08+normal*.52)*(.15+sliding*.5)*(.35+roughness*tooth*.65));return{coarse:detached*coarseShare/shareTotal,fine:detached*fineShare/shareTotal}}
+    fractureSplit(pressure,speed,tooth){if(!this.hasBrittleParticleSource())return{coarse:0,fine:0};const clamp=value=>Math.max(0,Math.min(1,value)),packing=clamp(this.p['DEPO-004']),toughness=clamp(this.p['TRIB-003']),abrasion=clamp(this.p['TRIB-004']),normal=clamp(pressure*this.calibration.particleBreakup),sliding=clamp((this.calibratedSpeed(speed)-.1)/1.9),roughness=clamp(this.s['SUBI-001']),distribution=this.p['PART-001'],coarseShare=clamp(Number(distribution.coarse_fraction)||0),fineShare=clamp(Number(distribution.fine_fraction)||0),shareTotal=coarseShare+fineShare||1;const detached=clamp((1-toughness*.65)*(1-abrasion*.4)*(1-packing*.38)*(.08+normal*.52)*(.15+sliding*.5)*(.35+roughness*tooth*.65));return{coarse:detached*coarseShare/shareTotal,fine:detached*fineShare/shareTotal}}
     addParticlePopulation(mass,index,vx,vy,population,vxField,vyField){if(mass<=0)return;const old=population[index],combined=old+mass;vxField[index]=(vxField[index]*old+vx*mass)/combined;vyField[index]=(vyField[index]*old+vy*mass)/combined;population[index]=combined}
     noise(x,y,seed){const v=Math.sin(x*127.1+y*311.7+seed*74.7)*43758.5453123;return v-Math.floor(v)}
     smoothNoise(x,y,seed){const x0=Math.floor(x),y0=Math.floor(y),fx=x-x0,fy=y-y0,u=fx*fx*(3-2*fx),v=fy*fy*(3-2*fy),a=this.noise(x0,y0,seed),b=this.noise(x0+1,y0,seed),c=this.noise(x0,y0+1,seed),d=this.noise(x0+1,y0+1,seed);return(a+(b-a)*u)*(1-v)+(c+(d-c)*u)*v}
@@ -57,10 +88,10 @@
       for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
         const dx=(x-cx)/radius,dy=(y-cy)/radius,q=dx*dx+dy*dy;if(q>1)continue;
         const k=(1-q)*this.p['DEPO-001'],i=y*this.w+x;
-        if(dry){const tooth=this.tooth(x,y),contact=tooth*.72+pressure*.48,potential=pigment*k,particleDensity=Math.max(0,Math.min(1,Number(this.p['PART-002'])||0)),shape=Math.max(0,Math.min(1,Number(this.p['PART-003'])||0)),grain=this.noise(x*1.91,y*2.37,this.substrate.texture.seed+1231),coverage=Math.max(.12,Math.min(.92,.02+pressure*.34+particleDensity*.18+tooth*.5-shape*.08));this.sourceOfferedPigment+=potential;if(contact<.34||grain>coverage||(speed>1.05&&contact<.58&&((x+y)%3===0))){this.sourceRemainingPigment+=potential;continue}const captureVariation=.58+grain*.78,amount=Math.min(potential,potential*(.16+tooth*.32+particleDensity*.14)*captureVariation),split=this.fractureSplit(pressure,speed,tooth),coarseMass=amount*split.coarse,fineMass=amount*split.fine,settledMass=Math.max(0,amount-coarseMass-fineMass),side=this.noise(x,y,this.substrate.texture.seed+997)*2-1,normalX=-strokeY,normalY=strokeX,coarseSpeed=.7+pressure*.85+speed*.45,fineSpeed=2+pressure*1.3+speed*2.1;this.sourceRemainingPigment+=potential-amount;this.deposited[i]+=settledMass;this.addParticlePopulation(coarseMass,i,strokeX*coarseSpeed+normalX*side*.35,strokeY*coarseSpeed+normalY*side*.35,this.coarse,this.coarseVx,this.coarseVy);this.addParticlePopulation(fineMass,i,strokeX*fineSpeed+normalX*side,strokeY*fineSpeed+normalY*side,this.fineDust,this.fineDustVx,this.fineDustVy);this.coarseCreatedPigment+=coarseMass;this.fineCreatedPigment+=fineMass;addedPigment+=amount}
+        if(dry){const tooth=this.tooth(x,y),texturePressure=Math.max(0,Math.min(1,pressure*this.calibration.paperTexture)),gestureSpeed=this.calibratedSpeed(speed),contact=tooth*.72+texturePressure*.48,potential=pigment*k,particleDensity=Math.max(0,Math.min(1,Number(this.p['PART-002'])||0)),shape=Math.max(0,Math.min(1,Number(this.p['PART-003'])||0)),grain=this.noise(x*1.91,y*2.37,this.substrate.texture.seed+1231),coverage=Math.max(.12,Math.min(.92,.02+texturePressure*.34+particleDensity*.18+tooth*.5-shape*.08));this.sourceOfferedPigment+=potential;if(contact<.34||grain>coverage||(gestureSpeed>1.05&&contact<.58&&((x+y)%3===0))){this.sourceRemainingPigment+=potential;continue}const captureVariation=.58+grain*.78,amount=Math.min(potential,potential*(.16+tooth*.32+particleDensity*.14)*captureVariation),split=this.fractureSplit(pressure,speed,tooth),coarseMass=amount*split.coarse,fineMass=amount*split.fine,settledMass=Math.max(0,amount-coarseMass-fineMass),side=this.noise(x,y,this.substrate.texture.seed+997)*2-1,normalX=-strokeY,normalY=strokeX,coarseSpeed=.7+pressure*.85+gestureSpeed*.45,fineSpeed=2+pressure*1.3+gestureSpeed*2.1;this.sourceRemainingPigment+=potential-amount;this.deposited[i]+=settledMass;this.addParticlePopulation(coarseMass,i,strokeX*coarseSpeed+normalX*side*.35,strokeY*coarseSpeed+normalY*side*.35,this.coarse,this.coarseVx,this.coarseVy);this.addParticlePopulation(fineMass,i,strokeX*fineSpeed+normalX*side,strokeY*fineSpeed+normalY*side,this.fineDust,this.fineDustVx,this.fineDustVy);this.coarseCreatedPigment+=coarseMass;this.fineCreatedPigment+=fineMass;addedPigment+=amount}
         else{
           const tooth=this.tooth(x,y),capacity=Math.max(.001,this.s['SUBI-003']),surfaceMobility=Math.max(0,Math.min(1,(this.water[i]+water*k)/.12)),paperMobility=.6*Math.max(0,Math.min(1,this.absorbed[i]/capacity)),contactWetness=1-(1-surfaceMobility)*(1-paperMobility),dryShare=Math.pow(1-contactWetness,1.35);
-          const toothContact=Math.max(0,Math.min(1,(tooth+pressure*.45-.5)/.45)),speedContact=Math.max(.35,Math.min(1,1.08-Math.max(0,speed-.4)*.12+pressure*.08)),contact=(1-dryShare)+dryShare*toothContact*speedContact;
+          const texturePressure=Math.max(0,Math.min(1,pressure*this.calibration.paperTexture)),gestureSpeed=this.calibratedSpeed(speed),toothContact=Math.max(0,Math.min(1,(tooth+texturePressure*.45-.5)/.45)),speedContact=Math.max(.35,Math.min(1,1.08-Math.max(0,gestureSpeed-.4)*.12+pressure*.08)),contact=(1-dryShare)+dryShare*toothContact*speedContact;
           const amount=pigment*k*contact,mobileAmount=amount*contactWetness;
           this.water[i]=Math.min(2.5,this.water[i]+water*k);this.mobile[i]+=mobileAmount;this.deposited[i]+=amount-mobileAmount;addedPigment+=amount;
         }
@@ -68,19 +99,21 @@
       this.initialPigment+=addedPigment;
     }
     depositSegment(ax,ay,bx,by,canvasW,canvasH,pressure,pigmentLoad,brushWater,speed){
+      pressure=this.transformPressure(pressure);
       const sx=this.w/canvasW,sy=this.h/canvasH,x0=ax*sx,y0=ay*sy,x1=bx*sx,y1=by*sy,d=Math.hypot(x1-x0,y1-y0),steps=Math.max(1,Math.ceil(d/.65));
       const carrier=this.p['COMP-001'],pigmentFraction=this.p['COMP-003'],radius=(1.2+pressure*2.6+brushWater*1.8),water=Math.pow(brushWater,1.85)*.36*carrier;
       const availablePigment=carrier>.02?(.05+pressure*.16)*pigmentFraction:(.012+pressure*.04)*(pigmentFraction||1),pigment=availablePigment*pigmentLoad;
       const ux=d>.001?(x1-x0)/d:0,uy=d>.001?(y1-y0)/d:0;for(let s=0;s<=steps;s++){const t=s/steps;this.addDisk(x0+(x1-x0)*t,y0+(y1-y0)*t,radius,water,pigment,pressure,speed,brushWater,ux,uy)}
     }
     smudgeSegment(ax,ay,bx,by,canvasW,canvasH,pressure,speed){
+      pressure=this.transformPressure(pressure);
       const sx=this.w/canvasW,sy=this.h/canvasH,x0=ax*sx,y0=ay*sy,x1=bx*sx,y1=by*sy,dx=x1-x0,dy=y1-y0,d=Math.hypot(dx,dy);if(d<.001)return 0;
       const ux=dx/d,uy=dy/d,radius=1.4+pressure*2.8,steps=Math.max(1,Math.ceil(d/.55)),contact=new Float32Array(this.n);
       for(let s=0;s<=steps;s++){
         const t=s/steps,cx=x0+dx*t,cy=y0+dy*t,xMin=Math.max(0,Math.floor(cx-radius)),xMax=Math.min(this.w-1,Math.ceil(cx+radius)),yMin=Math.max(0,Math.floor(cy-radius)),yMax=Math.min(this.h-1,Math.ceil(cy+radius));
         for(let y=yMin;y<=yMax;y++)for(let x=xMin;x<=xMax;x++){const q=((x-cx)*(x-cx)+(y-cy)*(y-cy))/(radius*radius);if(q>1)continue;const i=y*this.w+x;contact[i]=Math.max(contact[i],1-q)}
       }
-      const source=this.deposited.slice(),sourceLoose=this.loose.slice(),next=this.deposited.slice(),nextLoose=this.loose.slice(),nextLooseVx=this.looseVx.slice(),nextLooseVy=this.looseVy.slice(),friction=this.p['TRIB-002'],packing=Math.max(0,Math.min(1,this.p['DEPO-004'])),roughness=this.s['SUBI-001'],sliding=Math.max(.1,Math.min(2,speed)),coupling=Math.min(.72,(.08+friction*.34)*(0.3+pressure*.7)*(.45+sliding*.38)*(1-packing*.55)),travel=1+Math.min(3,sliding*1.15+pressure*.85),launchSpeed=2.4+sliding*3.2+pressure*1.4,normalCompression=Math.max(0,Math.min(1,(pressure-.55)/.45));
+      const source=this.deposited.slice(),sourceLoose=this.loose.slice(),next=this.deposited.slice(),nextLoose=this.loose.slice(),nextLooseVx=this.looseVx.slice(),nextLooseVy=this.looseVy.slice(),friction=this.p['TRIB-002'],packing=Math.max(0,Math.min(1,this.p['DEPO-004'])),roughness=this.s['SUBI-001'],sliding=this.calibratedSpeed(speed),smearPressure=Math.max(0,Math.min(1,pressure*this.calibration.smear)),coupling=Math.min(.72,(.08+friction*.34)*(0.3+smearPressure*.7)*(.45+sliding*.38)*(1-packing*.55)),travel=1+Math.min(3,sliding*1.15+smearPressure*.85),launchSpeed=2.4+sliding*3.2+smearPressure*1.4,normalCompression=Math.max(0,Math.min(1,(smearPressure-.55)/.45));
       let relocated=0;
       for(let i=0;i<this.n;i++){
         const available=source[i]+sourceLoose[i];if(contact[i]<=0||available<=0)continue;
@@ -146,5 +179,5 @@
     }
   }
 
-  global.SarasaraLab={SharedSolver,PROFILES,SUBSTRATES,validateProfile,validateSubstrate};
+  global.SarasaraLab={SharedSolver,PROFILES,SUBSTRATES,DEFAULT_CALIBRATION:calibrationCopy(),validateCalibration,interpolatePressure,validateProfile,validateSubstrate};
 })(window);
