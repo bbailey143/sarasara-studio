@@ -4,9 +4,9 @@ Charcoal calibration must preserve the difference between the source tool, detac
 
 | Parameter or relationship | Evidence source | Current status | Next action |
 | --- | --- | --- | --- |
-| Tooth capture versus pressure | Matched gestures on smooth and toothy substrates | Sample-guided pastel-paper height-band relationship verified; artist pending | Compare light and firm marks on Pastel Paper — White. |
-| Coarse/fine particle breakup | Material-specific particle evidence | Seed only | Measure or bound the size populations. |
-| Dusting versus main deposition | Controlled loading and speed scene | Unmeasured | Track detached particle mass separately. |
+| Tooth capture versus pressure | Matched gestures on smooth and toothy substrates | Artist accepted for Pastel Paper v0.2 diagnostic scope | Preserve the relationship during later changes. |
+| Coarse/fine particle breakup | Shared fracture ledger plus artist comparison | Automated relationship verified; artist pending | Judge whether v0.5 crumbs and dust resemble brittle charcoal breakup. |
+| Dusting versus main deposition | Controlled loading, pressure, and speed scenes | Mass bounded and automated; artist pending | Judge travel, amount, irregularity, and settling in the lab. |
 | Smudge relocation | Automated source/destination ledger plus artist gesture review | v0.4 artist accepted for smudge motion on Plain White and Rough Watercolor Paper | Preserve the accepted motion on sample-guided Pastel Paper. |
 | Lift response | Adhesion/cohesion and artist review | Pending prototype | Test gentle lift, hard lift, and repeated lift. |
 | Burnishing rejection | Repeated pressure scene | Pending prototype | Record packing, optical change, and fresh capture reduction. |
@@ -103,3 +103,12 @@ Each accepted calibration note should record material recipe, substrate, environ
 - White and Light Cream are accepted as physical twins whose ground tone differs without changing charcoal behavior.
 - Evidence boundary: only the smudge iteration has a saved JSON/image/measurement record. The matched Draw and color-twin approval is a direct artist statement and must not be misrepresented as separately exported trials.
 - Next calibration target: CH-P-03 / CH-P-04 coarse/fine fracture and bounded dusting with a conserved particle source; do not add decorative random flecks.
+
+### 2026-08-18 — Charcoal v0.5 fracture and bounded dusting checkpoint
+
+- The shared solver now keeps settled, loose, coarse-fragment, fine-dust, off-canvas, offered-source, and remaining-source quantities separately.
+- During Draw, every fragment is split from pigment actually transferred out of the applicator offer. During later smudge contact, fragments are split from existing deposited or loose pigment. Neither path adds material to the pigment ledger.
+- The trigger uses shared phase, pigment fraction, fracture toughness (`TRIB-003`), abrasion resistance (`TRIB-004`), particle population (`PART-001`), packing (`DEPO-004`), pressure, speed, and substrate tooth through `IM-008`; it does not test a medium name.
+- Current fracture, abrasion, particle-size share, density, shape, travel, and settling values are normalized unmeasured stand-ins. They are calibration knobs, not scientific constants.
+- Automated evidence: greater matched loading/pressure/speed creates more coarse and fine material; fine dust travels farther; coarse fragments settle sooner; both populations settle after contact; blank contact and a profile without a brittle particulate source create zero particles; identical commands reproduce exactly; total pigment error stays below 1% including off-canvas loss.
+- Artist status: **required and pending**. The artist must decide whether the result reads as brittle crumbs and dust physically shed by the stroke, whether fine dust travels too far or too evenly, and whether any marks look like decorative spray.

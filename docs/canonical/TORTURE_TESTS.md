@@ -12,7 +12,7 @@ The machine-readable cases live in [`TORTURE_TESTS.yaml`](TORTURE_TESTS.yaml). T
 
 ### Gate 2 — Behavioral prototype test
 
-**PARTIAL; GATE REMAINS OPEN.** The minimal shared solver now verifies several relationships automatically: separate watercolor carrier and pigment state, conservative pigment transport, porous uptake, moisture-dependent contact, clean-water reactivation, dry charcoal deposition without carrier, and conservative smudge relocation of existing deposited pigment. It does not yet isolate every required phenomenon. In particular, spectral wet crossings, clean-water bloom geometry, multiple paper recipes, charcoal tooth/pressure progression, fracture, dust, lifting, burnishing, and both media's failure ranges remain open. The test-by-test evidence is recorded in [`docs/validation/`](../validation/).
+**PARTIAL; GATE REMAINS OPEN.** The minimal shared solver now verifies several relationships automatically: separate watercolor carrier and pigment state, conservative pigment transport, porous uptake, moisture-dependent contact, clean-water reactivation, dry charcoal deposition without carrier, conservative smudge relocation, Pastel Paper tooth/pressure progression, and mass-bounded coarse/fine fracture with different travel and settling. It does not yet isolate every required phenomenon. In particular, spectral wet crossings, clean-water bloom geometry, broader measured paper recipes, charcoal lift, burnishing, and both media's full failure ranges remain open; fracture and dust also await artist approval. The test-by-test evidence is recorded in [`docs/validation/`](../validation/).
 
 ### Gate 3 — Artist reality test
 

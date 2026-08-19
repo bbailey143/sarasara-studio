@@ -23,3 +23,15 @@ For charcoal, use **Pastel Paper — White**. Make a steady light stroke at pres
 
 For watercolor, compare one matched damp stroke on **Hot Press**, **Cold Press**, and **Rough Watercolor Paper**. Judge the change in uptake, edge character, broken contact, and paper visibility—not which one is prettiest. Save each review so the mark, selected paper, settings, rating, and decision remain in history.
 The automated ledger passes CH-P-05's conservation requirements, v0.4 smudge motion has limited artist acceptance, and CH-P-01/02 have artist acceptance for Pastel Paper v0.2's diagnostic scope. The profiles remain experimental rather than measured production papers.
+
+## Charcoal fracture and dust checkpoint
+
+1. Choose **Charcoal**, **Pastel Paper — White**, and **Draw material**.
+2. Make a short stroke with pigment load `0.35`, pressure `0.25`, and speed `0.35`.
+3. Clear the surface. Repeat the same gesture with load `1.00`, pressure `0.85`, and speed `1.60`.
+4. In the stronger gesture, look for a few coarser crumbs staying near the stroke while finer dust travels slightly farther. Watch **Coarse fragments** and **Fine dust** fall after your hand lifts.
+5. Reject or recalibrate the result if it looks like evenly sprinkled dots, a spray brush, glitter, or decoration unrelated to the stroke. The particles must appear to break from the contacted material.
+6. Confirm **Conservation error** stays below `1%`. Switch to Smudge and drag on blank paper; it must create no particles.
+7. Save the review. CH-P-03 / CH-P-04 remain pending until an artist chooses **Accept**, **Recalibrate**, or **Revise model**.
+
+The lab records offered material, material left on the applicator, settled pigment, loose pigment, coarse fragments, fine dust, off-canvas loss, and the artist's image/settings in the exported JSON and browser history. These quantities verify the ledger; they do not prove that the breakup looks or feels right.

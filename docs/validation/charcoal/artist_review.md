@@ -137,3 +137,19 @@ This accepts the sample-guided Pastel White surface as an artist-convincing grou
 The artist approves the fine-fiber appearance, light-pressure peak/fiber capture, progressive firm-pressure reach into shallow gaps, White/Cream behavior parity, and preservation of the accepted smudge motion. The prior paragraph remains as the correct interpretation of the JSON by itself; this direct statement supplies the missing artist evidence and closes CH-P-01 and CH-P-02 for this experimental substrate scope.
 
 This is not final charcoal-medium or production-paper approval. Coarse/fine fracture populations, bounded dusting, lift, burnishing, and failure-range behavior remain open.
+
+## Pending artist gate — charcoal v0.5 fracture and bounded dusting
+
+Use **Pastel Paper — White** and **Draw material**. First make a short comparison stroke at pigment load `0.35`, pressure `0.25`, speed `0.35`. Clear the surface, then make the same gesture at load `1.00`, pressure `0.85`, speed `1.60`.
+
+Approve CH-P-03 / CH-P-04 only if all of these are true:
+
+- coarse crumbs remain nearer the stroke and settle sooner than the finest dust;
+- fine dust travels a little farther but still looks shed by the gesture;
+- increasing load, pressure, or speed strengthens breakup continuously;
+- particles are irregular consequences of contact, not an even spray, glitter, or decorative speckle layer;
+- the main stroke still catches the accepted Pastel Paper fibers;
+- after motion ends, the conservation reading remains below `1%`;
+- a blank smudge creates no crumbs or dust.
+
+Rate the visible result **Unconvincing**, **Recognizable**, **Good**, **Convincing**, or **Indistinguishable in behavior**, then choose **Accept**, **Recalibrate**, or **Revise model** and save the review JSON. Automated checks do not satisfy this artist gate.

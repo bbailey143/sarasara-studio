@@ -10,6 +10,8 @@ Each substrate cell stores:
 - mobile pigment;
 - deposited pigment;
 - loose surface pigment with short-lived velocity;
+- coarse fragments with short travel and fast settling;
+- fine dust with longer travel and slower settling;
 - carrier held as paper saturation, separately from mobile surface water;
 - deterministic surface tooth.
 
@@ -29,6 +31,8 @@ The paper selector preserves the archive's Plain White, Hot Press, Cold Press, a
 
 Smudging is a second action through that same shared contact system. It reads deposited material, kinetic friction, deposited packing, pressure, speed, and substrate roughness; then lifts a bounded fraction into a loose surface-particle state. Those loose particles retain short-lived directional momentum, coast after contact ends, lose energy through friction and roughness, and settle back into the deposited state. It never calls the deposition path and never changes the initial-pigment ledger. The UI may request **Draw** or **Smudge**, but neither action branches on a named medium.
 
+Fracture and dusting use the same shared contact ledger. A profile with a powder or brittle-solid phase and defined fracture/particle properties may split a bounded fraction of transferred material into coarse and fine populations. During Draw, that fraction comes from pigment actually transferred from the applicator offer; during later smudge contact, it comes from deposited or already loose material. Coarse pieces launch more slowly and settle sooner. Fine dust launches faster and settles more slowly. Material leaving the grid is recorded as off-canvas loss rather than silently deleted. A blank contact or a profile without a brittle particulate source creates no fragments. The current values are normalized stand-ins whose visible behavior requires artist approval.
+
 ## Canonical property inputs
 
 The profiles in `shared-solver.js` use canonical IDs from `PROPERTY_REGISTRY.yaml`:
@@ -44,6 +48,11 @@ The profiles in `shared-solver.js` use canonical IDs from `PROPERTY_REGISTRY.yam
 - `SUBI-001` surface roughness;
 - `SUBI-003` porosity;
 - `TRIB-002` kinetic friction coefficient;
+- `TRIB-003` fracture toughness;
+- `TRIB-004` abrasion resistance;
+- `PART-001` particle diameter population, represented here as coarse/fine shares;
+- `PART-002` particle density stand-in;
+- `PART-003` particle shape stand-in;
 - `EVOL-001` evaporation flux;
 - `EVOL-003` settling velocity;
 - `REAC-001` rewetting sensitivity;
@@ -62,6 +71,7 @@ Profiles are validated before drawing. Their current values are explicitly label
 - pigment settling is a time-scaled diagnostic approximation associated with `MODEL-PART-001`;
 - clean-water release uses `MODEL-REAC-001` and returns deposited pigment to the mobile state without adding pigment mass.
 - deposited-material smudging uses `MODEL-TRIB-001`, `MODEL-PART-001`, and interaction `IM-009`; it conservatively lifts, moves, and resettles existing surface pigment.
+- fracture and dusting use `MODEL-TRIB-001`, `MODEL-PART-001`, and interaction `IM-008`; coarse/fine mass is removed from a real source before it can move or settle.
 
 Water movement is computed first. Pigment then follows that water flux according to the local pigment-to-water ratio, with only a small separate dispersion term. This keeps visible spreading tied to carrier movement instead of making pigment expand on its own.
 
@@ -69,4 +79,4 @@ Each saved review records the material profile, named models, named interactions
 
 ## Current limits
 
-This is a small CPU grid intended to expose behavior for review. It is not the production Rust/GPU solver. Spectral color, granulation, brush reservoirs, measured paper profiles, and artist-accepted clean-water blooms remain future work. The watercolor v0.6.1 patch preserves the accepted v0.6 material constants while paper physics now comes from an independent selected substrate. Charcoal v0.4 adds short-lived loose-particle momentum and settling to that same shared transport. Both smudge and archive-seeded paper mappings require artist calibration. Any visible conclusion still requires artist approval.
+This is a small CPU grid intended to expose behavior for review. It is not the production Rust/GPU solver. Spectral color, granulation, brush reservoirs, measured paper profiles, and artist-accepted clean-water blooms remain future work. The watercolor v0.6.1 patch preserves the accepted v0.6 material constants while paper physics now comes from an independent selected substrate. Charcoal v0.5 adds mass-bounded coarse/fine fracture and dusting to the already accepted v0.4 loose-particle smudge motion. Fracture size shares and travel/settling are unmeasured stand-ins. Any visible conclusion still requires artist approval.

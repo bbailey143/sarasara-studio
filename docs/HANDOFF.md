@@ -80,10 +80,10 @@ The user should be able to start another AI with one sentence:
 
 - This foundation has no package install or production build yet. The lab is dependency-free HTML and JavaScript.
 - Verified command: `node lab/shared-solver.test.js`
-- Verified result on 2026-08-18 after the pastel samples were mapped: `shared solver checks passed`, including material/substrate separation, identical physical tooth for White/Cream, much lower Pastel relief than Rough Watercolor Paper, finer fiber frequency, peak/gap capture, pressure-driven gap reach, Hot Press versus Rough uptake, smudge momentum/settling, blank-paper behavior, and conservation assertions.
+- Verified result on 2026-08-18 after the fracture/dust checkpoint: `shared solver checks passed`, including all earlier material/substrate, watercolor, paper, and smudge relationships plus matched load/pressure/speed breakup, coarse-near versus fine-far travel, coarse-fast versus fine-slow settling, blank/profile-without-source zero creation, determinism, offered/remaining source closure, off-canvas accounting, and conservation below 1%.
 - Verified command: `git diff --check`
 - Verified result on 2026-08-18 during the GitHub cleanup checkpoint: passed with no whitespace errors.
-- Verified the inline lab script parses, each required control ID occurs exactly once, and `smudgeSegment` contains no `watercolor` or `charcoal` branch. Live visual browser inspection remains pending as recorded below.
+- Verified the inline lab script parses, every required reading/control ID occurs exactly once, and the fracture/dust functions contain no `watercolor` or `charcoal` branch. Browser control could not connect because its trusted runtime path was rejected; visual and feel inspection therefore remains the mandatory artist task.
 - The baton was introduced in local commit `f1be021` (`docs: add durable AI handoff baton`).
 - The original nine-commit checkpoint was published through `bcc0e6b` on `origin/vnext-bootstrap`.
 - Archived AI guidance was restored exactly as root `CLAUDE.md` in commit `9c48cc6`.
@@ -98,7 +98,7 @@ The user should be able to start another AI with one sentence:
 
 Prove that one shared, property-driven material architecture can describe and produce recognizable watercolor and charcoal without named-medium engines or hidden special cases. The current browser lab is a diagnostic instrument for that proof, not the production painting application.
 
-The validation-status reconciliation is complete. Gate 2 and Gate 3 are explicitly partial and remain open. Charcoal v0.4 smudge motion, Pastel Paper fiber capture, and pressure-driven gap reach are artist-accepted for their stated diagnostic scopes. The artist clarified that every prescribed Pastel White/Light Cream test was performed and approved although only one representative JSON was exported. The next phase is CH-P-03 / CH-P-04 fracture and physically bounded dusting.
+The validation-status reconciliation is complete. Gate 2 and Gate 3 are explicitly partial and remain open. Charcoal v0.4 smudge motion, Pastel Paper fiber capture, and pressure-driven gap reach are artist-accepted for their stated diagnostic scopes. Charcoal v0.5 now has code-verified CH-P-03 / CH-P-04 coarse/fine fracture and bounded dusting, but those visible behaviors are not accepted until the artist reviews them.
 
 ## What exists now
 
@@ -117,7 +117,7 @@ The validation-status reconciliation is complete. Gate 2 and Gate 3 are explicit
 - `lab/shared-solver.js` contains one solver used by both profiles.
 - `lab/ARCHITECTURE.md` maps the solver to canonical properties and named models.
 - The solver begins from an abstract material state. `watercolor` and `charcoal` are profile selectors, not separate engines.
-- Current profiles are `material.watercolor.diagnostic.v0.6.1` and `material.charcoal.diagnostic.v0.4`. Watercolor v0.6.1 preserves the artist-reviewed v0.6 drawing constants and adds only stand-in friction/packing inputs for the shared smudge action; smudge itself is not artist-accepted for watercolor. Charcoal v0.4 adds transient loose-particle momentum and settling without a named-medium engine branch.
+- Current profiles are `material.watercolor.diagnostic.v0.6.1` and `material.charcoal.diagnostic.v0.5`. Watercolor v0.6.1 preserves the artist-reviewed v0.6 drawing constants and adds only stand-in friction/packing inputs for the shared smudge action; smudge itself is not artist-accepted for watercolor. Charcoal v0.5 preserves v0.4's accepted loose-particle smudge relationship and adds normalized stand-in fracture/particle properties for artist calibration.
 - Paper is now a separate participant selected independently from material. The lab offers archive-seeded Plain White, Hot Press, Cold Press, and Rough Watercolor Paper plus reference-derived experimental Pastel Paper — White and Light Cream; saved reviews record the selected substrate ID, name, and provenance.
 - The commercial 5100 × 5100 samples are not copied into the repository. Their measured base color, low contrast, and visible fiber scale guide the procedural profiles; physical height/friction remain stand-ins. White and Cream share exactly the same physical tooth, so color cannot alter charcoal behavior.
 - The archive contains no separately named charcoal/pastel paper. Charcoal now selects Pastel Paper — White by default. This UI default does not change material physics or create a named-medium engine branch.
@@ -137,6 +137,8 @@ The validation-status reconciliation is complete. Gate 2 and Gate 3 are explicit
 - Clean water uses the same contact transaction and may reactivate pigment without inventing pigment mass.
 - Charcoal deposits dry particles with no carrier through the same shared contact/state framework.
 - A shared **Smudge existing material** action lifts deposited pigment into a short-lived loose state using friction, packing, pressure, speed, and substrate roughness. Loose particles retain gesture-direction momentum, coast briefly after contact, lose energy, and settle without calling the deposition path or branching on a medium name.
+- Shared fracture contact can split transferred or already deposited/loose material into coarse fragments and fine dust only when the property profile defines a brittle particulate source. Coarse pieces travel less and settle faster; fine dust travels farther and settles slower; off-canvas mass is recorded.
+- The dry-material ledger now exposes offered source, material remaining on the tool, settled, loose, coarse, fine, and lost/off-canvas pigment. The artist-facing history and exported JSON retain these quantities with the mark and verdict.
 
 ## Artist decisions and important corrections
 
@@ -178,36 +180,42 @@ Still open for watercolor:
 - Artist conclusion: charcoal movement still looked good, but the paper remained ugly and too dramatic; the artist correctly identified Rough as a watercolor-oriented preset.
 - Correction: fixing the inverted archived grain scale was necessary but did not make Rough suitable for charcoal. Do not keep tuning that wet-media paper toward dry-media needs.
 - Generic Fine-Tooth v0.1 was superseded before artist review. Sample-guided Pastel White/Cream v0.2 use identical fibrous tooth with different ground colors. Automated relationships pass. `CH-LAB-1787110275815` artist-accepted Pastel White appearance and low-pressure smudging as Convincing; direct follow-up confirms all prescribed light/firm Draw and Light Cream comparisons were also performed and approved.
-- CH-P-01 and CH-P-02 are artist-accepted for Pastel Paper v0.2's diagnostic scope. Still required: coarse/fine fracture populations, bounded dusting, lift, burnishing/rejection, and a continuous failure range.
+- CH-P-01 and CH-P-02 are artist-accepted for Pastel Paper v0.2's diagnostic scope. CH-P-03 and CH-P-04 now have automated relationship evidence but still require artist approval. Lift, burnishing/rejection, and a continuous failure range remain unbuilt.
 - Every visible charcoal conclusion requires artist review, with saved marks and settings.
 
 ## Reconciled validation status
 
 - Gate 1 remains **pass**: both media fit the canonical vocabulary without private named-medium properties.
-- Gate 2 is **partial and open**: several watercolor relationships, Hot Press/Rough uptake contrast, dry-charcoal tooth bands, pressure-driven valley reach, and CH-P-05 conservative smudge relocation are automated, while many numbered scenes remain unrun.
+- Gate 2 is **partial and open**: several watercolor relationships, Hot Press/Rough uptake contrast, dry-charcoal tooth bands, pressure-driven valley reach, CH-P-05 conservative smudge relocation, and CH-P-03/04 bounded coarse/fine breakup are automated, while lift, burnish, and other scenes remain unrun.
 - Gate 3 is **partial, mandatory, and open**: watercolor v0.6 is artist-accepted only for its initial shared-interaction scope; charcoal v0.4 smudge motion is accepted only for that scope; neither medium has final acceptance.
 - `docs/validation/watercolor/physics_tests.md` and `docs/validation/charcoal/physics_tests.md` now distinguish `automated_relationship_verified`, `artist_accepted_limited_scope`, `partial_not_isolated`, and `not_run` test by test.
 
 ## NEXT ACTION — start here
 
-Build the smallest CH-P-03 / CH-P-04 **fracture and bounded dusting diagnostic** in `lab/shared-solver.js`, `lab/shared-solver.test.js`, and `lab/diagnostic-lab.html`. Do this before adding lift or burnish because the artist-requested small particle flicks need a conserved physical source rather than decorative randomness.
+Run the mandatory CH-P-03 / CH-P-04 **artist fracture-and-dust review** in `lab/diagnostic-lab.html` before changing the equations or beginning lift.
 
-1. Extend the shared particle state with distinct coarse-fragment and fine-dust populations. Trigger fracture from shared properties—powder/solid phase, available source mass, pressure, tangential speed, packing/cohesion proxies, and substrate tooth—not from the word `charcoal`.
-2. Every detached fragment must be removed from an existing source: applicator-available mass during Draw or deposited/loose mass during later contact. Track remaining, deposited, loose, coarse, fine-dust, settled, and lost/off-canvas mass so the total error stays below `1%`.
-3. Coarse fragments should remain nearer the main contact and settle quickly. Fine dust may travel farther and settle more slowly. Neither population may appear on blank contact or when the profile lacks a brittle particulate source.
-4. Add lab readings for **Coarse fragments** and **Fine dust**, include them in saved review JSON/history, and add artist instructions that distinguish believable brittle crumbs/dust from decorative speckles.
-5. Add matched automated scenes: low versus high loading/pressure/speed; coarse-near versus fine-far distribution; post-contact settling; blank-contact zero creation; identical-command determinism; conservation below `1%`; and a check that the implementation contains no `watercolor`/`charcoal` named branch.
-6. Run `node lab/shared-solver.test.js`, parse the inline lab script, verify required IDs occur once, run `git diff --check`, then return the new diagnostic for mandatory artist review. Do not mark CH-P-03 or CH-P-04 accepted from automation alone.
+1. Open the lab, choose **Charcoal**, **Pastel Paper — White**, and **Draw material**.
+2. Make one short stroke at load `0.35`, pressure `0.25`, speed `0.35`. Clear, then repeat the same gesture at load `1.00`, pressure `0.85`, speed `1.60`.
+3. Look for coarse crumbs staying nearer the stroke and settling sooner, while finer dust travels slightly farther and settles more slowly. Reject or recalibrate any even spray, glitter, or decorative speckle appearance.
+4. Confirm breakup increases continuously with the stronger inputs, the accepted Pastel Paper tooth remains visible, the conservation reading stays below `1%`, and a blank smudge creates no particles.
+5. Save/export the review JSON with a rating and `Accept`, `Recalibrate`, or `Revise model` decision.
+6. Import the review into `docs/validation/charcoal/artist_review.md` and `calibration_notes.md`. If **Accept**, advance next to the smallest shared CH-P-06 lift diagnostic. If **Recalibrate**, adjust only shared fracture population/travel/settling stand-ins and repeat this same matched review. If **Revise model**, preserve the review and repair the shared mechanism before adding lift.
 
-**Success condition:** the lab exposes two physically sourced particle populations whose amount and travel respond continuously to gesture/material/substrate inputs, settle plausibly, and remain mass-conservative without a named-medium shortcut.
+**Why this action:** code verification already proves source-bounded mass, relative coarse/fine motion, determinism, and conservation. It cannot decide whether the visible breakup actually reads as charcoal.
 
-**Outcome rule:** after code verification, artist review decides `Accept`, `Recalibrate`, or `Revise model`. Only artist acceptance advances to CH-P-06 lift.
+**Success condition:** a saved artist review accepts believable brittle breakup and bounded dust for the stated v0.5 diagnostic scope. Automation alone cannot close CH-P-03 or CH-P-04.
 
 ## IN FLIGHT
 
-- Nothing. CH-P-03 / CH-P-04 fracture and bounded dusting is the next new task.
+- Nothing in code. Charcoal v0.5 is ready for the artist review described above.
 
 ## Recently completed
+
+- Implemented CH-P-03 / CH-P-04 as shared coarse-fragment and fine-dust populations sourced only from transferred or existing surface mass; no decorative particle source and no named-medium branch.
+- Added offered-source, remaining-tool, settled, loose, coarse, fine, and off-canvas readings to the ledger; the lab exposes the artist-relevant readings and saves them in JSON/history.
+- Added matched automated checks for load alone, pressure alone, speed alone, coarse-near/fine-far travel, different settling rates, blank/profile-without-source zero creation, determinism, source closure, off-canvas accounting, and total conservation below 1%.
+- In the checked high scene, created particle mass was `1.27168` versus `0.00341` in the low scene; after `0.75 s`, the coarse centroid was `45.53` and fine centroid `49.48`, with `15.20%` coarse versus `84.48%` fine mass still detached; conservation error was `0.0000006%`. `[1 RUN ONLY]`
+- Added explicit artist instructions distinguishing physically shed crumbs/dust from an even spray, glitter, or decorative speckles. CH-P-03/04 remain artist-pending.
 
 - Reorganized the diagnostic controls into Brush, Paper, View, and collapsible Gesture groups while preserving simulation hooks.
 - Added visible minimum, current, and maximum values to sliders and corrected narrow-screen layout.
@@ -244,9 +252,9 @@ Build the smallest CH-P-03 / CH-P-04 **fracture and bounded dusting diagnostic**
 - Pastel White/Light Cream appearance, light/firm Draw contact, and smudge behavior are artist-accepted for the v0.2 diagnostic scope. Only the representative smudge has exported JSON evidence; the broader approval is a direct artist statement.
 - The photographs provide color and visible-pattern evidence, not surface-height or friction measurements. Those values remain diagnostic stand-ins and may require recalibration.
 - The archive paper numbers are application presets, not scientific measurements. Their canonical `TRAN-002` mapping is explicitly a normalized diagnostic stand-in.
-- Small particle flicks require a physically bounded detached-particle population and mass ledger in CH-P-03/CH-P-04; no such state exists yet.
+- The CH-P-03/04 particle state now exists, but its visible amount, travel, irregularity, and settling have not yet received artist approval.
 - Live in-app browser inspection could not be completed in the implementation environment; page syntax, control structure, and solver behavior were checked, but the artist must refresh and inspect the actual lab.
-- The lab has no production brush reservoir, spectral color, measured papers, full particle fracture/dust system, or production renderer.
+- The lab has no production brush reservoir, spectral color, measured papers, physically measured fracture constants/particle sizes, lift/burnish system, or production renderer.
 - Rust is the intended production direction, but production implementation must wait until the shared foundation survives the stated validation scope.
 
 ## Do NOT

@@ -121,11 +121,39 @@ assert(dryState.water===0,'charcoal profile must not deposit carrier');
 assert(dryState.deposited_pigment>0,'charcoal profile must deposit dry particles');
 assert(dryState.pigment_conservation_error<.01,'charcoal deposition must remain conservative');
 
-const surfaceInRect=(solver,x0,y0,x1,y1)=>{let total=0;for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){const i=y*solver.w+x;total+=solver.deposited[i]+solver.loose[i]}return total};
+const surfaceInRect=(solver,x0,y0,x1,y1)=>{let total=0;for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){const i=y*solver.w+x;total+=solver.deposited[i]+solver.loose[i]+solver.coarse[i]+solver.fineDust[i]}return total};
 const looseCentroidX=solver=>{let mass=0,moment=0;for(let i=0;i<solver.n;i++){mass+=solver.loose[i];moment+=(i%solver.w)*solver.loose[i]}return mass?moment/mass:0};
+const populationCentroidX=(solver,population)=>{let mass=0,moment=0;for(let i=0;i<solver.n;i++){mass+=population[i];moment+=(i%solver.w)*population[i]}return mass?moment/mass:0};
+const pigmentLedger=state=>state.mobile_pigment+state.deposited_pigment+state.loose_pigment+state.coarse_fragment_pigment+state.fine_dust_pigment+state.lost_off_canvas_pigment;
+
+const fractureScene=(load,pressure,speed)=>{const solver=new SharedSolver(120,60,PROFILES.charcoal,SUBSTRATES.pastelWhite);solver.depositSegment(25,30,65,30,120,60,pressure,load,0,speed);return solver};
+const createdParticles=solver=>{const state=solver.metrics();return state.coarse_fragment_created+state.fine_dust_created};
+const lowFracture=fractureScene(.25,.2,.25),highFracture=fractureScene(1,.9,1.8),lowFractureState=lowFracture.metrics(),highFractureState=highFracture.metrics();
+assert(highFractureState.coarse_fragment_created>lowFractureState.coarse_fragment_created,'greater loading, pressure, and speed must create more coarse fragments');
+assert(highFractureState.fine_dust_created>lowFractureState.fine_dust_created,'greater loading, pressure, and speed must create more fine dust');
+assert(createdParticles(fractureScene(1,.65,1))>createdParticles(fractureScene(.25,.65,1))*3.9,'greater loading alone must proportionally increase physically sourced breakup');
+assert(createdParticles(fractureScene(.8,.9,1))>createdParticles(fractureScene(.8,.2,1)),'greater pressure alone must increase breakup');
+assert(createdParticles(fractureScene(.8,.65,1.8))>createdParticles(fractureScene(.8,.65,.25)),'greater tangential speed alone must increase breakup');
+assert(highFractureState.source_offered_pigment>highFractureState.source_remaining_pigment,'a dry draw must transfer only part of the pigment offered by the applicator');
+assert(Math.abs(highFractureState.source_offered_pigment-highFractureState.source_remaining_pigment-highFracture.initialPigment)<.0001,'offered dry pigment must equal remaining source plus transferred pigment');
+assert(Math.abs(pigmentLedger(highFractureState)-highFracture.initialPigment)<.0001&&highFractureState.pigment_conservation_error<.01,'settled, loose, coarse, fine, and lost pigment must close the transferred-mass ledger');
+
+const travelScene=fractureScene(1,.9,1.8),coarseStart=travelScene.metrics().coarse_fragment_pigment,fineStart=travelScene.metrics().fine_dust_pigment;for(let i=0;i<45;i++)travelScene.step(1/60);const coarseX=populationCentroidX(travelScene,travelScene.coarse),fineX=populationCentroidX(travelScene,travelScene.fineDust),travelState=travelScene.metrics();
+assert(fineX>coarseX,'fine dust must travel farther along the gesture than coarse fragments');
+assert(travelState.coarse_fragment_pigment/coarseStart<travelState.fine_dust_pigment/fineStart,'coarse fragments must settle faster than fine dust');
+for(let i=0;i<240;i++)travelScene.step(1/60);const postSettleState=travelScene.metrics();
+assert(postSettleState.coarse_fragment_pigment<travelState.coarse_fragment_pigment&&postSettleState.fine_dust_pigment<travelState.fine_dust_pigment,'both detached populations must settle after contact');
+assert(postSettleState.pigment_conservation_error<.01,'detached-particle travel and settling must conserve pigment including off-canvas loss');
+
+const deterministicA=fractureScene(.8,.72,1.35),deterministicB=fractureScene(.8,.72,1.35);for(let i=0;i<75;i++){deterministicA.step(1/60);deterministicB.step(1/60)}
+assert(JSON.stringify(deterministicA.metrics())===JSON.stringify(deterministicB.metrics())&&JSON.stringify(Array.from(deterministicA.fineDust))===JSON.stringify(Array.from(deterministicB.fineDust)),'identical fracture commands must reproduce identical particle state');
+
+const nonBrittleDryProfile=JSON.parse(JSON.stringify(PROFILES.charcoal));delete nonBrittleDryProfile.state['TRIB-003'];delete nonBrittleDryProfile.state['PART-001'];const nonBrittleDry=new SharedSolver(120,60,nonBrittleDryProfile,SUBSTRATES.pastelWhite);nonBrittleDry.depositSegment(25,30,65,30,120,60,.9,1,0,1.8);const nonBrittleState=nonBrittleDry.metrics();
+assert(nonBrittleState.coarse_fragment_created===0&&nonBrittleState.fine_dust_created===0,'a profile without a brittle particulate source must not create fragments or dust');
+assert(!/watercolor|charcoal/i.test(SharedSolver.prototype.fractureSplit.toString()+SharedSolver.prototype.stepDetachedPopulation.toString()),'fracture and dusting must not branch on a named medium');
 const smudged=new SharedSolver(120,60,PROFILES.charcoal,SUBSTRATES.pastelWhite);
 smudged.depositSegment(40,15,40,45,120,60,.75,.9,0,.8);
-const sourceBefore=surfaceInRect(smudged,35,10,43,50),destinationBefore=surfaceInRect(smudged,43,10,53,50),initialBeforeSmudge=smudged.initialPigment,totalBeforeSmudge=smudged.metrics().deposited_pigment;
+const sourceBefore=surfaceInRect(smudged,35,10,43,50),destinationBefore=surfaceInRect(smudged,43,10,53,50),initialBeforeSmudge=smudged.initialPigment,totalBeforeSmudge=pigmentLedger(smudged.metrics());
 const moved=smudged.smudgeSegment(35,30,68,30,120,60,.65,1);
 const sourceAfter=surfaceInRect(smudged,35,10,43,50),destinationAfter=surfaceInRect(smudged,43,10,53,50),smudgedState=smudged.metrics(),looseImmediately=smudgedState.loose_pigment,settledImmediately=smudgedState.deposited_pigment,centroidImmediately=looseCentroidX(smudged);
 assert(moved>0&&smudgedState.relocated_pigment>0,'smudge contact must relocate existing deposited pigment');
@@ -133,7 +161,7 @@ assert(sourceAfter<sourceBefore,'smudge contact must reduce surface pigment in t
 assert(destinationAfter>destinationBefore,'smudge contact must increase surface pigment in the destination region');
 assert(looseImmediately>0,'smudge contact must create a transient loose-particle ridge');
 assert(smudged.initialPigment===initialBeforeSmudge,'smudging must not add pigment to the material ledger');
-assert(Math.abs(smudgedState.deposited_pigment+smudgedState.loose_pigment-totalBeforeSmudge)<.0001,'smudging must conserve settled plus loose surface pigment');
+assert(Math.abs(pigmentLedger(smudgedState)-totalBeforeSmudge)<.0001,'smudging must conserve settled, loose, coarse, fine, and lost pigment');
 assert(smudgedState.pigment_conservation_error<.01,'smudge transport must remain conservative');
 for(let i=0;i<30;i++)smudged.step(1/60);
 const movingState=smudged.metrics(),centroidAfterCoast=looseCentroidX(smudged);
@@ -150,6 +178,6 @@ assert(smudgeMovedAtPressure(.75)>smudgeMovedAtPressure(.25),'firmer smudge cont
 const blankSmudge=new SharedSolver(120,60,PROFILES.charcoal,SUBSTRATES.pastelWhite);
 blankSmudge.smudgeSegment(20,30,90,30,120,60,.8,1.2);
 const blankSmudgeState=blankSmudge.metrics();
-assert(blankSmudgeState.deposited_pigment===0&&blankSmudgeState.loose_pigment===0&&blankSmudgeState.relocated_pigment===0,'smudging blank paper must not create pigment');
+assert(blankSmudgeState.deposited_pigment===0&&blankSmudgeState.loose_pigment===0&&blankSmudgeState.coarse_fragment_pigment===0&&blankSmudgeState.fine_dust_pigment===0&&blankSmudgeState.relocated_pigment===0,'smudging blank paper must not create pigment or detached particles');
 
 console.log('shared solver checks passed');
