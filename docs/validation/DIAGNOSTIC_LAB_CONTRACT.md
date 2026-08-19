@@ -4,7 +4,7 @@ The first working prototype should be a small diagnostic lab, not a polished pai
 
 ## Required panels
 
-1. **Material setup** — choose watercolor or charcoal, paper, load, pressure, speed, and wetness.
+1. **Material setup** — choose watercolor or charcoal, contact action, paper, load, pressure, speed, and wetness.
 2. **Observation canvas** — show the simulated mark and a simple reference target beside it.
 3. **Measurements** — show only useful readings: deposited amount, spread distance, edge contrast, valley contact, and conservation error.
 4. **Review card** — record the artist rating, notes, and whether the result is accepted, recalibrated, or rejected.
@@ -23,6 +23,7 @@ The first working prototype should be a small diagnostic lab, not a polished pai
 - tooth capture;
 - valley skipping;
 - pressure-driven deposition;
+- conservative smudge transport;
 - one failure case: dusting or broken deposition.
 
 ## Artist approval is a required step
@@ -37,6 +38,7 @@ The artist must answer whether the change feels like real charcoal before the re
 
 ```yaml
 experiment_id: WC-DRY-001
+contact_action: draw
 physics_status: pass
 artist_status: pending
 artist_rating: null

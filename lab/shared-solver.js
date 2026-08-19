@@ -1,20 +1,20 @@
 (function(global){
   'use strict';
 
-  const REQUIRED=['COMP-001','COMP-003','STATE-001','STATE-003','TRAN-001','TRAN-002','DEPO-001','SUBI-001','SUBI-003','EVOL-001','EVOL-003','REAC-001','REAC-002','REAC-003','REAC-004'];
-  const MODELS=['MODEL-TRAN-001','MODEL-TRAN-002','MODEL-TRAN-003','MODEL-DEPO-001','MODEL-EVOL-001','MODEL-PART-001','MODEL-REAC-001'];
+  const REQUIRED=['COMP-001','COMP-003','STATE-001','STATE-003','TRAN-001','TRAN-002','DEPO-001','DEPO-004','SUBI-001','SUBI-003','TRIB-002','EVOL-001','EVOL-003','REAC-001','REAC-002','REAC-003','REAC-004'];
+  const MODELS=['MODEL-TRAN-001','MODEL-TRAN-002','MODEL-TRAN-003','MODEL-DEPO-001','MODEL-EVOL-001','MODEL-PART-001','MODEL-REAC-001','MODEL-TRIB-001'];
 
   const PROFILES={
     watercolor:{
-      id:'material.watercolor.diagnostic.v0.6',version:'0.6.0',
-      state:{'COMP-001':.88,'COMP-003':.12,'STATE-001':'suspension','STATE-003':0,'TRAN-001':.48,'TRAN-002':.055,'DEPO-001':.74,'SUBI-001':.28,'SUBI-003':.64,'EVOL-001':.0032,'EVOL-003':.016,'REAC-001':.22,'REAC-002':.58,'REAC-003':.18,'REAC-004':.025},
+      id:'material.watercolor.diagnostic.v0.6.1',version:'0.6.1',
+      state:{'COMP-001':.88,'COMP-003':.12,'STATE-001':'suspension','STATE-003':0,'TRAN-001':.48,'TRAN-002':.055,'DEPO-001':.74,'DEPO-004':.42,'SUBI-001':.28,'SUBI-003':.64,'TRIB-002':.18,'EVOL-001':.0032,'EVOL-003':.016,'REAC-001':.22,'REAC-002':.58,'REAC-003':.18,'REAC-004':.025},
       display:{pigment_visibility_gain:2.6,note:'Diagnostic preview gain only; does not alter physical pigment mass.'},
-      models:MODELS,provenance:[{status:'stand-in',note:'Artist-calibrated diagnostic values; not measured production constants.'}]
+      models:MODELS,interactions:['IM-009'],provenance:[{status:'stand-in',note:'Artist-calibrated diagnostic values; not measured production constants.'}]
     },
     charcoal:{
-      id:'material.charcoal.diagnostic.v0.2',version:'0.2.0',
-      state:{'COMP-001':0,'COMP-003':1,'STATE-001':'powder','STATE-003':0,'TRAN-001':0,'TRAN-002':0,'DEPO-001':.68,'SUBI-001':.82,'SUBI-003':.45,'EVOL-001':0,'EVOL-003':0,'REAC-001':0,'REAC-002':0,'REAC-003':0,'REAC-004':1},
-      models:['MODEL-DEPO-001'],provenance:[{status:'stand-in',note:'Artist-recognizable diagnostic profile; further calibration required.'}]
+      id:'material.charcoal.diagnostic.v0.3',version:'0.3.0',
+      state:{'COMP-001':0,'COMP-003':1,'STATE-001':'powder','STATE-003':0,'TRAN-001':0,'TRAN-002':0,'DEPO-001':.68,'DEPO-004':.48,'SUBI-001':.82,'SUBI-003':.45,'TRIB-002':.58,'EVOL-001':0,'EVOL-003':0,'REAC-001':0,'REAC-002':0,'REAC-003':0,'REAC-004':1},
+      models:['MODEL-DEPO-001','MODEL-TRIB-001'],interactions:['IM-009'],provenance:[{status:'stand-in',note:'Artist-recognizable diagnostic profile; friction and packing require artist calibration.'}]
     }
   };
 
@@ -27,9 +27,9 @@
 
   class SharedSolver{
     constructor(width,height,profile){this.w=width;this.h=height;this.n=width*height;this.surface=document.createElement('canvas');this.surface.width=width;this.surface.height=height;this.sctx=this.surface.getContext('2d');this.image=this.sctx.createImageData(width,height);this.setProfile(profile)}
-    setProfile(profile){this.profile=validateProfile(profile);this.p=profile.state;this.displayGain=profile.display?.pigment_visibility_gain||1;this.water=new Float32Array(this.n);this.mobile=new Float32Array(this.n);this.deposited=new Float32Array(this.n);this.absorbed=new Float32Array(this.n);this.nextWater=new Float32Array(this.n);this.nextMobile=new Float32Array(this.n);this.initialPigment=0;this.lostPigment=0;this.dryBoost=1;this.elapsed=0}
+    setProfile(profile){this.profile=validateProfile(profile);this.p=profile.state;this.displayGain=profile.display?.pigment_visibility_gain||1;this.water=new Float32Array(this.n);this.mobile=new Float32Array(this.n);this.deposited=new Float32Array(this.n);this.absorbed=new Float32Array(this.n);this.nextWater=new Float32Array(this.n);this.nextMobile=new Float32Array(this.n);this.initialPigment=0;this.lostPigment=0;this.relocatedPigment=0;this.dryBoost=1;this.elapsed=0}
     setDisplayGain(value){this.displayGain=Math.max(1,Math.min(12,Number(value)||1))}
-    clear(substrateDampness=0){const saturation=this.p['COMP-001']>.02?Math.max(0,Math.min(1,substrateDampness))*this.p['SUBI-003']:0;this.water.fill(0);this.mobile.fill(0);this.deposited.fill(0);this.absorbed.fill(saturation);this.initialPigment=0;this.lostPigment=0;this.dryBoost=1;this.elapsed=0}
+    clear(substrateDampness=0){const saturation=this.p['COMP-001']>.02?Math.max(0,Math.min(1,substrateDampness))*this.p['SUBI-003']:0;this.water.fill(0);this.mobile.fill(0);this.deposited.fill(0);this.absorbed.fill(saturation);this.initialPigment=0;this.lostPigment=0;this.relocatedPigment=0;this.dryBoost=1;this.elapsed=0}
     tooth(x,y){return Math.max(0,Math.min(1,(Math.sin(x*.73+y*1.31)+Math.sin(x*.19-y*.41)+2)/4))}
     addDisk(cx,cy,radius,water,pigment,pressure,speed,brushMoisture){
       const dry=this.p['COMP-001']<.02,rough=this.p['SUBI-001'];
@@ -54,6 +54,23 @@
       const availablePigment=carrier>.02?(.05+pressure*.16)*pigmentFraction:(.012+pressure*.04)*(pigmentFraction||1),pigment=availablePigment*pigmentLoad;
       for(let s=0;s<=steps;s++){const t=s/steps;this.addDisk(x0+(x1-x0)*t,y0+(y1-y0)*t,radius,water,pigment,pressure,speed,brushWater)}
     }
+    smudgeSegment(ax,ay,bx,by,canvasW,canvasH,pressure,speed){
+      const sx=this.w/canvasW,sy=this.h/canvasH,x0=ax*sx,y0=ay*sy,x1=bx*sx,y1=by*sy,dx=x1-x0,dy=y1-y0,d=Math.hypot(dx,dy);if(d<.001)return 0;
+      const ux=dx/d,uy=dy/d,radius=1.4+pressure*2.8,steps=Math.max(1,Math.ceil(d/.55)),contact=new Float32Array(this.n);
+      for(let s=0;s<=steps;s++){
+        const t=s/steps,cx=x0+dx*t,cy=y0+dy*t,xMin=Math.max(0,Math.floor(cx-radius)),xMax=Math.min(this.w-1,Math.ceil(cx+radius)),yMin=Math.max(0,Math.floor(cy-radius)),yMax=Math.min(this.h-1,Math.ceil(cy+radius));
+        for(let y=yMin;y<=yMax;y++)for(let x=xMin;x<=xMax;x++){const q=((x-cx)*(x-cx)+(y-cy)*(y-cy))/(radius*radius);if(q>1)continue;const i=y*this.w+x;contact[i]=Math.max(contact[i],1-q)}
+      }
+      const source=this.deposited.slice(),next=this.deposited.slice(),friction=this.p['TRIB-002'],packing=Math.max(0,Math.min(1,this.p['DEPO-004'])),roughness=this.p['SUBI-001'],sliding=Math.max(.1,Math.min(2,speed)),coupling=Math.min(.72,(.08+friction*.34)*(0.3+pressure*.7)*(.45+sliding*.38)*(1-packing*.55)),travel=1+Math.min(3,sliding*1.15+pressure*.85);
+      let relocated=0;
+      for(let i=0;i<this.n;i++){
+        if(contact[i]<=0||source[i]<=0)continue;
+        const x=i%this.w,y=Math.floor(i/this.w),toothHold=.65+.35*this.tooth(x,y)*roughness,amount=Math.min(source[i],source[i]*contact[i]*coupling/toothHold);if(amount<=0)continue;
+        const tx=Math.max(0,Math.min(this.w-1,Math.round(x+ux*travel))),ty=Math.max(0,Math.min(this.h-1,Math.round(y+uy*travel))),px=-uy,py=ux,lx=Math.max(0,Math.min(this.w-1,Math.round(tx+px))),ly=Math.max(0,Math.min(this.h-1,Math.round(ty+py))),rx=Math.max(0,Math.min(this.w-1,Math.round(tx-px))),ry=Math.max(0,Math.min(this.h-1,Math.round(ty-py)));
+        next[i]-=amount;next[ty*this.w+tx]+=amount*.72;next[ly*this.w+lx]+=amount*.14;next[ry*this.w+rx]+=amount*.14;relocated+=amount;
+      }
+      this.deposited.set(next);this.relocatedPigment+=relocated;return relocated;
+    }
     step(dt){
       this.elapsed+=dt;const wet=this.p['COMP-001']>.02;if(!wet)return;
       const D=this.p['TRAN-001'],uptake=this.p['TRAN-002']*this.p['SUBI-003'],evap=this.p['EVOL-001']*this.dryBoost*dt*2,settle=this.p['EVOL-003'],rewetRate=this.p['REAC-001'],releaseFraction=this.p['REAC-002'],redispersion=this.p['REAC-003'],reactivationThreshold=this.p['REAC-004'];
@@ -73,7 +90,7 @@
       if(this.dryBoost>1)this.dryBoost=Math.max(1,this.dryBoost-dt*4);
     }
     dry(){this.dryBoost=35}
-    metrics(){let water=0,mobile=0,deposited=0,absorbed=0,wetCells=0,pigmentCells=0;for(let i=0;i<this.n;i++){water+=this.water[i];mobile+=this.mobile[i];deposited+=this.deposited[i];absorbed+=this.absorbed[i];if(this.water[i]>.008||this.absorbed[i]>.008)wetCells++;if(this.mobile[i]+this.deposited[i]>.0001)pigmentCells++}const pigment=mobile+deposited,error=this.initialPigment?Math.abs(this.initialPigment-pigment-this.lostPigment)/this.initialPigment:0;return{water,wet_area_fraction:wetCells/this.n,pigment_area_fraction:pigmentCells/this.n,mobile_pigment:mobile,deposited_pigment:deposited,absorbed_water:absorbed,pigment_conservation_error:error}}
+    metrics(){let water=0,mobile=0,deposited=0,absorbed=0,wetCells=0,pigmentCells=0;for(let i=0;i<this.n;i++){water+=this.water[i];mobile+=this.mobile[i];deposited+=this.deposited[i];absorbed+=this.absorbed[i];if(this.water[i]>.008||this.absorbed[i]>.008)wetCells++;if(this.mobile[i]+this.deposited[i]>.0001)pigmentCells++}const pigment=mobile+deposited,error=this.initialPigment?Math.abs(this.initialPigment-pigment-this.lostPigment)/this.initialPigment:0;return{water,wet_area_fraction:wetCells/this.n,pigment_area_fraction:pigmentCells/this.n,mobile_pigment:mobile,deposited_pigment:deposited,absorbed_water:absorbed,relocated_pigment:this.relocatedPigment,pigment_conservation_error:error}}
     render(target,canvas){
       const data=this.image.data,dry=this.p['COMP-001']<.02;
       for(let i=0;i<this.n;i++){

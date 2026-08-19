@@ -17,9 +17,10 @@ test_suite:
         - watercolor pigment transport and clean-water reactivation conserve pigment within the diagnostic tolerance
         - paper-held saturation is separate from mobile surface water
         - charcoal deposits dry particles without carrier and conserves deposited pigment
+        - shared smudge contact relocates existing deposited pigment without adding pigment mass
       remaining:
         - complete the test-by-test scenes in docs/validation
-        - isolate charcoal tooth, pressure, fracture, dust, smudge, lift, and burnish behavior
+        - isolate charcoal tooth, pressure, fracture, dust, lift, and burnish behavior
     artist_reality_test:
       pass_condition: A practicing artist recognizes the medium without being told what is being simulated.
       minimum_v0_1: recognizable_without_prompting

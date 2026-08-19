@@ -89,4 +89,25 @@ assert(dryState.water===0,'charcoal profile must not deposit carrier');
 assert(dryState.deposited_pigment>0,'charcoal profile must deposit dry particles');
 assert(dryState.pigment_conservation_error<.01,'charcoal deposition must remain conservative');
 
+const depositedInRect=(solver,x0,y0,x1,y1)=>{let total=0;for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++)total+=solver.deposited[y*solver.w+x];return total};
+const smudged=new SharedSolver(120,60,PROFILES.charcoal);
+smudged.depositSegment(40,15,40,45,120,60,.75,.9,0,.8);
+const sourceBefore=depositedInRect(smudged,35,10,43,50),destinationBefore=depositedInRect(smudged,43,10,53,50),initialBeforeSmudge=smudged.initialPigment,totalBeforeSmudge=smudged.metrics().deposited_pigment;
+const moved=smudged.smudgeSegment(35,30,68,30,120,60,.65,1);
+const sourceAfter=depositedInRect(smudged,35,10,43,50),destinationAfter=depositedInRect(smudged,43,10,53,50),smudgedState=smudged.metrics();
+assert(moved>0&&smudgedState.relocated_pigment>0,'smudge contact must relocate existing deposited pigment');
+assert(sourceAfter<sourceBefore,'smudge contact must reduce deposited mass in the source region');
+assert(destinationAfter>destinationBefore,'smudge contact must increase deposited mass in the destination region');
+assert(smudged.initialPigment===initialBeforeSmudge,'smudging must not add pigment to the material ledger');
+assert(Math.abs(smudgedState.deposited_pigment-totalBeforeSmudge)<.0001,'smudging must conserve total deposited pigment');
+assert(smudgedState.pigment_conservation_error<.01,'smudge transport must remain conservative');
+
+const smudgeMovedAtPressure=pressure=>{const solver=new SharedSolver(120,60,PROFILES.charcoal);solver.depositSegment(40,15,40,45,120,60,.75,.9,0,.8);return solver.smudgeSegment(35,30,68,30,120,60,pressure,.8)};
+assert(smudgeMovedAtPressure(.75)>smudgeMovedAtPressure(.25),'firmer smudge contact must relocate more existing pigment than light contact');
+
+const blankSmudge=new SharedSolver(120,60,PROFILES.charcoal);
+blankSmudge.smudgeSegment(20,30,90,30,120,60,.8,1.2);
+const blankSmudgeState=blankSmudge.metrics();
+assert(blankSmudgeState.deposited_pigment===0&&blankSmudgeState.relocated_pigment===0,'smudging blank paper must not create pigment');
+
 console.log('shared solver checks passed');
