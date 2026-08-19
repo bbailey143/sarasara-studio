@@ -88,6 +88,7 @@ The user should be able to start another AI with one sentence:
 - The original nine-commit checkpoint was published through `bcc0e6b` on `origin/vnext-bootstrap`.
 - Archived AI guidance was restored exactly as root `CLAUDE.md` in commit `9c48cc6`.
 - The user explicitly authorized publishing every current `vnext-bootstrap` commit to `https://github.com/bbailey143/sarasara-studio.git` during this cleanup checkpoint.
+- Fine-Tooth implementation and review history were published in commit `40f19f1` (`feat: add fine-tooth charcoal paper`).
 - Always verify publication with `git status --short --branch`; a clean published checkpoint shows no `ahead` count.
 
 ## Current objective
@@ -200,7 +201,7 @@ Artist-validate **Fine-Tooth Drawing Paper v0.1** and CH-P-01 / CH-P-02 in `lab/
 
 ## IN FLIGHT
 
-- Fine-Tooth implementation and documentation are complete locally and automated checks pass. Artist review is the only unfinished acceptance step. Verify Git publication before claiming the checkpoint is pushed.
+- Nothing. Fine-Tooth implementation and documentation are complete and published; artist review is the next new task, not half-finished implementation work.
 
 ## Recently completed
 
