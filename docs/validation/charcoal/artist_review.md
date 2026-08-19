@@ -202,7 +202,9 @@ This does not revoke the prior acceptance at pressure `0.55` / speed `1.00`; it 
 
 Charcoal v0.5.2 adds that relationship within shared `IM-009`: above the high-load compaction threshold, pressure, friction, deposited packing, paper roughness, and local tooth determine a bounded share that is deposited into the contacted trail. The remainder still follows the existing loose/coarse/fine paths. This adds no pigment and contains no named-medium branch.
 
-## Pending artist gate — charcoal v0.5.2 strong-pressure anchoring
+## Superseded artist gate — charcoal v0.5.2 strong-pressure anchoring
+
+This focused retest is retained as history. Its checks now belong to the **Smudge** section of the combined v0.6 gate below; do not submit both as separate approvals.
 
 1. Make a fresh dense charcoal mark on **Pastel Paper — White**.
 2. Smudge at pressure `0.55`, speed `1.00`. Confirm the previously accepted moderate behavior still feels dusty, surface-connected, and controllable.
@@ -211,3 +213,14 @@ Charcoal v0.5.2 adds that relationship within shared `IM-009`: above the high-lo
 5. Recalibrate if the whole mark still sweeps away, the smear is too pale, or the result becomes a stopped putty slab. Confirm conservation remains below `1%` and save the review.
 
 Only after both settings pass should the work return to the separate light-versus-strong Draw fracture comparison.
+
+## Pending artist gate — charcoal v0.6 loose, grainy target
+
+Use **Pastel Paper — White** and judge these four marks together:
+
+1. **Stamp:** make a brief dab. It should be an irregular cluster of particulate contact with broken paper showing—not a filled circle or airbrush dot.
+2. **1 Layer:** make one steady stroke at load `0.70`, pressure `0.55`, speed `0.80`. Paper should remain visible inside the mark, density should vary, and the stroke should not read as a flat gray ribbon.
+3. **Multi-Layer:** cross the same area three times with the same settings. Overlaps should become progressively darker through accumulated material while the grain remains legible.
+4. **Smudge:** from a dark layered source, smudge first at pressure `0.55`, speed `1.00`, then from a fresh source at pressure `0.85`, speed `1.60`. The moderate pass should make a light directional veil without erasing the source. The strong pass should additionally leave some rubbed charcoal pressed into the trail while loose dust still moves ahead.
+
+Choose one overall rating and decision, but describe any failed section by name: **Stamp**, **1 Layer**, **Multi-Layer**, or **Smudge**. Also note whether the next target should be the heavier/flatter charcoal variant the artist mentioned. Automated coverage, layer-mass, darkness, conservation, and pressure-anchoring checks do not satisfy this gate.

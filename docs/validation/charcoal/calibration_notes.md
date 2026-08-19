@@ -143,3 +143,13 @@ Each accepted calibration note should record material recipe, substrate, environ
 - v0.5.2 response: add a shared high-load anchoring share to `IM-009`. Above normalized pressure `0.55`, pressure, `TRIB-002` friction, `DEPO-004` packing, `SUBI-001` roughness, and local paper tooth determine how much relocated material deposits immediately into the contacted trail; all remaining material keeps the existing loose/coarse/fine behavior.
 - Matched code check: at pressure `0.55`, anchored mass is exactly `0` and the accepted path is unchanged. At pressure `0.85` / speed `1.60`, `0.06547` of `0.37697` relocated units (`17.37%`) anchor immediately; deposited mass in the checked clean trail rises from `0` to `0.04165`, loose mass remains `0.29237`, and conservation error is `0.00000112%`. `[1 RUN ONLY]`
 - Artist status: **mandatory retest pending** at both moderate and strong settings. The 17.37% relationship is an unmeasured calibration starting point, not an accepted physical constant.
+
+### 2026-08-19 — artist loose-grain target and charcoal v0.6
+
+- Artist target: an annotated reference divided into **Stamp**, **1 Layer**, **Multi-Layer**, and **Smudge**. The desired charcoal is loose and grainy; the current result was described as too flat and heavy.
+- Required visible relationships: irregular particulate first contact; one layer with paper visible inside the stroke; repeated layers that deepen without flattening; a lighter directional smudge veil that preserves darker source structure.
+- Evidence boundary: the reference is artist visual evidence, not a measured recipe, particle size, pressure, paper height, or optical-density sample. The screenshot is not shipped; the durable behavior description is `docs/reference/material-studies/LOOSE_GRAIN_CHARCOAL_TARGET.md`.
+- v0.6 transfer response: local tooth, pressure, `PART-002` density, and `PART-003` shape govern a deterministic granular capture field. Uncaptured offered mass remains on the tool; no decorative post-process particles are added.
+- v0.6 optical response: settled/coarse material darkens according to packing and particle density, while loose/fine material remains a lighter veil. Layering darkens only because deposited mass accumulates.
+- Matched code check at load `0.70`, pressure `0.55`, speed `0.80`: one pass marks `33.20%` of the checked contact corridor and leaves `66.80%` as visible paper/gaps. Three identical passes keep the same footprint, increase deposited mass from `4.41292` to `13.23877`, and lower mean corridor RGB from `232.02` to `222.72`; conservation error remains below `0.000001%`. `[1 RUN ONLY]`
+- Artist status: **mandatory review pending**. These numbers prove incomplete capture and mass-based buildup, not resemblance to the reference.

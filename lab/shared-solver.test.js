@@ -7,7 +7,7 @@ require('./shared-solver.js');
 const {SharedSolver,PROFILES,SUBSTRATES}=window.SarasaraLab;
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 
-assert(PROFILES.charcoal.id==='material.charcoal.diagnostic.v0.5.2','the pressure-anchoring change must remain versioned for artist review history');
+assert(PROFILES.charcoal.id==='material.charcoal.diagnostic.v0.6','the loose-grain target must remain versioned for artist review history');
 assert(PROFILES.watercolor.state['SUBI-001']===undefined&&PROFILES.charcoal.state['SUBI-001']===undefined,'material profiles must not own intrinsic paper roughness');
 assert(SUBSTRATES.rough.texture.tooth===.85&&SUBSTRATES.coldPress.texture.capacity===.5,'archived paper seed values must remain traceable');
 assert(SUBSTRATES.rough.version==='0.2.0','corrected paper scale must remain versioned for artist review history');
@@ -122,6 +122,17 @@ assert(dryState.water===0,'charcoal profile must not deposit carrier');
 assert(dryState.deposited_pigment>0,'charcoal profile must deposit dry particles');
 assert(dryState.pigment_conservation_error<.01,'charcoal deposition must remain conservative');
 
+const grainScene=passes=>{const solver=new SharedSolver(120,60,PROFILES.charcoal,SUBSTRATES.pastelWhite);for(let i=0;i<passes;i++)solver.depositSegment(20,30,100,30,120,60,.55,.7,0,.8);return solver};
+const singleGrain=grainScene(1),layeredGrain=grainScene(3),singleGrainState=singleGrain.metrics(),layeredGrainState=layeredGrain.metrics();let contacted=0,marked=0;for(let y=26;y<=34;y++)for(let x=20;x<=100;x++){contacted++;const i=y*singleGrain.w+x;if(singleGrain.deposited[i]+singleGrain.coarse[i]+singleGrain.fineDust[i]>.000001)marked++}
+assert(JSON.stringify(Array.from(singleGrain.deposited))===JSON.stringify(Array.from(grainScene(1).deposited)),'identical granular contact must reproduce the same broken mark');
+assert(!/watercolor|charcoal/i.test(SharedSolver.prototype.addDisk.toString()),'granular dry contact must not branch on a named medium');
+assert(marked>contacted*.2&&marked<contacted*.82,'one loose-charcoal layer must remain materially grainy with both captured particles and visible paper gaps');
+assert(layeredGrainState.deposited_pigment>singleGrainState.deposited_pigment*2.9,'repeated charcoal layers must accumulate real deposited mass rather than use a display-only darkening effect');
+assert(Math.abs(layeredGrainState.pigment_area_fraction-singleGrainState.pigment_area_fraction)<.01,'matched repeated layers should deepen the same granular structure rather than inflate into a flat wider ribbon');
+assert(singleGrainState.pigment_conservation_error<.01&&layeredGrainState.pigment_conservation_error<.01,'granular transfer and repeated layers must conserve pigment');
+const renderTarget={save(){},clearRect(){},drawImage(){},restore(){}};singleGrain.render(renderTarget,{width:120,height:60});layeredGrain.render(renderTarget,{width:120,height:60});const strokeLuminance=solver=>{let total=0,cells=0;for(let y=26;y<=34;y++)for(let x=20;x<=100;x++){const j=(y*solver.w+x)*4;total+=(solver.image.data[j]+solver.image.data[j+1]+solver.image.data[j+2])/3;cells++}return total/cells};
+assert(strokeLuminance(layeredGrain)<strokeLuminance(singleGrain)-5,'multiple charcoal layers must become visibly darker while retaining the same granular footprint');
+
 const surfaceInRect=(solver,x0,y0,x1,y1)=>{let total=0;for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){const i=y*solver.w+x;total+=solver.deposited[i]+solver.loose[i]+solver.coarse[i]+solver.fineDust[i]}return total};
 const depositedInRect=(solver,x0,y0,x1,y1)=>{let total=0;for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++)total+=solver.deposited[y*solver.w+x];return total};
 const looseCentroidX=solver=>{let mass=0,moment=0;for(let i=0;i<solver.n;i++){mass+=solver.loose[i];moment+=(i%solver.w)*solver.loose[i]}return mass?moment/mass:0};
@@ -184,7 +195,7 @@ const pressureSmearScene=pressure=>{const solver=new SharedSolver(120,60,PROFILE
 const moderateSmear=pressureSmearScene(.55),strongSmear=pressureSmearScene(.85);
 assert(strongSmear.after-strongSmear.before>moderateSmear.after-moderateSmear.before,'strong pressure must anchor more relocated pigment into a deposited smear than the accepted moderate smudge');
 assert(strongSmear.after>strongSmear.before,'strong smudging must leave pressed pigment in the contacted paper trail instead of moving every particle as loose dust');
-assert(moderateSmear.solver.metrics().pressure_anchored_pigment===0,'the v0.5.2 high-load correction must preserve the accepted pressure-0.55 smudge path');
+assert(moderateSmear.solver.metrics().pressure_anchored_pigment===0,'the carried-forward high-load correction must preserve the accepted pressure-0.55 smudge path');
 assert(strongSmear.solver.metrics().pressure_anchored_pigment>moderateSmear.solver.metrics().pressure_anchored_pigment,'the pressure-anchoring ledger must distinguish strong contact from the accepted moderate reference');
 assert(strongSmear.solver.metrics().loose_pigment>0,'strong pressure anchoring must coexist with loose dusty movement rather than turn the whole smudge into putty');
 assert(strongSmear.solver.metrics().pigment_conservation_error<.01,'strong pressure anchoring must conserve the full pigment ledger');
