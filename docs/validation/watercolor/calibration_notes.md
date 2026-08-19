@@ -81,3 +81,14 @@ Every accepted calibration note should record material recipe, substrate, enviro
 - Architectural basis: this is the `applicator_load` input to the shared contact/transfer model, not a watercolor-only visual effect. Dry-powder delivery retains its prior scale.
 - Automated guardrail: changing pigment load changes pigment mass proportionally while matched gestures deliver identical carrier mass.
 - Validation status: **artist review required** for believable concentration, transparency, motion, and dried appearance. The v0.3 fluid-action approval remains provisional and should be rechecked for accidental visual regression.
+
+### 2026-08-18 — Dry-brush review and v0.5 contact correction (`WC-LAB-1787097983799`)
+
+- Artist rating: **Recognizable**; decision: **Recalibrate**.
+- Review conditions: pigment load `1.00`, brush water `0.00`, paper dampness `0.00`, pressure `0.55`, speed `1.00`, diagnostic visibility `12.00`.
+- Rejected behavior: those settings failed to produce a convincing dry-brush mark with tooth-catching and broken deposition.
+- Root cause: the contact calculation added hidden carrier at zero brush water and treated all watercolor pigment as mobile suspension.
+- Correction: zero water now means zero delivered carrier. Brush moisture and existing paper moisture continuously blend tooth-controlled direct deposition into mobile wet transfer.
+- Pressure consequence: greater pressure progressively reaches more paper valleys; low and moderate pressure leave more broken contact.
+- Automated guardrails: dry contact adds no carrier, deposits pigment directly, covers less paper than a wet wash, gains mobility continuously with moisture, and deposits more material under greater pressure.
+- Validation status: **artist review required** across at least dry `0.00`, damp `0.35`, and wet `1.00` brush-water settings. Preserve the previously approved full-wet fluid action.

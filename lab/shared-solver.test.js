@@ -28,6 +28,21 @@ const cleanWaterState=cleanWater.metrics();
 assert(cleanWaterState.water>0,'clean-water gesture must deposit carrier');
 assert(cleanWaterState.mobile_pigment===0&&cleanWaterState.deposited_pigment===0,'clean-water gesture must not invent pigment');
 
+const dryBrush=new SharedSolver(48,24,PROFILES.watercolor),dampBrush=new SharedSolver(48,24,PROFILES.watercolor),wetBrush=new SharedSolver(48,24,PROFILES.watercolor);
+dryBrush.depositSegment(20,30,100,30,120,60,.55,1,0,1);
+dampBrush.depositSegment(20,30,100,30,120,60,.55,1,.35,1);
+wetBrush.depositSegment(20,30,100,30,120,60,.55,1,1,1);
+const dryBrushState=dryBrush.metrics(),dampBrushState=dampBrush.metrics(),wetBrushState=wetBrush.metrics();
+assert(dryBrushState.water===0,'zero brush water on dry paper must not add hidden carrier');
+assert(dryBrushState.mobile_pigment===0&&dryBrushState.deposited_pigment>0,'dry watercolor contact must deposit pigment directly onto paper tooth');
+assert(dryBrushState.pigment_area_fraction<wetBrushState.pigment_area_fraction,'dry watercolor must skip more paper than a wet wash');
+assert(dampBrushState.mobile_pigment>dryBrushState.mobile_pigment&&wetBrushState.mobile_pigment>dampBrushState.mobile_pigment,'pigment mobility must increase continuously with brush moisture');
+
+const lightDryBrush=new SharedSolver(48,24,PROFILES.watercolor),heavyDryBrush=new SharedSolver(48,24,PROFILES.watercolor);
+lightDryBrush.depositSegment(20,30,100,30,120,60,.2,1,0,1);
+heavyDryBrush.depositSegment(20,30,100,30,120,60,.9,1,0,1);
+assert(heavyDryBrush.metrics().deposited_pigment>lightDryBrush.metrics().deposited_pigment,'pressure must increase dry-brush contact and deposition');
+
 const prewet=new SharedSolver(48,24,PROFILES.watercolor);
 prewet.clear(.8);
 assert(prewet.metrics().wet_area_fraction===1,'paper dampness must prepare the full substrate');

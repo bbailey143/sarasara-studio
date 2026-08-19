@@ -16,6 +16,8 @@ The lab exposes pigment load, brush water, and initial paper dampness separately
 
 The pigment-load control represents pigment available at the applicator contact. Its mapping to deposited mass is state-aware: a suspension and a dry powder use the same contact model but different available-mass scales. This keeps watercolor concentration adjustable without changing carrier delivery or altering the already reviewed charcoal profile.
 
+Watercolor contact is continuous across moisture levels. Brush moisture and existing paper moisture combine into one contact-wetness value. At its dry end, surface tooth and pressure determine which cells receive directly deposited pigment; as moisture increases, the same contact progressively becomes continuous and transfers more pigment into the mobile suspension. There is no named dry-brush mode or hidden carrier at zero brush water.
+
 ## Canonical property inputs
 
 The profiles in `shared-solver.js` use canonical IDs from `PROPERTY_REGISTRY.yaml`:

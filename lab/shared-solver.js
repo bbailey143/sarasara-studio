@@ -6,7 +6,7 @@
 
   const PROFILES={
     watercolor:{
-      id:'material.watercolor.diagnostic.v0.4',version:'0.4.0',
+      id:'material.watercolor.diagnostic.v0.5',version:'0.5.0',
       state:{'COMP-001':.88,'COMP-003':.12,'STATE-001':'suspension','TRAN-001':.48,'TRAN-002':.055,'DEPO-001':.74,'SUBI-001':.28,'SUBI-003':.64,'EVOL-001':.0032,'EVOL-003':.016,'REAC-001':.22,'REAC-002':.58,'REAC-003':.18,'REAC-004':.025},
       display:{pigment_visibility_gain:2.6,note:'Diagnostic preview gain only; does not alter physical pigment mass.'},
       models:MODELS,provenance:[{status:'stand-in',note:'Artist-calibrated diagnostic values; not measured production constants.'}]
@@ -31,7 +31,7 @@
     setDisplayGain(value){this.displayGain=Math.max(1,Math.min(12,Number(value)||1))}
     clear(substrateDampness=0){const initialWater=this.p['COMP-001']>.02?Math.max(0,Math.min(1,substrateDampness))*.12:0;this.water.fill(initialWater);this.mobile.fill(0);this.deposited.fill(0);this.absorbed.fill(0);this.initialPigment=0;this.lostPigment=0;this.dryBoost=1;this.elapsed=0}
     tooth(x,y){return Math.max(0,Math.min(1,(Math.sin(x*.73+y*1.31)+Math.sin(x*.19-y*.41)+2)/4))}
-    addDisk(cx,cy,radius,water,pigment,pressure,speed){
+    addDisk(cx,cy,radius,water,pigment,pressure,speed,brushMoisture){
       const dry=this.p['COMP-001']<.02,rough=this.p['SUBI-001'];
       let addedPigment=0;
       const x0=Math.max(0,Math.floor(cx-radius)),x1=Math.min(this.w-1,Math.ceil(cx+radius)),y0=Math.max(0,Math.floor(cy-radius)),y1=Math.min(this.h-1,Math.ceil(cy+radius));
@@ -39,15 +39,20 @@
         const dx=(x-cx)/radius,dy=(y-cy)/radius,q=dx*dx+dy*dy;if(q>1)continue;
         const k=(1-q)*this.p['DEPO-001'],i=y*this.w+x;
         if(dry){const tooth=this.tooth(x,y),contact=tooth*.72+pressure*.48;if(contact<.34||(speed>1.05&&contact<.58&&((x+y)%3===0)))continue;const amount=pigment*k*(.35+rough*tooth);this.deposited[i]+=amount;addedPigment+=amount}
-        else{const amount=pigment*k;this.water[i]=Math.min(2.5,this.water[i]+water*k);this.mobile[i]+=amount;addedPigment+=amount}
+        else{
+          const tooth=this.tooth(x,y),paperMoisture=Math.max(0,Math.min(1,this.water[i]/.12)),contactWetness=1-(1-brushMoisture)*(1-paperMoisture),dryShare=Math.pow(1-contactWetness,1.35);
+          const toothContact=Math.max(0,Math.min(1,(tooth+pressure*.45-.5)/.45)),speedContact=Math.max(.35,Math.min(1,1.08-Math.max(0,speed-.4)*.12+pressure*.08)),contact=(1-dryShare)+dryShare*toothContact*speedContact;
+          const amount=pigment*k*contact,mobileAmount=amount*contactWetness;
+          this.water[i]=Math.min(2.5,this.water[i]+water*k);this.mobile[i]+=mobileAmount;this.deposited[i]+=amount-mobileAmount;addedPigment+=amount;
+        }
       }
       this.initialPigment+=addedPigment;
     }
     depositSegment(ax,ay,bx,by,canvasW,canvasH,pressure,pigmentLoad,brushWater,speed){
       const sx=this.w/canvasW,sy=this.h/canvasH,x0=ax*sx,y0=ay*sy,x1=bx*sx,y1=by*sy,d=Math.hypot(x1-x0,y1-y0),steps=Math.max(1,Math.ceil(d/.65));
-      const carrier=this.p['COMP-001'],pigmentFraction=this.p['COMP-003'],radius=(1.2+pressure*2.6+brushWater*1.8),water=(.02+brushWater*.34)*carrier;
+      const carrier=this.p['COMP-001'],pigmentFraction=this.p['COMP-003'],radius=(1.2+pressure*2.6+brushWater*1.8),water=brushWater*.36*carrier;
       const availablePigment=carrier>.02?(.05+pressure*.16)*pigmentFraction:(.012+pressure*.04)*(pigmentFraction||1),pigment=availablePigment*pigmentLoad;
-      for(let s=0;s<=steps;s++){const t=s/steps;this.addDisk(x0+(x1-x0)*t,y0+(y1-y0)*t,radius,water,pigment,pressure,speed)}
+      for(let s=0;s<=steps;s++){const t=s/steps;this.addDisk(x0+(x1-x0)*t,y0+(y1-y0)*t,radius,water,pigment,pressure,speed,brushWater)}
     }
     step(dt){
       this.elapsed+=dt;const wet=this.p['COMP-001']>.02;if(!wet)return;
