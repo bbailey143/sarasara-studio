@@ -4,10 +4,10 @@ Charcoal calibration must preserve the difference between the source tool, detac
 
 | Parameter or relationship | Evidence source | Current status | Next action |
 | --- | --- | --- | --- |
-| Tooth capture versus pressure | Matched gestures on smooth and toothy substrates | Fine-Tooth automated height-band relationship verified; artist pending | Compare light and firm marks on Fine-Tooth Drawing Paper. |
+| Tooth capture versus pressure | Matched gestures on smooth and toothy substrates | Sample-guided pastel-paper height-band relationship verified; artist pending | Compare light and firm marks on Pastel Paper — White. |
 | Coarse/fine particle breakup | Material-specific particle evidence | Seed only | Measure or bound the size populations. |
 | Dusting versus main deposition | Controlled loading and speed scene | Unmeasured | Track detached particle mass separately. |
-| Smudge relocation | Automated source/destination ledger plus artist gesture review | v0.4 artist accepted for smudge motion on Plain White and Rough Watercolor Paper | Preserve the accepted motion on Fine-Tooth Drawing Paper. |
+| Smudge relocation | Automated source/destination ledger plus artist gesture review | v0.4 artist accepted for smudge motion on Plain White and Rough Watercolor Paper | Preserve the accepted motion on sample-guided Pastel Paper. |
 | Lift response | Adhesion/cohesion and artist review | Pending prototype | Test gentle lift, hard lift, and repeated lift. |
 | Burnishing rejection | Repeated pressure scene | Pending prototype | Record packing, optical change, and fresh capture reduction. |
 | Failure envelope | Artist review | Pending prototype | Include broken deposition, dusting, and over-burnished rejection. |
@@ -75,3 +75,13 @@ Each accepted calibration note should record material recipe, substrate, environ
 - Architecture decision: do not tune the watercolor Rough profile until it serves charcoal. Add an independent experimental **Fine-Tooth Drawing Paper** substrate with smaller, shallower, more frequent grain and leave the shared material/contact system unchanged.
 - Automated evidence on Fine-Tooth: its peak-to-valley range is lower than Rough Watercolor Paper; its grain changes direction more frequently; light contact favors raised fibers; firmer contact increases deposition in valleys; smudge conservation and settling checks still pass.
 - Artist status: **required**. Those checks establish the intended relationships, not whether the sheet looks like drawing paper or makes charcoal feel right.
+
+### 2026-08-18 — Artist-supplied Pastel White and Light Cream references
+
+- The artist supplied two 5100 × 5100 pastel-paper samples after the generic Fine-Tooth v0.1 checkpoint.
+- Visual reading: both show quiet, dense, irregular fibers with shallow apparent relief and none of the large rounded terrain seen in Rough Watercolor Paper.
+- Measured appearance: Pastel White sampled mean RGB `238.10 / 237.95 / 237.01`, luminance spread `8.81`; Pastel Light Cream sampled mean RGB `238.08 / 234.95 / 223.03`, luminance spread `10.30`.
+- Implementation response: replace the unreviewed generic Fine-Tooth selector with sibling **Pastel Paper — White** and **Pastel Paper — Light Cream** profiles. Both share identical physical state and deterministic fiber tooth. Only base color and subtle visible-fiber contrast differ.
+- Architecture status: the samples calibrate an independent substrate pattern; they do not create charcoal-only contact equations. A photograph supplies appearance evidence, not measured height or friction.
+- Automated evidence: pastel relief is much shallower than Rough Watercolor Paper, grain is more frequent, both colors have identical tooth, light contact favors raised fibers, firm contact reaches more shallow gaps, and smudge/conservation checks still pass.
+- Artist status: **required** for visible scale, contact feel, pressure progression, and whether either ground supports believable charcoal gesture.

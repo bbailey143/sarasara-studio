@@ -12,15 +12,15 @@ assert(SUBSTRATES.rough.texture.tooth===.85&&SUBSTRATES.coldPress.texture.capaci
 assert(SUBSTRATES.rough.version==='0.2.0','corrected paper scale must remain versioned for artist review history');
 
 const plainTexture=new SharedSolver(48,24,PROFILES.charcoal,SUBSTRATES.plain),roughTexture=new SharedSolver(48,24,PROFILES.charcoal,SUBSTRATES.rough);
-const fineTexture=new SharedSolver(48,24,PROFILES.charcoal,SUBSTRATES.fineTooth);let plainMin=1,plainMax=0,roughMin=1,roughMax=0,fineMin=1,fineMax=0;for(let y=0;y<24;y++)for(let x=0;x<48;x++){const p=plainTexture.tooth(x,y),r=roughTexture.tooth(x,y),f=fineTexture.tooth(x,y);plainMin=Math.min(plainMin,p);plainMax=Math.max(plainMax,p);roughMin=Math.min(roughMin,r);roughMax=Math.max(roughMax,r);fineMin=Math.min(fineMin,f);fineMax=Math.max(fineMax,f)}
+const pastelTexture=new SharedSolver(48,24,PROFILES.charcoal,SUBSTRATES.pastelWhite),creamTexture=new SharedSolver(48,24,PROFILES.charcoal,SUBSTRATES.pastelCream);let plainMin=1,plainMax=0,roughMin=1,roughMax=0,pastelMin=1,pastelMax=0;for(let y=0;y<24;y++)for(let x=0;x<48;x++){const p=plainTexture.tooth(x,y),r=roughTexture.tooth(x,y),f=pastelTexture.tooth(x,y);plainMin=Math.min(plainMin,p);plainMax=Math.max(plainMax,p);roughMin=Math.min(roughMin,r);roughMax=Math.max(roughMax,r);pastelMin=Math.min(pastelMin,f);pastelMax=Math.max(pastelMax,f);assert(Math.abs(f-creamTexture.tooth(x,y))<.000001,'pastel paper color variants must share identical physical tooth')}
 assert(plainMax-plainMin<.0001,'plain paper must have a flat contact surface');
 assert(roughMax-roughMin>.35,'rough paper must expose meaningful peaks and valleys');
-assert(fineMax-fineMin<(roughMax-roughMin)*.75,'fine-tooth drawing paper must have shallower relief than rough watercolor paper');
+assert(pastelMax-pastelMin<(roughMax-roughMin)*.45,'sample-guided pastel paper must have much shallower relief than rough watercolor paper');
 const toothCrossings=substrate=>{const solver=new SharedSolver(300,130,PROFILES.charcoal,substrate);let crossings=0,last=solver.tooth(0,65)-.5;for(let x=1;x<300;x++){const value=solver.tooth(x,65)-.5;if(value*last<0)crossings++;if(value!==0)last=value}return crossings};
 const hotCrossings=toothCrossings(SUBSTRATES.hotPress),roughCrossings=toothCrossings(SUBSTRATES.rough);
 assert(roughCrossings>=25,'rough paper must use fine tooth rather than a few zoomed-in terrain ridges');
 assert(roughCrossings>hotCrossings*2,'the archived inverse grain scale must make Rough finer-grained than Hot Press');
-assert(toothCrossings(SUBSTRATES.fineTooth)>roughCrossings,'fine-tooth drawing paper must use smaller, more frequent grain than rough watercolor paper');
+assert(toothCrossings(SUBSTRATES.pastelWhite)>roughCrossings,'sample-guided pastel paper must use smaller, more frequent grain than rough watercolor paper');
 
 const roughLight=new SharedSolver(48,24,PROFILES.charcoal,SUBSTRATES.rough),roughFirm=new SharedSolver(48,24,PROFILES.charcoal,SUBSTRATES.rough);
 for(let y=5;y<60;y+=5){roughLight.depositSegment(5,y,115,y,120,60,.2,.8,0,1.25);roughFirm.depositSegment(5,y,115,y,120,60,.85,.8,0,1.25)}
@@ -30,10 +30,10 @@ const lightPeak=toothBandAverage(roughLight,.62,1.01),lightValley=toothBandAvera
 assert(lightPeak>lightValley,'light charcoal contact must favor raised rough-paper tooth over valleys');
 assert(firmValley>lightValley,'greater pressure must progressively increase charcoal captured in rough-paper valleys (light '+lightValley+', firm '+firmValley+')');
 
-const fineLight=new SharedSolver(48,24,PROFILES.charcoal,SUBSTRATES.fineTooth),fineFirm=new SharedSolver(48,24,PROFILES.charcoal,SUBSTRATES.fineTooth);for(let y=5;y<60;y+=5){fineLight.depositSegment(5,y,115,y,120,60,.2,.8,0,1.25);fineFirm.depositSegment(5,y,115,y,120,60,.85,.8,0,1.25)}
-const fineLightPeak=toothBandAverage(fineLight,.58,1.01),fineLightValley=toothBandAverage(fineLight,0,.42),fineFirmValley=toothBandAverage(fineFirm,0,.42);
-assert(fineLightPeak>fineLightValley,'light charcoal must still favor the small peaks of fine-tooth drawing paper');
-assert(fineFirmValley>fineLightValley,'firm charcoal must reach more shallow valleys on fine-tooth drawing paper');
+const pastelLight=new SharedSolver(48,24,PROFILES.charcoal,SUBSTRATES.pastelWhite),pastelFirm=new SharedSolver(48,24,PROFILES.charcoal,SUBSTRATES.pastelWhite);for(let y=0;y<24;y+=2){pastelLight.depositSegment(0,y,48,y,48,24,.2,.8,0,.8);pastelFirm.depositSegment(0,y,48,y,48,24,.85,.8,0,.8)}
+const pastelLightPeak=toothBandAverage(pastelLight,.515,1.01),pastelLightValley=toothBandAverage(pastelLight,0,.485),pastelFirmValley=toothBandAverage(pastelFirm,0,.485);
+assert(pastelLightPeak>pastelLightValley,'light charcoal must still favor the small raised fibers of pastel paper');
+assert(pastelFirmValley>pastelLightValley,'firm charcoal must reach more shallow valleys on pastel paper');
 
 const hotUptake=new SharedSolver(48,24,PROFILES.watercolor,SUBSTRATES.hotPress),roughUptake=new SharedSolver(48,24,PROFILES.watercolor,SUBSTRATES.rough);
 hotUptake.depositSegment(30,30,90,30,120,60,.55,.7,.7,.8);roughUptake.depositSegment(30,30,90,30,120,60,.55,.7,.7,.8);for(let i=0;i<120;i++){hotUptake.step(1/60);roughUptake.step(1/60)}
@@ -123,7 +123,7 @@ assert(dryState.pigment_conservation_error<.01,'charcoal deposition must remain 
 
 const surfaceInRect=(solver,x0,y0,x1,y1)=>{let total=0;for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){const i=y*solver.w+x;total+=solver.deposited[i]+solver.loose[i]}return total};
 const looseCentroidX=solver=>{let mass=0,moment=0;for(let i=0;i<solver.n;i++){mass+=solver.loose[i];moment+=(i%solver.w)*solver.loose[i]}return mass?moment/mass:0};
-const smudged=new SharedSolver(120,60,PROFILES.charcoal,SUBSTRATES.fineTooth);
+const smudged=new SharedSolver(120,60,PROFILES.charcoal,SUBSTRATES.pastelWhite);
 smudged.depositSegment(40,15,40,45,120,60,.75,.9,0,.8);
 const sourceBefore=surfaceInRect(smudged,35,10,43,50),destinationBefore=surfaceInRect(smudged,43,10,53,50),initialBeforeSmudge=smudged.initialPigment,totalBeforeSmudge=smudged.metrics().deposited_pigment;
 const moved=smudged.smudgeSegment(35,30,68,30,120,60,.65,1);
@@ -144,10 +144,10 @@ assert(settledState.loose_pigment<looseImmediately*.2,'loose particles must lose
 assert(settledState.deposited_pigment>settledImmediately,'settling must return loose particles to the deposited state');
 assert(settledState.pigment_conservation_error<.01,'post-contact motion and settling must conserve pigment');
 
-const smudgeMovedAtPressure=pressure=>{const solver=new SharedSolver(120,60,PROFILES.charcoal,SUBSTRATES.fineTooth);solver.depositSegment(40,15,40,45,120,60,.75,.9,0,.8);return solver.smudgeSegment(35,30,68,30,120,60,pressure,.8)};
+const smudgeMovedAtPressure=pressure=>{const solver=new SharedSolver(120,60,PROFILES.charcoal,SUBSTRATES.pastelWhite);solver.depositSegment(40,15,40,45,120,60,.75,.9,0,.8);return solver.smudgeSegment(35,30,68,30,120,60,pressure,.8)};
 assert(smudgeMovedAtPressure(.75)>smudgeMovedAtPressure(.25),'firmer smudge contact must relocate more existing pigment than light contact');
 
-const blankSmudge=new SharedSolver(120,60,PROFILES.charcoal,SUBSTRATES.fineTooth);
+const blankSmudge=new SharedSolver(120,60,PROFILES.charcoal,SUBSTRATES.pastelWhite);
 blankSmudge.smudgeSegment(20,30,90,30,120,60,.8,1.2);
 const blankSmudgeState=blankSmudge.metrics();
 assert(blankSmudgeState.deposited_pigment===0&&blankSmudgeState.loose_pigment===0&&blankSmudgeState.relocated_pigment===0,'smudging blank paper must not create pigment');

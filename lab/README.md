@@ -17,9 +17,9 @@ The current lab uses a small property-driven shared solver rather than separate 
 
 ## Paper comparison checkpoint
 
-The paper selector contains four preserved archive seeds—Plain White, Hot Press, Cold Press, and Rough Watercolor Paper—plus an experimental Fine-Tooth Drawing Paper candidate. They are separate from the material choice and are not measured final papers.
+The paper selector contains four preserved archive seeds—Plain White, Hot Press, Cold Press, and Rough Watercolor Paper—plus sample-guided Pastel White and Pastel Light Cream candidates. They are separate from the material choice and are not measured final papers.
 
-For charcoal, use **Fine-Tooth Drawing Paper**. Make a steady light stroke at pressure `0.25`, then a matched firm stroke at `0.75`. Look for subtle, tiny paper gaps—not large hills—with the firm stroke progressively reaching more of the shallow valleys. Then make a dense mark and repeat the accepted smudge gesture. Judge whether the finer sheet preserves the loose-particle motion without turning the paper into visible terrain. Save the review; Fine-Tooth is still awaiting artist approval.
+For charcoal, use **Pastel Paper — White**. Make a steady light stroke at pressure `0.25`, then a matched firm stroke at `0.75`. Look for a quiet field of tiny fibers—not large hills—with the firm stroke progressively reaching more of the shallow spaces. Repeat on **Pastel Paper — Light Cream** and confirm only the ground color changes. Then make a dense mark and repeat the accepted smudge gesture. Save the reviews; both sample-guided papers still await artist approval.
 
 For watercolor, compare one matched damp stroke on **Hot Press**, **Cold Press**, and **Rough Watercolor Paper**. Judge the change in uptake, edge character, broken contact, and paper visibility—not which one is prettiest. Save each review so the mark, selected paper, settings, rating, and decision remain in history.
-The automated ledger passes CH-P-05's conservation requirements, and v0.4 smudge motion has limited artist acceptance. Fine-Tooth charcoal paper and the recovered watercolor paper profiles remain pending artist review.
+The automated ledger passes CH-P-05's conservation requirements, and v0.4 smudge motion has limited artist acceptance. The sample-guided pastel papers and recovered watercolor paper profiles remain pending artist review.

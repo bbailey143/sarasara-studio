@@ -35,3 +35,5 @@ v0.2 restores the inverse relationship and raises the diagnostic sampling densit
 The candidate has lower relief and smaller, more frequent grain than Rough Watercolor Paper. It still enters through the same independent substrate properties—roughness, permeability, capacity, texture sampling, and color—and does not create a charcoal-only engine path. Its provenance is explicitly `stand-in`.
 
 Automated checks verify relative relief, grain frequency, raised-fiber capture under light pressure, increased valley reach under firm pressure, and pigment conservation. Artist approval remains mandatory before this profile or CH-P-01 / CH-P-02 can be treated as canonical.
+
+This generic v0.1 candidate was superseded before artist review when the artist supplied Pastel White and Pastel Light Cream visual samples. The replacement evidence and mapping are recorded in `PASTEL_PAPER_SAMPLES.md`; the original entry remains here as correction history rather than being erased.

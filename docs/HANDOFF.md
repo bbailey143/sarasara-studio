@@ -80,7 +80,7 @@ The user should be able to start another AI with one sentence:
 
 - This foundation has no package install or production build yet. The lab is dependency-free HTML and JavaScript.
 - Verified command: `node lab/shared-solver.test.js`
-- Verified result on 2026-08-18 after the Fine-Tooth candidate was added: `shared solver checks passed`, including material/substrate separation, lower Fine-Tooth relief than Rough Watercolor Paper, finer grain frequency, peak/valley capture, pressure-driven valley reach, Hot Press versus Rough uptake, smudge momentum/settling, blank-paper behavior, and conservation assertions.
+- Verified result on 2026-08-18 after the pastel samples were mapped: `shared solver checks passed`, including material/substrate separation, identical physical tooth for White/Cream, much lower Pastel relief than Rough Watercolor Paper, finer fiber frequency, peak/gap capture, pressure-driven gap reach, Hot Press versus Rough uptake, smudge momentum/settling, blank-paper behavior, and conservation assertions.
 - Verified command: `git diff --check`
 - Verified result on 2026-08-18 during the GitHub cleanup checkpoint: passed with no whitespace errors.
 - Verified the inline lab script parses, each required control ID occurs exactly once, and `smudgeSegment` contains no `watercolor` or `charcoal` branch. Live visual browser inspection remains pending as recorded below.
@@ -95,7 +95,7 @@ The user should be able to start another AI with one sentence:
 
 Prove that one shared, property-driven material architecture can describe and produce recognizable watercolor and charcoal without named-medium engines or hidden special cases. The current browser lab is a diagnostic instrument for that proof, not the production painting application.
 
-The validation-status reconciliation is complete. Gate 2 and Gate 3 are explicitly partial and remain open. Charcoal v0.4 smudge motion is artist-accepted for that limited scope on Plain White and Rough. Review `CH-LAB-1787107972495` confirmed that motion as Good while rejecting the archived Rough surface itself as ugly, overly dramatic, and fundamentally a watercolor paper. The next phase is artist validation of the independent experimental Fine-Tooth Drawing Paper candidate.
+The validation-status reconciliation is complete. Gate 2 and Gate 3 are explicitly partial and remain open. Charcoal v0.4 smudge motion is artist-accepted for that limited scope on Plain White and Rough. Review `CH-LAB-1787107972495` confirmed that motion as Good while rejecting the archived Rough surface itself as ugly, overly dramatic, and fundamentally a watercolor paper. The artist then supplied Pastel White and Pastel Light Cream samples; the next phase is artist validation of those sample-guided sibling substrates.
 
 ## What exists now
 
@@ -115,8 +115,9 @@ The validation-status reconciliation is complete. Gate 2 and Gate 3 are explicit
 - `lab/ARCHITECTURE.md` maps the solver to canonical properties and named models.
 - The solver begins from an abstract material state. `watercolor` and `charcoal` are profile selectors, not separate engines.
 - Current profiles are `material.watercolor.diagnostic.v0.6.1` and `material.charcoal.diagnostic.v0.4`. Watercolor v0.6.1 preserves the artist-reviewed v0.6 drawing constants and adds only stand-in friction/packing inputs for the shared smudge action; smudge itself is not artist-accepted for watercolor. Charcoal v0.4 adds transient loose-particle momentum and settling without a named-medium engine branch.
-- Paper is now a separate participant selected independently from material. The lab offers archive-seeded Plain White, Hot Press, Cold Press, and Rough Watercolor Paper v0.2 profiles plus experimental Fine-Tooth Drawing Paper v0.1; saved reviews record the selected substrate ID, name, and provenance.
-- The archive contains no separately named charcoal/pastel paper. Artist review rejected using its Rough watercolor preset as the charcoal evaluation sheet, so charcoal now selects Fine-Tooth by default. This UI default does not change material physics or create a named-medium engine branch.
+- Paper is now a separate participant selected independently from material. The lab offers archive-seeded Plain White, Hot Press, Cold Press, and Rough Watercolor Paper plus reference-derived experimental Pastel Paper — White and Light Cream; saved reviews record the selected substrate ID, name, and provenance.
+- The commercial 5100 × 5100 samples are not copied into the repository. Their measured base color, low contrast, and visible fiber scale guide the procedural profiles; physical height/friction remain stand-ins. White and Cream share exactly the same physical tooth, so color cannot alter charcoal behavior.
+- The archive contains no separately named charcoal/pastel paper. Charcoal now selects Pastel Paper — White by default. This UI default does not change material physics or create a named-medium engine branch.
 - `docs/reference/material-studies/PAPER_SUBSTRATE_EXTRACT.md` records the exact archived paper values and the provisional canonical mapping.
 - Saved reviews include the mark image, settings, profile/model information, measurements, rating, notes, and decision so historical comparisons can be made.
 - Pressure and speed remain available under the collapsed Gesture diagnostics because they are test inputs, not primary material controls.
@@ -173,7 +174,7 @@ Still open for watercolor:
 - Latest settings: smudge, pressure `1.00`, speed `1.00`, diagnostic visibility `1.00`. Measurements: pigment area `26.00%`, deposited pigment `2992.55`, cumulative relocated pigment `5991.20`, conservation error `0.00032%`.
 - Artist conclusion: charcoal movement still looked good, but the paper remained ugly and too dramatic; the artist correctly identified Rough as a watercolor-oriented preset.
 - Correction: fixing the inverted archived grain scale was necessary but did not make Rough suitable for charcoal. Do not keep tuning that wet-media paper toward dry-media needs.
-- Fine-Tooth Drawing Paper v0.1 is a new stand-in with lower relief and smaller, more frequent grain. Automated relationships pass; no artist acceptance exists yet.
+- Generic Fine-Tooth v0.1 was superseded before artist review. Sample-guided Pastel White/Cream v0.2 use identical fibrous tooth with different ground colors. Automated relationships pass; no artist acceptance exists yet.
 - Still required: artist acceptance of paper tooth and pressure progression, coarse/fine fracture populations, bounded dusting, lift, burnishing/rejection, and a continuous failure range.
 - Every visible charcoal conclusion requires artist review, with saved marks and settings.
 
@@ -186,22 +187,23 @@ Still open for watercolor:
 
 ## NEXT ACTION — start here
 
-Artist-validate **Fine-Tooth Drawing Paper v0.1** and CH-P-01 / CH-P-02 in `lab/diagnostic-lab.html`. This is the smallest next action because the shared pressure/tooth relationships are automated, but only an artist can decide whether the new surface looks and feels like drawing paper.
+Artist-validate **Pastel Paper — White / Light Cream v0.2** and CH-P-01 / CH-P-02 in `lab/diagnostic-lab.html`. This is the smallest next action because the shared pressure/tooth relationships are automated, but only an artist can decide whether the sample-guided surface looks and feels like pastel paper.
 
-1. Refresh the lab, choose **Charcoal**, and confirm Paper automatically changes to **Fine-Tooth Drawing Paper**. Choose **Draw material** and clear the surface.
+1. Refresh the lab, choose **Charcoal**, and confirm Paper automatically changes to **Pastel Paper — White**. Choose **Draw material** and clear the surface.
 2. Set pigment load `0.70`, speed `1.00`, pressure `0.25`, and diagnostic visibility `1.00`. Draw several steady strokes.
-3. Judge scale before darkness: tooth should appear as subtle, tiny interruptions rather than visible hills. Light contact should favor raised fibers and leave fine, believable gaps. Save a rated review.
-4. Keep every setting fixed except pressure `0.75`, clear, and repeat. Firmer contact should progressively fill more shallow valleys without becoming a uniformly enlarged stamp. Save a second review.
-5. Make a dense mark, switch to **Smudge existing material**, and push across it. Confirm the already accepted loose-particle motion survives on the finer sheet. Save a review if the paper changes that feel.
-6. Send the exported `CH-LAB-*.json` records. Import them into `docs/validation/charcoal/artist_review.md` and `calibration_notes.md` before changing CH-P-01 or CH-P-02 status.
+3. Judge scale before darkness: the untouched sheet should read as quiet tiny fibers rather than visible hills. Light contact should favor raised fibers and leave fine, believable gaps. Save a rated review.
+4. Keep every setting fixed except pressure `0.75`, clear, and repeat. Firmer contact should progressively fill more shallow spaces without becoming a uniformly enlarged stamp. Save a second review.
+5. Switch only Paper to **Pastel Paper — Light Cream**, clear, and repeat one matched stroke. The ground color should change while tooth and charcoal response remain the same. Save if the appearance affects the verdict.
+6. Make a dense mark, switch to **Smudge existing material**, and push across it. Confirm the already accepted loose-particle motion survives on the fibrous sheet.
+7. Send the exported `CH-LAB-*.json` records. Import them into `docs/validation/charcoal/artist_review.md` and `calibration_notes.md` before changing CH-P-01 or CH-P-02 status.
 
-**Success condition:** Fine-Tooth reads as fine drawing-paper texture; light pressure catches tiny peaks, firm pressure reaches more shallow valleys continuously, and accepted smudge motion survives.
+**Success condition:** the papers resemble the supplied fine fibrous samples rather than terrain; light pressure catches tiny fibers, firm pressure reaches more shallow gaps continuously, White/Cream differ only in tone, and accepted smudge motion survives.
 
-**Outcome rule:** `Accept` advances to CH-P-03 / CH-P-04 fracture and bounded dusting. `Recalibrate` changes only the independent Fine-Tooth substrate values and repeats the matched review. `Revise model` means the shared paper/contact relationship is systematically wrong; do not add a charcoal-only paper effect.
+**Outcome rule:** `Accept` advances to CH-P-03 / CH-P-04 fracture and bounded dusting. `Recalibrate` changes only the independent Pastel Paper substrate values and repeats the matched review. `Revise model` means the shared paper/contact relationship is systematically wrong; do not add a charcoal-only paper effect.
 
 ## IN FLIGHT
 
-- Nothing. Fine-Tooth implementation and documentation are complete and published; artist review is the next new task, not half-finished implementation work.
+- Sample-guided Pastel Paper implementation and documentation are complete locally and automated checks pass. Artist review is the next new task. Verify Git publication before claiming this checkpoint is pushed.
 
 ## Recently completed
 
@@ -230,11 +232,13 @@ Artist-validate **Fine-Tooth Drawing Paper v0.1** and CH-P-01 / CH-P-02 in `lab/
 - Imported `CH-LAB-1787107972495`: charcoal v0.4 smudge was **Good / Accept for motion**, while Rough v0.2 was rejected as the charcoal paper. Recorded pigment area `26.00%`, deposited `2992.55`, relocated `5991.20`, conservation error `0.00032%`.
 - Renamed the preserved Rough profile **Rough Watercolor Paper** and added independent **Fine-Tooth Drawing Paper v0.1** as an explicitly experimental stand-in. Charcoal selects Fine-Tooth by default without changing shared contact physics.
 - Added automated checks that Fine-Tooth relief is lower than Rough Watercolor Paper, grain is more frequent, light pressure favors peaks, firm pressure reaches valleys, and smudge/conservation behavior remains intact.
+- Superseded unreviewed Fine-Tooth v0.1 with sample-guided Pastel White and Light Cream v0.2 profiles. Sampled RGB/luminance evidence is recorded in `docs/reference/material-studies/PASTEL_PAPER_SAMPLES.md`; source JPEGs are not shipped.
+- White/Cream share identical physical tooth. On the 300 × 130 diagnostic field, Pastel relief range is `0.15663` with `105` midline crossings versus Rough's `1.0` range and `39` crossings. Automated pressure, smudge, blank-paper, and conservation checks pass. `[1 RUN ONLY]`
 
 ## Blocked and open questions
 
-- Artist judgment of Fine-Tooth appearance and contact feel is pending. Automated height bands cannot determine whether it looks like drawing paper, feels appropriate for charcoal, or preserves expressive gesture.
-- Fine-Tooth is artist-directed but not measured. Its current values are diagnostic stand-ins, and acceptance may require recalibration.
+- Artist judgment of the sample-guided Pastel Paper appearance and contact feel is pending. Automated height bands cannot determine whether it resembles the supplied samples, feels appropriate for charcoal, or preserves expressive gesture.
+- The photographs provide color and visible-pattern evidence, not surface-height or friction measurements. Those values remain diagnostic stand-ins and may require recalibration.
 - The archive paper numbers are application presets, not scientific measurements. Their canonical `TRAN-002` mapping is explicitly a normalized diagnostic stand-in.
 - Small particle flicks require a physically bounded detached-particle population and mass ledger in CH-P-03/CH-P-04; no such state exists yet.
 - Live in-app browser inspection could not be completed in the implementation environment; page syntax, control structure, and solver behavior were checked, but the artist must refresh and inspect the actual lab.
