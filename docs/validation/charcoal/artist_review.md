@@ -50,3 +50,15 @@ ______________________________________________________________________________
 **Which believable failure was missing or overdone?**
 
 ______________________________________________________________________________
+
+## Recorded review — CH-LAB-1787103913509
+
+- **Date:** 2026-08-18
+- **Prototype/build:** `material.charcoal.diagnostic.v0.3`
+- **Action:** Smudge existing material
+- **Settings:** pressure `0.25`, speed `0.80`, pigment load `1.00`; the saved inactive brush-water and paper-dampness values were `0.75` and `0.25`.
+- **Rating:** **Good**
+- **Decision:** **Recalibrate**
+- **Saved evidence:** pigment area `17.24%`, deposited pigment `5108.84`, cumulative relocated pigment `5567.64`, conservation error below `0.001%`.
+
+The artist recognized the sense of pushing dense particles, but the movement also felt like putty because everything stopped as soon as the smudge gesture stopped. A believable pass should form a small loose ridge beneath and ahead of the contact, allow that ridge to retain a little forward movement after the hand lifts, then lose energy and settle. This review does **not** accept CH-P-05; it requires another artist pass on the recalibrated behavior.

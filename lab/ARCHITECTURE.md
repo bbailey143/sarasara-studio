@@ -9,6 +9,7 @@ Each substrate cell stores:
 - mobile carrier;
 - mobile pigment;
 - deposited pigment;
+- loose surface pigment with short-lived velocity;
 - carrier held as paper saturation, separately from mobile surface water;
 - deterministic surface tooth.
 
@@ -24,7 +25,7 @@ The v0.6 damp interval follows relationships recovered from the archived waterco
 
 The shared solver begins from a deliberately abstract material state, not from watercolor. Profiles supply phase, composition, transport, deposition, substrate interaction, evolution, and reactivation values. The same contact and state-update functions then derive behavior from those values. A medium name is only a convenient profile selector in this lab; it is not permission to invoke a private medium engine or effect.
 
-Smudging is a second action through that same shared contact system. It reads deposited material, kinetic friction, deposited packing, pressure, speed, and substrate roughness; then moves a bounded fraction along the gesture. It never calls the deposition path and never changes the initial-pigment ledger. The UI may request **Draw** or **Smudge**, but neither action branches on a named medium.
+Smudging is a second action through that same shared contact system. It reads deposited material, kinetic friction, deposited packing, pressure, speed, and substrate roughness; then lifts a bounded fraction into a loose surface-particle state. Those loose particles retain short-lived directional momentum, coast after contact ends, lose energy through friction and roughness, and settle back into the deposited state. It never calls the deposition path and never changes the initial-pigment ledger. The UI may request **Draw** or **Smudge**, but neither action branches on a named medium.
 
 ## Canonical property inputs
 
@@ -58,7 +59,7 @@ Profiles are validated before drawing. Their current values are explicitly label
 - evaporation uses `MODEL-EVOL-001`;
 - pigment settling is a time-scaled diagnostic approximation associated with `MODEL-PART-001`;
 - clean-water release uses `MODEL-REAC-001` and returns deposited pigment to the mobile state without adding pigment mass.
-- deposited-material smudging uses `MODEL-TRIB-001` and interaction `IM-009`; it conservatively relocates existing deposited pigment.
+- deposited-material smudging uses `MODEL-TRIB-001`, `MODEL-PART-001`, and interaction `IM-009`; it conservatively lifts, moves, and resettles existing surface pigment.
 
 Water movement is computed first. Pigment then follows that water flux according to the local pigment-to-water ratio, with only a small separate dispersion term. This keeps visible spreading tied to carrier movement instead of making pigment expand on its own.
 
@@ -66,4 +67,4 @@ Each saved review records the material profile, named models, named interactions
 
 ## Current limits
 
-This is a small CPU grid intended to expose behavior for review. It is not the production Rust/GPU solver. Spectral color, granulation, brush reservoirs, measured paper profiles, and artist-accepted clean-water blooms remain future work. The watercolor v0.6.1 patch preserves the accepted v0.6 drawing constants while adding stand-in friction/packing inputs for the shared smudge action. Charcoal v0.3 adds the same canonical inputs and conservative smudge transport. These smudge values are diagnostic stand-ins and require artist calibration. Any visible conclusion still requires artist approval.
+This is a small CPU grid intended to expose behavior for review. It is not the production Rust/GPU solver. Spectral color, granulation, brush reservoirs, measured paper profiles, and artist-accepted clean-water blooms remain future work. The watercolor v0.6.1 patch preserves the accepted v0.6 drawing constants while adding stand-in friction/packing inputs for the shared smudge action. Charcoal v0.4 adds short-lived loose-particle momentum and settling to that same shared transport. These smudge values are diagnostic stand-ins and require artist calibration. Any visible conclusion still requires artist approval.

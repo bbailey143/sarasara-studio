@@ -12,9 +12,9 @@
       models:MODELS,interactions:['IM-009'],provenance:[{status:'stand-in',note:'Artist-calibrated diagnostic values; not measured production constants.'}]
     },
     charcoal:{
-      id:'material.charcoal.diagnostic.v0.3',version:'0.3.0',
+      id:'material.charcoal.diagnostic.v0.4',version:'0.4.0',
       state:{'COMP-001':0,'COMP-003':1,'STATE-001':'powder','STATE-003':0,'TRAN-001':0,'TRAN-002':0,'DEPO-001':.68,'DEPO-004':.48,'SUBI-001':.82,'SUBI-003':.45,'TRIB-002':.58,'EVOL-001':0,'EVOL-003':0,'REAC-001':0,'REAC-002':0,'REAC-003':0,'REAC-004':1},
-      models:['MODEL-DEPO-001','MODEL-TRIB-001'],interactions:['IM-009'],provenance:[{status:'stand-in',note:'Artist-recognizable diagnostic profile; friction and packing require artist calibration.'}]
+      models:['MODEL-DEPO-001','MODEL-PART-001','MODEL-TRIB-001'],interactions:['IM-009'],provenance:[{status:'stand-in',note:'Artist-recognizable diagnostic profile; friction, packing, and loose-particle settling require artist calibration.'}]
     }
   };
 
@@ -27,9 +27,9 @@
 
   class SharedSolver{
     constructor(width,height,profile){this.w=width;this.h=height;this.n=width*height;this.surface=document.createElement('canvas');this.surface.width=width;this.surface.height=height;this.sctx=this.surface.getContext('2d');this.image=this.sctx.createImageData(width,height);this.setProfile(profile)}
-    setProfile(profile){this.profile=validateProfile(profile);this.p=profile.state;this.displayGain=profile.display?.pigment_visibility_gain||1;this.water=new Float32Array(this.n);this.mobile=new Float32Array(this.n);this.deposited=new Float32Array(this.n);this.absorbed=new Float32Array(this.n);this.nextWater=new Float32Array(this.n);this.nextMobile=new Float32Array(this.n);this.initialPigment=0;this.lostPigment=0;this.relocatedPigment=0;this.dryBoost=1;this.elapsed=0}
+    setProfile(profile){this.profile=validateProfile(profile);this.p=profile.state;this.displayGain=profile.display?.pigment_visibility_gain||1;this.water=new Float32Array(this.n);this.mobile=new Float32Array(this.n);this.deposited=new Float32Array(this.n);this.loose=new Float32Array(this.n);this.looseVx=new Float32Array(this.n);this.looseVy=new Float32Array(this.n);this.nextLoose=new Float32Array(this.n);this.nextLooseMx=new Float32Array(this.n);this.nextLooseMy=new Float32Array(this.n);this.absorbed=new Float32Array(this.n);this.nextWater=new Float32Array(this.n);this.nextMobile=new Float32Array(this.n);this.initialPigment=0;this.lostPigment=0;this.relocatedPigment=0;this.dryBoost=1;this.elapsed=0}
     setDisplayGain(value){this.displayGain=Math.max(1,Math.min(12,Number(value)||1))}
-    clear(substrateDampness=0){const saturation=this.p['COMP-001']>.02?Math.max(0,Math.min(1,substrateDampness))*this.p['SUBI-003']:0;this.water.fill(0);this.mobile.fill(0);this.deposited.fill(0);this.absorbed.fill(saturation);this.initialPigment=0;this.lostPigment=0;this.relocatedPigment=0;this.dryBoost=1;this.elapsed=0}
+    clear(substrateDampness=0){const saturation=this.p['COMP-001']>.02?Math.max(0,Math.min(1,substrateDampness))*this.p['SUBI-003']:0;this.water.fill(0);this.mobile.fill(0);this.deposited.fill(0);this.loose.fill(0);this.looseVx.fill(0);this.looseVy.fill(0);this.absorbed.fill(saturation);this.initialPigment=0;this.lostPigment=0;this.relocatedPigment=0;this.dryBoost=1;this.elapsed=0}
     tooth(x,y){return Math.max(0,Math.min(1,(Math.sin(x*.73+y*1.31)+Math.sin(x*.19-y*.41)+2)/4))}
     addDisk(cx,cy,radius,water,pigment,pressure,speed,brushMoisture){
       const dry=this.p['COMP-001']<.02,rough=this.p['SUBI-001'];
@@ -61,18 +61,31 @@
         const t=s/steps,cx=x0+dx*t,cy=y0+dy*t,xMin=Math.max(0,Math.floor(cx-radius)),xMax=Math.min(this.w-1,Math.ceil(cx+radius)),yMin=Math.max(0,Math.floor(cy-radius)),yMax=Math.min(this.h-1,Math.ceil(cy+radius));
         for(let y=yMin;y<=yMax;y++)for(let x=xMin;x<=xMax;x++){const q=((x-cx)*(x-cx)+(y-cy)*(y-cy))/(radius*radius);if(q>1)continue;const i=y*this.w+x;contact[i]=Math.max(contact[i],1-q)}
       }
-      const source=this.deposited.slice(),next=this.deposited.slice(),friction=this.p['TRIB-002'],packing=Math.max(0,Math.min(1,this.p['DEPO-004'])),roughness=this.p['SUBI-001'],sliding=Math.max(.1,Math.min(2,speed)),coupling=Math.min(.72,(.08+friction*.34)*(0.3+pressure*.7)*(.45+sliding*.38)*(1-packing*.55)),travel=1+Math.min(3,sliding*1.15+pressure*.85);
+      const source=this.deposited.slice(),next=this.deposited.slice(),friction=this.p['TRIB-002'],packing=Math.max(0,Math.min(1,this.p['DEPO-004'])),roughness=this.p['SUBI-001'],sliding=Math.max(.1,Math.min(2,speed)),coupling=Math.min(.72,(.08+friction*.34)*(0.3+pressure*.7)*(.45+sliding*.38)*(1-packing*.55)),travel=1+Math.min(3,sliding*1.15+pressure*.85),launchSpeed=2.4+sliding*3.2+pressure*1.4;
       let relocated=0;
       for(let i=0;i<this.n;i++){
         if(contact[i]<=0||source[i]<=0)continue;
         const x=i%this.w,y=Math.floor(i/this.w),toothHold=.65+.35*this.tooth(x,y)*roughness,amount=Math.min(source[i],source[i]*contact[i]*coupling/toothHold);if(amount<=0)continue;
         const tx=Math.max(0,Math.min(this.w-1,Math.round(x+ux*travel))),ty=Math.max(0,Math.min(this.h-1,Math.round(y+uy*travel))),px=-uy,py=ux,lx=Math.max(0,Math.min(this.w-1,Math.round(tx+px))),ly=Math.max(0,Math.min(this.h-1,Math.round(ty+py))),rx=Math.max(0,Math.min(this.w-1,Math.round(tx-px))),ry=Math.max(0,Math.min(this.h-1,Math.round(ty-py)));
-        next[i]-=amount;next[ty*this.w+tx]+=amount*.72;next[ly*this.w+lx]+=amount*.14;next[ry*this.w+rx]+=amount*.14;relocated+=amount;
+        next[i]-=amount;
+        const launch=(targetIndex,mass,sideBias)=>{const old=this.loose[targetIndex],combined=old+mass;if(combined<=0)return;this.looseVx[targetIndex]=(this.looseVx[targetIndex]*old+(ux*launchSpeed+px*sideBias)*mass)/combined;this.looseVy[targetIndex]=(this.looseVy[targetIndex]*old+(uy*launchSpeed+py*sideBias)*mass)/combined;this.loose[targetIndex]=combined};
+        launch(ty*this.w+tx,amount*.72,0);launch(ly*this.w+lx,amount*.14,.35);launch(ry*this.w+rx,amount*.14,-.35);relocated+=amount;
       }
       this.deposited.set(next);this.relocatedPigment+=relocated;return relocated;
     }
+    stepSurfaceParticles(dt){
+      const L=this.loose,VX=this.looseVx,VY=this.looseVy,NL=this.nextLoose,MX=this.nextLooseMx,MY=this.nextLooseMy,DP=this.deposited,w=this.w,h=this.h,friction=this.p['TRIB-002'],packing=Math.max(0,Math.min(1,this.p['DEPO-004'])),roughness=this.p['SUBI-001'];
+      NL.fill(0);MX.fill(0);MY.fill(0);const drag=Math.exp(-(1.15+friction*2.2+roughness*.8)*dt);
+      const add=(x,y,mass,vx,vy)=>{if(mass<=0)return;const i=y*w+x;NL[i]+=mass;MX[i]+=mass*vx;MY[i]+=mass*vy};
+      for(let i=0;i<this.n;i++){
+        const mass=L[i];if(mass<=0)continue;const speed=Math.hypot(VX[i],VY[i]),settleRate=.26+packing*.38+roughness*.2+Math.max(0,1-speed)*.42,settled=mass*Math.min(.12,settleRate*dt),moving=mass-settled;DP[i]+=settled;if(moving<=0)continue;
+        const vx=VX[i]*drag,vy=VY[i]*drag,x=i%w,y=Math.floor(i/w),nx=Math.max(0,Math.min(w-1,x+vx*dt)),ny=Math.max(0,Math.min(h-1,y+vy*dt)),x0=Math.floor(nx),y0=Math.floor(ny),x1=Math.min(w-1,x0+1),y1=Math.min(h-1,y0+1),fx=nx-x0,fy=ny-y0;
+        add(x0,y0,moving*(1-fx)*(1-fy),vx,vy);add(x1,y0,moving*fx*(1-fy),vx,vy);add(x0,y1,moving*(1-fx)*fy,vx,vy);add(x1,y1,moving*fx*fy,vx,vy);
+      }
+      for(let i=0;i<this.n;i++){L[i]=NL[i];if(NL[i]>0){VX[i]=MX[i]/NL[i];VY[i]=MY[i]/NL[i]}else{VX[i]=0;VY[i]=0}}
+    }
     step(dt){
-      this.elapsed+=dt;const wet=this.p['COMP-001']>.02;if(!wet)return;
+      this.elapsed+=dt;this.stepSurfaceParticles(dt);const wet=this.p['COMP-001']>.02;if(!wet)return;
       const D=this.p['TRAN-001'],uptake=this.p['TRAN-002']*this.p['SUBI-003'],evap=this.p['EVOL-001']*this.dryBoost*dt*2,settle=this.p['EVOL-003'],rewetRate=this.p['REAC-001'],releaseFraction=this.p['REAC-002'],redispersion=this.p['REAC-003'],reactivationThreshold=this.p['REAC-004'];
       const w=this.w,h=this.h,W=this.water,M=this.mobile,NW=this.nextWater,NM=this.nextMobile,DP=this.deposited,AB=this.absorbed;
       NW.set(W);NM.set(M);
@@ -90,11 +103,11 @@
       if(this.dryBoost>1)this.dryBoost=Math.max(1,this.dryBoost-dt*4);
     }
     dry(){this.dryBoost=35}
-    metrics(){let water=0,mobile=0,deposited=0,absorbed=0,wetCells=0,pigmentCells=0;for(let i=0;i<this.n;i++){water+=this.water[i];mobile+=this.mobile[i];deposited+=this.deposited[i];absorbed+=this.absorbed[i];if(this.water[i]>.008||this.absorbed[i]>.008)wetCells++;if(this.mobile[i]+this.deposited[i]>.0001)pigmentCells++}const pigment=mobile+deposited,error=this.initialPigment?Math.abs(this.initialPigment-pigment-this.lostPigment)/this.initialPigment:0;return{water,wet_area_fraction:wetCells/this.n,pigment_area_fraction:pigmentCells/this.n,mobile_pigment:mobile,deposited_pigment:deposited,absorbed_water:absorbed,relocated_pigment:this.relocatedPigment,pigment_conservation_error:error}}
+    metrics(){let water=0,mobile=0,deposited=0,loose=0,absorbed=0,wetCells=0,pigmentCells=0;for(let i=0;i<this.n;i++){water+=this.water[i];mobile+=this.mobile[i];deposited+=this.deposited[i];loose+=this.loose[i];absorbed+=this.absorbed[i];if(this.water[i]>.008||this.absorbed[i]>.008)wetCells++;if(this.mobile[i]+this.deposited[i]+this.loose[i]>.0001)pigmentCells++}const pigment=mobile+deposited+loose,error=this.initialPigment?Math.abs(this.initialPigment-pigment-this.lostPigment)/this.initialPigment:0;return{water,wet_area_fraction:wetCells/this.n,pigment_area_fraction:pigmentCells/this.n,mobile_pigment:mobile,deposited_pigment:deposited,loose_pigment:loose,absorbed_water:absorbed,relocated_pigment:this.relocatedPigment,pigment_conservation_error:error}}
     render(target,canvas){
       const data=this.image.data,dry=this.p['COMP-001']<.02;
       for(let i=0;i<this.n;i++){
-        const j=i*4,water=this.water[i],mobile=this.mobile[i],deposit=this.deposited[i],pigment=mobile+deposit,paperNoise=this.tooth(i%this.w,Math.floor(i/this.w));
+        const j=i*4,water=this.water[i],mobile=this.mobile[i],deposit=this.deposited[i],loose=this.loose[i],pigment=mobile+deposit+loose,paperNoise=this.tooth(i%this.w,Math.floor(i/this.w));
         let pr=249-(paperNoise-.5)*4,pg=245-(paperNoise-.5)*3,pb=235-(paperNoise-.5)*2;
         if(dry){const a=1-Math.exp(-pigment*2.5);data[j]=pr*(1-a)+32*a;data[j+1]=pg*(1-a)+28*a;data[j+2]=pb*(1-a)+24*a}
         else{const a=Math.min(.74,1-Math.exp(-pigment*.78*this.displayGain)),wetGlow=Math.min(.045,water*.018);data[j]=pr*(1-a)+44*a;data[j+1]=pg*(1-a)+105*a;data[j+2]=pb*(1-a)+158*a;data[j]=data[j]*(1-wetGlow)+220*wetGlow;data[j+1]=data[j+1]*(1-wetGlow)+236*wetGlow;data[j+2]=data[j+2]*(1-wetGlow)+245*wetGlow}
