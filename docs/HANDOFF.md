@@ -94,7 +94,7 @@ The user should be able to start another AI with one sentence:
 
 Prove that one shared, property-driven material architecture can describe and produce recognizable watercolor and charcoal without named-medium engines or hidden special cases. The current browser lab is a diagnostic instrument for that proof, not the production painting application.
 
-The validation-status reconciliation is complete. Gate 2 and Gate 3 are explicitly partial and remain open. Charcoal v0.4 smudge motion is artist-accepted for that limited scope and was subsequently rated Convincing on the Plain White control. The next phase remains matched **Draw material** validation of the recovered independent paper profiles; the Plain smudge review does not substitute for tooth/pressure evidence.
+The validation-status reconciliation is complete. Gate 2 and Gate 3 are explicitly partial and remain open. Charcoal v0.4 smudge motion is artist-accepted for that limited scope and was subsequently rated Convincing on the Plain White control. Direct Rough-paper feedback passed charcoal movement over valleys in principle but rejected the paper scale as severely zoomed-in. Substrate v0.2 corrects the inverted grain scale; the next phase is artist revalidation of that finer paper.
 
 ## What exists now
 
@@ -114,7 +114,7 @@ The validation-status reconciliation is complete. Gate 2 and Gate 3 are explicit
 - `lab/ARCHITECTURE.md` maps the solver to canonical properties and named models.
 - The solver begins from an abstract material state. `watercolor` and `charcoal` are profile selectors, not separate engines.
 - Current profiles are `material.watercolor.diagnostic.v0.6.1` and `material.charcoal.diagnostic.v0.4`. Watercolor v0.6.1 preserves the artist-reviewed v0.6 drawing constants and adds only stand-in friction/packing inputs for the shared smudge action; smudge itself is not artist-accepted for watercolor. Charcoal v0.4 adds transient loose-particle momentum and settling without a named-medium engine branch.
-- Paper is now a separate participant selected independently from material. The lab offers archive-seeded Plain White, Hot Press, Cold Press, and Rough profiles; saved reviews record the selected substrate ID, name, and provenance.
+- Paper is now a separate participant selected independently from material. The lab offers archive-seeded Plain White, Hot Press, Cold Press, and Rough v0.2 profiles; saved reviews record the selected substrate ID, name, and provenance.
 - The archive contains no separately named charcoal/pastel paper. `Rough` is the strongest preserved tooth candidate. Its use for charcoal/pastel remains an artist hypothesis, not an archived fact.
 - `docs/reference/material-studies/PAPER_SUBSTRATE_EXTRACT.md` records the exact archived paper values and the provisional canonical mapping.
 - Saved reviews include the mark image, settings, profile/model information, measurements, rating, notes, and decision so historical comparisons can be made.
@@ -173,6 +173,8 @@ Still open for watercolor:
 - Saved measurements: pigment area `31.00%`, deposited pigment `3922.91`, cumulative relocated pigment `6220.98`, conservation error `0.00070%`.
 - Artist conclusion: the smudge was “so much fun to use.” Minor desired improvement: believable small particle flicks.
 - Scope correction: this was a high-pressure smudge on intentionally flat paper. It does not validate CH-P-01 tooth capture or CH-P-02 pressure-driven valley reach.
+- Direct Rough-paper follow-up without exported JSON: charcoal smudging up over valleys passed in principle, but the ridges/valleys were too enlarged to judge naturally. The cause was an inverted archive `noiseScale` mapping, not the charcoal material or smudge model.
+- Substrate v0.2 makes the grain much finer and requires artist re-review; no corrected-paper acceptance exists yet.
 - Still required: artist acceptance of paper tooth and pressure progression, coarse/fine fracture populations, bounded dusting, lift, burnishing/rejection, and a continuous failure range.
 - Every visible charcoal conclusion requires artist review, with saved marks and settings.
 
@@ -185,16 +187,16 @@ Still open for watercolor:
 
 ## NEXT ACTION — start here
 
-Complete the **CH-P-01 / CH-P-02 paper and pressure artist comparison** in `lab/diagnostic-lab.html`.
+Revalidate the corrected **Rough v0.2 paper scale** and CH-P-01 / CH-P-02 behavior in `lab/diagnostic-lab.html`.
 
-1. Refresh the lab, choose **Charcoal**, **Draw material**, and **Plain White**. Clear the surface. Do not use the already reviewed Smudge action for this comparison.
-2. Set pigment load `0.70`, speed `1.00`, pressure `0.25`, and diagnostic visibility `1.00`. Draw several steady strokes and save a rated review.
-3. Change only the paper to **Rough**, clear, and repeat the same strokes. Judge whether peaks catch charcoal, valleys remain broken, and the paper looks/cooperates like a plausible drawing sheet rather than decorative noise. Save a second review.
-4. Keep **Rough**, change only pressure to `0.75`, clear, and repeat. Judge whether greater pressure progressively reaches valleys while preserving paper character instead of merely scaling a dark stamp. Save a third review.
-5. On Rough, make one dense mark at pressure about `0.70`, switch to **Smudge existing material**, and repeat the previously accepted push. Confirm the better tooth does not destroy the accepted loose-ridge motion.
-6. Send the exported `CH-LAB-*.json` records. The next model must import them before changing CH-P-01 or CH-P-02 artist status.
+1. Refresh the lab so the Paper note identifies **Rough seed v0.2**. Choose **Charcoal**, **Draw material**, and **Rough**; clear the surface.
+2. Set pigment load `0.70`, speed `1.00`, pressure `0.25`, and diagnostic visibility `1.00`. Draw several steady strokes.
+3. Judge the paper scale first: ridges and valleys should read as fine tooth, not enlarged hills. Then judge whether light charcoal favors peaks and leaves small believable gaps. Save a rated review.
+4. Keep Rough, change only pressure to `0.75`, clear, and repeat. Judge whether greater pressure reaches more small valleys continuously. Save a second review.
+5. Make one dense Rough mark, switch to **Smudge existing material**, and push across the fine tooth. Confirm the accepted ridge motion still travels over local valleys. Save if this reveals anything new.
+6. Send the exported `CH-LAB-*.json` records. Import them before changing CH-P-01 or CH-P-02 artist status.
 
-**Success condition:** Rough is recognizably more toothy than Plain without looking like a pasted texture; light pressure favors peaks, firm pressure reaches more valleys continuously, and the accepted smudge motion survives.
+**Success condition:** Rough reads as fine paper tooth rather than zoomed terrain; light pressure favors peaks, firm pressure reaches more valleys continuously, and accepted smudge motion survives.
 
 **Outcome rule:** `Accept` advances to CH-P-03 / CH-P-04 fracture and dusting. `Recalibrate` adjusts only the independent substrate mapping/texture and repeats the matched papers. `Revise model` means the paper/contact relationship is systematically wrong; do not add a charcoal-only paper effect.
 
@@ -224,10 +226,13 @@ Complete the **CH-P-01 / CH-P-02 paper and pressure artist comparison** in `lab/
 - Added automated checks for flat Plain paper, meaningful Rough height range, light peak capture, pressure-driven valley capture, Rough-versus-Hot-Press carrier uptake, and all existing conservation/smudge relationships.
 - Imported `CH-LAB-1787107111788`: a pressure-`0.96` Plain White smudge was rated **Convincing / Accept** with conservation error `0.00070%`. This strengthens CH-P-05 but does not complete CH-P-01/CH-P-02.
 - Recorded the artist's requested “little random bits” under future CH-P-03/CH-P-04 fracture/dusting rather than implementing arbitrary speckles.
+- Recorded the direct Rough-paper feedback: charcoal movement over valleys passed in principle, while the enlarged paper scale required recalibration.
+- Corrected the inverted archived `noiseScale` mapping in substrate v0.2. Rough now has 39 midline tooth crossings in the checked 300-cell field versus 13 for Hot Press, rather than a few oversized terrain features. Existing physics/conservation checks still pass.
 
 ## Blocked and open questions
 
 - Artist judgment of the recovered paper appearance and contact feel is pending. Automated height bands cannot determine whether Rough looks natural, feels appropriate for charcoal/pastel, or preserves expressive gesture.
+- Corrected Rough v0.2 has not yet been seen by the artist; the 39-versus-13 crossing check proves scale separation, not natural appearance.
 - The archive paper numbers are application presets, not scientific measurements. Their canonical `TRAN-002` mapping is explicitly a normalized diagnostic stand-in.
 - Small particle flicks require a physically bounded detached-particle population and mass ledger in CH-P-03/CH-P-04; no such state exists yet.
 - Live in-app browser inspection could not be completed in the implementation environment; page syntax, control structure, and solver behavior were checked, but the artist must refresh and inspect the actual lab.

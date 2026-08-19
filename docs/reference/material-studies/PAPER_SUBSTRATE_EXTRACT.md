@@ -21,3 +21,9 @@ The archived texture generator used deterministic multi-scale noise for a height
 - Seed, grain scale, dry-brush breakup, and color remain traceable archive metadata.
 
 The mapped values are labeled `archive-seed`. They are neither physical measurements nor final production constants. Artist comparison is mandatory, and later measured paper profiles may replace them without changing the shared material architecture.
+
+## v0.2 grain-scale correction
+
+The first JavaScript mapping multiplied sampling frequency by the archived `noiseScale`. That inverted the archived implementation, which divides its coordinates by `noiseScale`, and made Rough paper look like severely enlarged terrain. Direct artist feedback described the ridges and valleys as much larger than in the previous app and too zoomed-in to judge well.
+
+v0.2 restores the inverse relationship and raises the diagnostic sampling density so Rough has many small tooth changes across the canvas. The physical tooth amplitude, absorbency, sizing, capacity, seed, color, and material behavior are unchanged. Automated checks now require at least 25 midline tooth crossings across the 300-cell diagnostic field and require Rough to have more than twice the crossing count of Hot Press. Visible paper scale still requires artist approval.

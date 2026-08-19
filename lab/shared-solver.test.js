@@ -9,11 +9,16 @@ const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 
 assert(PROFILES.watercolor.state['SUBI-001']===undefined&&PROFILES.charcoal.state['SUBI-001']===undefined,'material profiles must not own intrinsic paper roughness');
 assert(SUBSTRATES.rough.archive.tooth===.85&&SUBSTRATES.coldPress.archive.capacity===.5,'archived paper seed values must remain traceable');
+assert(SUBSTRATES.rough.version==='0.2.0','corrected paper scale must remain versioned for artist review history');
 
 const plainTexture=new SharedSolver(48,24,PROFILES.charcoal,SUBSTRATES.plain),roughTexture=new SharedSolver(48,24,PROFILES.charcoal,SUBSTRATES.rough);
 let plainMin=1,plainMax=0,roughMin=1,roughMax=0;for(let y=0;y<24;y++)for(let x=0;x<48;x++){const p=plainTexture.tooth(x,y),r=roughTexture.tooth(x,y);plainMin=Math.min(plainMin,p);plainMax=Math.max(plainMax,p);roughMin=Math.min(roughMin,r);roughMax=Math.max(roughMax,r)}
 assert(plainMax-plainMin<.0001,'plain paper must have a flat contact surface');
 assert(roughMax-roughMin>.35,'rough paper must expose meaningful peaks and valleys');
+const toothCrossings=substrate=>{const solver=new SharedSolver(300,130,PROFILES.charcoal,substrate);let crossings=0,last=solver.tooth(0,65)-.5;for(let x=1;x<300;x++){const value=solver.tooth(x,65)-.5;if(value*last<0)crossings++;if(value!==0)last=value}return crossings};
+const hotCrossings=toothCrossings(SUBSTRATES.hotPress),roughCrossings=toothCrossings(SUBSTRATES.rough);
+assert(roughCrossings>=25,'rough paper must use fine tooth rather than a few zoomed-in terrain ridges');
+assert(roughCrossings>hotCrossings*2,'the archived inverse grain scale must make Rough finer-grained than Hot Press');
 
 const roughLight=new SharedSolver(48,24,PROFILES.charcoal,SUBSTRATES.rough),roughFirm=new SharedSolver(48,24,PROFILES.charcoal,SUBSTRATES.rough);
 for(let y=5;y<60;y+=5){roughLight.depositSegment(5,y,115,y,120,60,.2,.8,0,1.25);roughFirm.depositSegment(5,y,115,y,120,60,.85,.8,0,1.25)}

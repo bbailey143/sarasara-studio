@@ -89,3 +89,11 @@ The artist described the revised motion as “looking really good.” CH-P-05’
 The artist reported that the smudge was “so much fun to use.” This strengthens CH-P-05’s limited artist acceptance and confirms that separating the paper profile did not break the accepted smudge motion on the flat control sheet. A desired minor improvement is believable small particle flicks. That belongs to CH-P-03 / CH-P-04 fracture and dusting, where detached particles must have a bounded physical source and mass ledger; it must not be added as arbitrary random decoration.
 
 This record does not decide CH-P-01 or CH-P-02: Plain White is intentionally flat, the action was smudge rather than draw, and pressure was `0.96`. Rough-paper light/firm drawing comparisons are still required.
+
+## Direct artist follow-up — Rough paper scale
+
+- **Source:** Conversation follow-up after the archive-seeded paper comparison; no new exported JSON was supplied.
+- **Behavioral verdict:** **Pass in principle** — charcoal smudged up and over valleys, which matched the expected physical behavior.
+- **Paper verdict:** **Recalibrate** — ridges and valleys appeared severely zoomed-in and much larger than in the previous application, making the paper difficult to judge.
+
+The v0.1 implementation had inverted the archived grain-scale direction. Substrate v0.2 corrects that mapping and makes the tooth substantially finer while leaving material and smudge physics unchanged. CH-P-01 / CH-P-02 artist approval remains pending until the corrected Rough paper is reviewed.

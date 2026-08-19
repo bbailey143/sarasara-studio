@@ -57,3 +57,12 @@ Each accepted calibration note should record material recipe, substrate, environ
 - Desired improvement: occasional believable small particle flicks.
 - Model placement: particle flicks belong to future CH-P-03 / CH-P-04 fracture and dusting with detached coarse/fine populations and conservation. Do not add a visual random-speck shortcut.
 - Scope limit: this high-pressure Plain White smudge does not validate tooth capture or pressure-driven valley reach. Rough paper draw reviews remain required.
+
+### 2026-08-18 — Rough paper appeared zoomed-in; v0.2 scale correction
+
+- Direct artist feedback: the paper ridges and valleys were much too large compared with the previous application and were difficult to judge.
+- Limited pass: charcoal smudged up over the valleys as expected, so the contact relationship passed in principle.
+- Cause: the JavaScript port multiplied frequency by archived `noiseScale`; the archived generator divided coordinates by it. Rough therefore became the broadest terrain instead of the finer-sampled tooth.
+- Correction: substrate profiles advance to v0.2 and use inverse grain scale with a higher diagnostic sampling density. Tooth amplitude and all charcoal material/smudge parameters remain unchanged.
+- Automated guard: Rough must show at least 25 midline tooth crossings over the 300-cell field and more than twice the Hot Press crossing count; all height-band, uptake, smudge, and conservation checks must still pass.
+- Artist status: **re-review required** for corrected paper scale and naturalness.
