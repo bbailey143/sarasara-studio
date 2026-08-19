@@ -16,7 +16,7 @@ The machine-readable cases live in [`TORTURE_TESTS.yaml`](TORTURE_TESTS.yaml). T
 
 ### Gate 3 — Artist reality test
 
-**MANDATORY and PARTIAL; GATE REMAINS OPEN.** Watercolor diagnostic v0.6 received a **Good / Accept for this scope** artist decision for the shared substrate → carrier → pigment → applicator relationship. That does not approve spectral mixing, blooms, multiple papers, reservoir run-out, or believable failure ranges. No charcoal review is canonical in this repository yet. A practicing artist must still recognize each intended medium without prompting across the required pressure, speed, loading, run-out, layering, substrate, irregularity, expressive, and failure behaviors. “Indistinguishable” is not required for v0.1.
+**MANDATORY and PARTIAL; GATE REMAINS OPEN.** Watercolor diagnostic v0.6 received a **Good / Accept for this scope** artist decision for the shared substrate → carrier → pigment → applicator relationship. Charcoal v0.4 smudge motion received **Good / Accept for that limited scope** in `CH-LAB-1787105475421`, with final approval explicitly withheld pending better substrate review. Neither decision approves complete medium realism, multiple papers, failure ranges, or the remaining numbered scenes. A practicing artist must still recognize each intended medium without prompting across the required pressure, speed, loading, run-out, layering, substrate, irregularity, expressive, and failure behaviors. “Indistinguishable” is not required for v0.1.
 
 The validation records live in:
 

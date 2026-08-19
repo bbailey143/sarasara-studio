@@ -80,7 +80,7 @@ The user should be able to start another AI with one sentence:
 
 - This foundation has no package install or production build yet. The lab is dependency-free HTML and JavaScript.
 - Verified command: `node lab/shared-solver.test.js`
-- Verified result on 2026-08-18 after the CH-P-05 v0.4 recalibration: `shared solver checks passed`, including source/destination, pressure response, loose-ridge creation, post-contact forward motion, settling, blank-paper, and conservation assertions.
+- Verified result on 2026-08-18 after archived-paper recovery: `shared solver checks passed`, including material/substrate separation, flat-versus-rough height variation, peak/valley capture, pressure-driven valley reach, Hot Press versus Rough uptake, smudge momentum/settling, blank-paper behavior, and conservation assertions.
 - Verified command: `git diff --check`
 - Verified result on 2026-08-18 during the GitHub cleanup checkpoint: passed with no whitespace errors.
 - Verified the inline lab script parses, each required control ID occurs exactly once, and `smudgeSegment` contains no `watercolor` or `charcoal` branch. Live visual browser inspection remains pending as recorded below.
@@ -94,7 +94,7 @@ The user should be able to start another AI with one sentence:
 
 Prove that one shared, property-driven material architecture can describe and produce recognizable watercolor and charcoal without named-medium engines or hidden special cases. The current browser lab is a diagnostic instrument for that proof, not the production painting application.
 
-The validation-status reconciliation is complete. Gate 2 and Gate 3 are explicitly partial and remain open. The artist rated the first CH-P-05 smudge **Good / Recalibrate** because its dense push stopped like putty. The shared v0.4 response now adds conservative loose-particle momentum and settling. The next phase is mandatory artist validation of that visible behavior.
+The validation-status reconciliation is complete. Gate 2 and Gate 3 are explicitly partial and remain open. Charcoal v0.4 smudge motion is now artist-accepted for that limited scope. The artist explicitly withheld final approval because the placeholder paper was poor, so the next phase is matched artist validation of the recovered independent paper profiles.
 
 ## What exists now
 
@@ -114,6 +114,9 @@ The validation-status reconciliation is complete. Gate 2 and Gate 3 are explicit
 - `lab/ARCHITECTURE.md` maps the solver to canonical properties and named models.
 - The solver begins from an abstract material state. `watercolor` and `charcoal` are profile selectors, not separate engines.
 - Current profiles are `material.watercolor.diagnostic.v0.6.1` and `material.charcoal.diagnostic.v0.4`. Watercolor v0.6.1 preserves the artist-reviewed v0.6 drawing constants and adds only stand-in friction/packing inputs for the shared smudge action; smudge itself is not artist-accepted for watercolor. Charcoal v0.4 adds transient loose-particle momentum and settling without a named-medium engine branch.
+- Paper is now a separate participant selected independently from material. The lab offers archive-seeded Plain White, Hot Press, Cold Press, and Rough profiles; saved reviews record the selected substrate ID, name, and provenance.
+- The archive contains no separately named charcoal/pastel paper. `Rough` is the strongest preserved tooth candidate. Its use for charcoal/pastel remains an artist hypothesis, not an archived fact.
+- `docs/reference/material-studies/PAPER_SUBSTRATE_EXTRACT.md` records the exact archived paper values and the provisional canonical mapping.
 - Saved reviews include the mark image, settings, profile/model information, measurements, rating, notes, and decision so historical comparisons can be made.
 - Pressure and speed remain available under the collapsed Gesture diagnostics because they are test inputs, not primary material controls.
 - Diagnostic visibility changes display strength only; the automated test verifies it does not change physical state.
@@ -121,6 +124,7 @@ The validation-status reconciliation is complete. Gate 2 and Gate 3 are explicit
 ### Shared relationships currently represented
 
 - Applicator contact transfers available material according to pressure, speed, moisture, and substrate tooth.
+- Intrinsic paper roughness, porosity/capacity, permeability, texture seed/scale, and color come from the selected substrate rather than from the watercolor or charcoal material profile.
 - Surface carrier, paper-held saturation, mobile pigment, and deposited pigment are separate state values.
 - Paper dampness initializes paper-held saturation rather than a surface puddle.
 - Pigment follows carrier movement and can settle/deposit; visibility is separate from physical quantity.
@@ -161,42 +165,36 @@ Still open for watercolor:
 
 ### Charcoal
 
-- Latest recorded smudge review: `CH-LAB-1787103913509`, profile `material.charcoal.diagnostic.v0.3`.
-- Rating: **Good**. Decision: **Recalibrate**.
-- Reviewed settings: pressure `0.25`, speed `0.80`, pigment load `1.00`; saved inactive brush water `0.75` and paper dampness `0.25`.
-- Artist conclusion: the dense-particle push was recognizable, but it felt putty-like because the displaced ridge had no momentum after the gesture stopped.
-- v0.4 now creates a transient loose-particle ridge, carries it briefly in the gesture direction, dissipates its energy, and settles it back into the deposited state. Automated checks pass; artist acceptance is still required.
-- Still required: artist acceptance of smudge feel, tooth capture by height band, pressure progression into valleys, coarse/fine fracture populations, bounded dusting, lift, burnishing/rejection, and a continuous failure range.
+- Correction history: `CH-LAB-1787103913509` rated v0.3 **Good / Recalibrate** because the displaced material stopped like putty.
+- Latest review: `CH-LAB-1787105475421`, profile `material.charcoal.diagnostic.v0.4`.
+- Rating: **Good**. Decision: **Accept for the smudge-motion scope**.
+- Reviewed settings: pressure `0.77`, speed `1.00`, diagnostic visibility `1.00`; saved inactive load `0.70`, brush water `0.75`, and paper dampness `0.25`.
+- Saved measurements: pigment area `17.13%`, deposited pigment `1580.78`, cumulative relocated pigment `2521.69`, conservation error `0.00045%`.
+- Artist conclusion: the revised motion is “looking really good,” but final charcoal approval is withheld until it is tested on a better substrate.
+- Still required: artist acceptance of paper tooth and pressure progression, coarse/fine fracture populations, bounded dusting, lift, burnishing/rejection, and a continuous failure range.
 - Every visible charcoal conclusion requires artist review, with saved marks and settings.
 
 ## Reconciled validation status
 
 - Gate 1 remains **pass**: both media fit the canonical vocabulary without private named-medium properties.
-- Gate 2 is **partial and open**: several watercolor relationships, the dry-charcoal baseline, and CH-P-05 conservative smudge relocation are automated, while many numbered scenes remain unrun.
-- Gate 3 is **partial, mandatory, and open**: watercolor v0.6 is artist-accepted only for its initial shared-interaction scope; no canonical charcoal acceptance exists.
+- Gate 2 is **partial and open**: several watercolor relationships, Hot Press/Rough uptake contrast, dry-charcoal tooth bands, pressure-driven valley reach, and CH-P-05 conservative smudge relocation are automated, while many numbered scenes remain unrun.
+- Gate 3 is **partial, mandatory, and open**: watercolor v0.6 is artist-accepted only for its initial shared-interaction scope; charcoal v0.4 smudge motion is accepted only for that scope; neither medium has final acceptance.
 - `docs/validation/watercolor/physics_tests.md` and `docs/validation/charcoal/physics_tests.md` now distinguish `automated_relationship_verified`, `artist_accepted_limited_scope`, `partial_not_isolated`, and `not_run` test by test.
 
 ## NEXT ACTION — start here
 
-Repeat the **CH-P-05 artist validation** on charcoal v0.4 in `lab/diagnostic-lab.html`.
+Complete the **CH-P-01 / CH-P-02 paper and pressure artist comparison** in `lab/diagnostic-lab.html`.
 
-1. Refresh the lab, choose **Charcoal** and **Draw material**, and clear the surface.
-2. Make two similar dense charcoal marks at pigment load `1.00`, speed `0.80`, and pressure about `0.70`.
-3. Choose **Smudge existing material** without clearing. Drag once from the first dark mark into clean paper at pressure `0.25`; drag once from the second mark at pressure `0.75`. Keep speed `0.80`.
-4. On an untouched blank area, make a smudge gesture. It must remain blank.
-5. After each push, lift your hand and watch the leading edge plus the **Loose / moving pigment** reading. Judge:
-   - does each source lighten while a softer trail gains charcoal;
-   - does firm pressure move more existing charcoal than light pressure;
-   - does a small loose ridge continue forward briefly, lose energy, and settle rather than stopping as putty or sliding indefinitely;
-   - does the trail feel dusty, soft, and dragged rather than freshly painted, oily, or digitally blurred;
-   - do repeated passes relocate material progressively rather than creating darkness;
-   - does **Relocated by contact** increase while **Conservation error** remains near zero.
-6. Add notes, choose a rating and decision, then **Save review record**. Send the exported `CH-LAB-*.json` to the next model.
-7. The next model must import the review into `docs/validation/charcoal/artist_review.md` and `calibration_notes.md` before changing status.
+1. Refresh the lab, choose **Charcoal**, **Draw material**, and **Plain White**. Clear the surface.
+2. Set pigment load `0.70`, speed `1.00`, pressure `0.25`, and diagnostic visibility `1.00`. Draw several steady strokes and save a rated review.
+3. Change only the paper to **Rough**, clear, and repeat the same strokes. Judge whether peaks catch charcoal, valleys remain broken, and the paper looks/cooperates like a plausible drawing sheet rather than decorative noise. Save a second review.
+4. Keep **Rough**, change only pressure to `0.75`, clear, and repeat. Judge whether greater pressure progressively reaches valleys while preserving paper character instead of merely scaling a dark stamp. Save a third review.
+5. On Rough, make one dense mark at pressure about `0.70`, switch to **Smudge existing material**, and repeat the previously accepted push. Confirm the better tooth does not destroy the accepted loose-ridge motion.
+6. Send the exported `CH-LAB-*.json` records. The next model must import them before changing CH-P-01 or CH-P-02 artist status.
 
-**Success condition:** the saved review recognizes existing charcoal being pushed into a loose ridge whose brief residual movement and settling feel believable. Automated motion and conservation alone are not acceptance.
+**Success condition:** Rough is recognizably more toothy than Plain without looking like a pasted texture; light pressure favors peaks, firm pressure reaches more valleys continuously, and the accepted smudge motion survives.
 
-**Outcome rule:** `Accept` advances to CH-P-01/CH-P-02 tooth and pressure height-band measurements. `Recalibrate` adjusts the shared `TRIB-002` / `DEPO-004` contact response and repeats the same matched gestures. `Revise model` means the visible failure is systematic; do not add a charcoal-only shortcut.
+**Outcome rule:** `Accept` advances to CH-P-03 / CH-P-04 fracture and dusting. `Recalibrate` adjusts only the independent substrate mapping/texture and repeats the matched papers. `Revise model` means the paper/contact relationship is systematically wrong; do not add a charcoal-only paper effect.
 
 ## IN FLIGHT
 
@@ -218,10 +216,15 @@ Repeat the **CH-P-05 artist validation** on charcoal v0.4 in `lab/diagnostic-lab
 - Imported `CH-LAB-1787103913509`: charcoal v0.3 was rated **Good / Recalibrate** because its dense push stopped like putty instead of carrying a loose ridge forward.
 - Added a shared loose surface-particle state with velocity, friction/roughness energy loss, and resettling. Automated checks verify ridge creation, continued forward motion after contact ends, loose-mass decay, deposited-mass recovery, blank-paper behavior, and conservation below 1%.
 - Added a **Loose / moving pigment** reading and explicit artist checks for ridge motion, energy loss, and settling. The charcoal profile is now v0.4 and requires a new artist review.
+- Imported `CH-LAB-1787105475421`: charcoal v0.4 was rated **Good / Accept for smudge motion**, with final approval explicitly withheld pending better paper.
+- Recovered the archive's exact Plain White, Hot Press, Cold Press, and Rough paper seeds. Confirmed there is no separately named charcoal/pastel preset in the preserved branch.
+- Split paper properties out of the material profiles. The lab now saves substrate identity/provenance independently and uses deterministic multi-scale height texture plus paper-specific uptake and color.
+- Added automated checks for flat Plain paper, meaningful Rough height range, light peak capture, pressure-driven valley capture, Rough-versus-Hot-Press carrier uptake, and all existing conservation/smudge relationships.
 
 ## Blocked and open questions
 
-- CH-P-05 v0.4 artist feel is pending. Automated momentum and settling cannot determine whether the ridge amount, travel, timing, or tactile impression is believable.
+- Artist judgment of the recovered paper appearance and contact feel is pending. Automated height bands cannot determine whether Rough looks natural, feels appropriate for charcoal/pastel, or preserves expressive gesture.
+- The archive paper numbers are application presets, not scientific measurements. Their canonical `TRAN-002` mapping is explicitly a normalized diagnostic stand-in.
 - Live in-app browser inspection could not be completed in the implementation environment; page syntax, control structure, and solver behavior were checked, but the artist must refresh and inspect the actual lab.
 - The lab has no production brush reservoir, spectral color, measured papers, full particle fracture/dust system, or production renderer.
 - Rust is the intended production direction, but production implementation must wait until the shared foundation survives the stated validation scope.

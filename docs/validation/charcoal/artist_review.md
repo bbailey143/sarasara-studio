@@ -62,3 +62,15 @@ ______________________________________________________________________________
 - **Saved evidence:** pigment area `17.24%`, deposited pigment `5108.84`, cumulative relocated pigment `5567.64`, conservation error below `0.001%`.
 
 The artist recognized the sense of pushing dense particles, but the movement also felt like putty because everything stopped as soon as the smudge gesture stopped. A believable pass should form a small loose ridge beneath and ahead of the contact, allow that ridge to retain a little forward movement after the hand lifts, then lose energy and settle. This review does **not** accept CH-P-05; it requires another artist pass on the recalibrated behavior.
+
+## Recorded review — CH-LAB-1787105475421
+
+- **Date:** 2026-08-18
+- **Prototype/build:** `material.charcoal.diagnostic.v0.4`
+- **Action:** Smudge existing material
+- **Settings:** pressure `0.77`, speed `1.00`, diagnostic visibility `1.00`; the saved inactive pigment-load, brush-water, and paper-dampness values were `0.70`, `0.75`, and `0.25`.
+- **Rating:** **Good**
+- **Decision:** **Accept for the v0.4 smudge-motion scope**
+- **Saved evidence:** pigment area `17.13%`, deposited pigment `1580.78`, loose pigment effectively settled at save time, cumulative relocated pigment `2521.69`, conservation error `0.00045%`.
+
+The artist described the revised motion as “looking really good.” CH-P-05’s loose-ridge motion and settling are accepted for this diagnostic checkpoint. This is **not final charcoal approval**: the reviewer explicitly withheld that until the placeholder substrate is replaced and compared with better paper, pointing to the archived watercolor and charcoal/pastel-oriented paper work as useful evidence.

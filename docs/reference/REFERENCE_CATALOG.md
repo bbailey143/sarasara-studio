@@ -23,6 +23,7 @@
 | [`specs/oil-engine-spec.md`](https://github.com/bbailey143/sarasara-studio/blob/archive/legacy-main/specs/oil-engine-spec.md) | Yield-gated Herschel–Bulkley flow, mechanical pigment transport, impasto height, and lighting. | Accepted candidate model family; parameters require evidence. |
 | [`WATERCOLOR-FLUID-RECOVERY.md`](https://github.com/bbailey143/sarasara-studio/blob/archive/legacy-main/WATERCOLOR-FLUID-RECOVERY.md) | Detailed recovery notes, conservation checks, wet-union observations, and performance caveats. | Reference behavior plus historical decisions; never copy tuning numbers blindly. |
 | [`WATERCOLOR-REDESIGN.md`](https://github.com/bbailey143/sarasara-studio/blob/archive/legacy-main/WATERCOLOR-REDESIGN.md) | Wet-map/diffusion experiment and the reason artist review rejected it as wet-looking markers. | Historical rejection; retain as a negative test. |
+| [`lib/models/paper.dart`](https://github.com/bbailey143/sarasara-studio/blob/archive/legacy-main/lib/models/paper.dart) and paper texture helpers | Plain, Hot Press, Cold Press, and Rough paper seeds; deterministic height/capacity texture ownership. | Preserved in `material-studies/PAPER_SUBSTRATE_EXTRACT.md`; archive seeds require scientific and artist calibration. |
 | `TestingArtifacts/` and recorded frames | Visual proof of washes, working time, mixing, and freezes. | Artist-validation evidence; inspect images separately from code tests. |
 
 ## Subject map

@@ -4,10 +4,10 @@ Charcoal calibration must preserve the difference between the source tool, detac
 
 | Parameter or relationship | Evidence source | Current status | Next action |
 | --- | --- | --- | --- |
-| Tooth capture versus pressure | Matched gestures on smooth and toothy substrates | Unmeasured | Record deposited mass by surface height band. |
+| Tooth capture versus pressure | Matched gestures on smooth and toothy substrates | Automated height-band relationship verified; artist pending | Compare Plain and Rough marks, then light and firm pressure on Rough. |
 | Coarse/fine particle breakup | Material-specific particle evidence | Seed only | Measure or bound the size populations. |
 | Dusting versus main deposition | Controlled loading and speed scene | Unmeasured | Track detached particle mass separately. |
-| Smudge relocation | Automated source/destination ledger plus artist gesture review | v0.3 rated Good but Recalibrate; v0.4 artist pending | Test whether the loose ridge briefly coasts and settles like displaced particles rather than stopping as putty. |
+| Smudge relocation | Automated source/destination ledger plus artist gesture review | v0.4 artist accepted for smudge motion; substrate scope remains open | Preserve the accepted motion while comparing it on better tooth/absorbency profiles. |
 | Lift response | Adhesion/cohesion and artist review | Pending prototype | Test gentle lift, hard lift, and repeated lift. |
 | Burnishing rejection | Repeated pressure scene | Pending prototype | Record packing, optical change, and fresh capture reduction. |
 | Failure envelope | Artist review | Pending prototype | Include broken deposition, dusting, and over-burnished rejection. |
@@ -33,3 +33,18 @@ Each accepted calibration note should record material recipe, substrate, environ
 - Architecture status: this is a shared surface-particle relationship driven by canonical packing, friction, roughness, pressure, and speed—not a charcoal-only effect or named-medium branch.
 - Automated evidence: a loose ridge is created, its center continues forward after contact ends, loose mass decreases as deposited mass increases, blank contact creates nothing, and total pigment error remains below 1%.
 - Validation status: **artist review required** for v0.4. The automated result establishes motion and conservation, not whether the amount, timing, ridge shape, or feel is believable.
+
+### 2026-08-18 — CH-LAB-1787105475421 limited artist acceptance
+
+- Artist verdict on v0.4: **Good / Accept for the smudge-motion scope**.
+- Accepted relationship: displaced pigment behaves like a loose particle ridge with brief residual motion and settling rather than a putty slab.
+- Saved state: pressure `0.77`, speed `1.00`, pigment area `17.13%`, deposited pigment `1580.78`, cumulative relocated pigment `2521.69`, conservation error `0.00045%`.
+- Explicit limit: the artist withheld final charcoal approval because the single placeholder substrate was poor.
+- Next evidence: recover the archived paper definitions, keep them as separate substrate profiles, compare matched gestures on smooth and toothy sheets, and require artist approval before any paper becomes canonical.
+
+### 2026-08-18 — Archived paper profiles integrated
+
+- Archive finding: the preserved branch contains Plain White, Hot Press, Cold Press, and Rough presets. It contains no separately named charcoal/pastel paper; Rough is only the strongest tooth candidate.
+- Separation correction: intrinsic roughness, porosity/capacity, permeability, texture seed/scale, and paper color now belong to an independently selected substrate profile rather than the charcoal or watercolor material profile.
+- Automated evidence: Plain is flat; Rough has a meaningful peak/valley range; light charcoal deposits more per cell in the raised Rough band than the valley band; firm pressure increases valley-band deposit; matched Rough watercolor contact absorbs more carrier than Hot Press; conservation checks still pass.
+- Artist status: **pending**. The equations cannot decide whether the procedural Rough sheet looks natural, feels appropriate for charcoal/pastel, or preserves the accepted smudge character.
