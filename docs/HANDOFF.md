@@ -90,6 +90,7 @@ The user should be able to start another AI with one sentence:
 - The user explicitly authorized publishing every current `vnext-bootstrap` commit to `https://github.com/bbailey143/sarasara-studio.git` during this cleanup checkpoint.
 - Fine-Tooth implementation and review history were published in commit `40f19f1` (`feat: add fine-tooth charcoal paper`).
 - Sample-guided Pastel White/Cream profiles were published in commit `00dff73` (`feat: calibrate pastel paper from artist samples`).
+- Pastel White artist acceptance was published in commit `e80f8d9` (`docs: accept pastel white charcoal smudge`).
 - Always verify publication with `git status --short --branch`; a clean published checkpoint shows no `ahead` count.
 
 ## Current objective
@@ -203,7 +204,7 @@ Complete the remaining **Draw** comparisons for Pastel Paper v0.2 and CH-P-01 / 
 
 ## IN FLIGHT
 
-- Review `CH-LAB-1787110275815` is being imported locally. After commit/push, the only unfinished acceptance work is artist Draw comparison at pressure `0.25` versus `0.75` plus the Light Cream color twin.
+- Nothing. The only remaining work is a new artist Draw comparison at pressure `0.25` versus `0.75` plus the Light Cream color twin.
 
 ## Recently completed
 
