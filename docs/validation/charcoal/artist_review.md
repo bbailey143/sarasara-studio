@@ -169,3 +169,19 @@ Rate the visible result **Unconvincing**, **Recognizable**, **Good**, **Convinci
 The review supports the particle idea but rejects the v0.5 fine-dust travel/drag calibration. It does not close CH-P-03 or CH-P-04. The exported action was Smudge, so it specifically establishes that dust detached during strong later contact felt too pale, too dispersed, and insufficiently coupled to the Pastel Paper surface. It does not by itself judge the prescribed light-versus-strong Draw comparison.
 
 Charcoal v0.5.1 responds by reducing fine-particle launch and sideways spread, increasing fine-particle drag from shared `TRIB-002` friction and `SUBI-001` substrate roughness, and increasing fine-particle settling while retaining the required coarse-near/fine-far and coarse-fast/fine-slow relationships. A focused artist retest is required before acceptance.
+
+## Recorded review — CH-LAB-1787158644333
+
+- **Date:** 2026-08-19
+- **Material/build:** `material.charcoal.diagnostic.v0.5.1`
+- **Substrate:** `substrate.paper.pastel-white.reference-derived.experimental.v0.2` — Pastel Paper — White
+- **Action:** Smudge existing material
+- **Settings:** pressure `0.55`, speed `1.00`, diagnostic visibility `1.00`; pigment load `0.70` was inactive during smudging.
+- **Rating:** **Convincing**
+- **Decision:** **Accept for the reviewed moderate-smudge fracture/dust/drag scope**
+- **Artist note:** “Not sure where to end with this looking good, perfect, or in need of refinement anymore. This looks pretty darn good.”
+- **Saved evidence:** pigment area `13.94%`, deposited pigment `801.65`, coarse fragments created `29.87`, fine dust created `48.73`, offered source `1819.08`, source remaining `1017.42`, cumulative relocated pigment `1759.55`, effectively zero off-canvas loss, conservation error `0.00141%`; coarse, fine, and loose populations were effectively settled at save time.
+
+This accepts v0.5.1's visible surface resistance, breakup, and settling for the saved moderate smudge. The correct response is to preserve this result rather than chase an undefined “perfect” endpoint. Future work may revisit it only if another change causes an obvious regression or broader artist testing exposes a repeatable problem.
+
+The evidence boundary matters: this export used Smudge at pressure `0.55` and speed `1.00`, not the prescribed strong `0.85` / `1.60` retest and not the light-versus-strong Draw comparison. It therefore does not complete the separate Draw judgment for CH-P-03 / CH-P-04, and it is not final approval of the entire charcoal medium or a production paper.

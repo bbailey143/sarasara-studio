@@ -123,3 +123,12 @@ Each accepted calibration note should record material recipe, substrate, environ
 - v0.5.1 response: reduce fine-dust launch speed and lateral spread, increase the influence of shared kinetic friction and substrate roughness on fine-dust energy loss, and settle fine dust somewhat sooner. Do not alter the accepted loose-ridge smudge path or create a named charcoal branch.
 - New automated guard: increasing `TRIB-002` alone must shorten fine-dust travel while coarse fragments still travel less and settle faster than fine dust; all conservation and determinism checks remain required.
 - Artist status: **retest required**. The intended result should remain visibly dusty, but denser, more surface-bound, and less like a pale airborne veil.
+
+### 2026-08-19 — CH-LAB-1787158644333 accepts v0.5.1 moderate smudging
+
+- Artist verdict: **Convincing / Accept** for the reviewed moderate-smudge fracture/dust/drag scope.
+- Reviewed action: Smudge on Pastel Paper — White at pressure `0.55`, speed `1.00`, visibility `1.00`.
+- Artist response: “Not sure where to end with this looking good, perfect, or in need of refinement anymore. This looks pretty darn good.”
+- Saved state: pigment area `13.94%`, deposited `801.65`, coarse created `29.87`, fine dust created `48.73`, offered source `1819.08`, source remaining `1017.42`, relocated `1759.55`, effectively zero off-canvas loss, conservation error `0.00141%`.
+- Calibration decision: stop tuning this accepted smudge unless a later change creates a visible regression or broader artist testing identifies a repeatable issue.
+- Evidence boundary: this was a moderate Smudge review, not the planned pressure-`0.85` / speed-`1.60` repeat and not the prescribed light-versus-strong Draw comparison. Draw fracture remains the next artist question; do not infer that it was performed from this representative export.

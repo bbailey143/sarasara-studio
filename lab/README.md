@@ -32,10 +32,10 @@ The automated ledger passes CH-P-05's conservation requirements, v0.4 smudge mot
 4. In the stronger gesture, look for a few coarser crumbs staying near the stroke while finer dust travels slightly farther. Watch **Coarse fragments** and **Fine dust** fall after your hand lifts.
 5. Reject or recalibrate the result if it looks like evenly sprinkled dots, a spray brush, glitter, or decoration unrelated to the stroke. The particles must appear to break from the contacted material.
 6. Confirm **Conservation error** stays below `1%`. Switch to Smudge and drag on blank paper; it must create no particles.
-7. Save the review. CH-P-03 / CH-P-04 remain pending until an artist chooses **Accept**, **Recalibrate**, or **Revise model**.
+7. Save the review. The moderate-smudge breakup/drag is already accepted; this matched Draw comparison is the remaining artist question for CH-P-03 / CH-P-04.
 
 The lab records offered material, material left on the applicator, settled pigment, loose pigment, coarse fragments, fine dust, off-canvas loss, and the artist's image/settings in the exported JSON and browser history. These quantities verify the ledger; they do not prove that the breakup looks or feels right.
 
-### v0.5.1 focused friction retest
+### v0.5.1 accepted smudge reference
 
-`CH-LAB-1787112551932` rated the v0.5 strong smudge **Good / Recalibrate** because the dust was too light, wispy, and nearly frictionless. To check the response, make a dense charcoal mark, switch to **Smudge existing material**, set pressure `0.85` and speed `1.60`, and repeat the same kind of push. The dust should remain visible but feel denser, lose sideways/forward energy sooner, and stay more connected to the paper and source mark. It must not become a stopped putty slab. Save the retest before accepting CH-P-03 or CH-P-04.
+`CH-LAB-1787158644333` rated the v0.5.1 moderate smudge **Convincing / Accept** at pressure `0.55` and speed `1.00`. Treat that result as the reference: visible dust should remain surface-connected, lose energy, settle, and avoid both a pale frictionless veil and a stopped putty slab. Repeat it only as a regression check after later changes; do not keep polishing an accepted behavior toward an undefined “perfect.”
