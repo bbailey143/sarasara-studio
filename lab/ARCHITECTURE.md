@@ -18,7 +18,9 @@ The pigment-load control represents pigment available at the applicator contact.
 
 Watercolor contact is continuous across moisture levels. Brush moisture and existing paper moisture combine into one contact-wetness value. At its dry end, surface tooth and pressure determine which cells receive directly deposited pigment; as moisture increases, the same contact progressively becomes continuous and transfers more pigment into the mobile suspension. There is no named dry-brush mode or hidden carrier at zero brush water.
 
-The v0.6 damp interval follows relationships recovered from the archived watercolor reference. The artist-facing brush-water control maps nonlinearly to delivered surface carrier, while `STATE-003`-like paper saturation remains a separate slower store. Paper-held water supports only partial mobility. At lower surface-water levels, `SUBI-001` tooth restricts connected carrier flow and mechanically retains part of the pigment; abundant surface water progressively overwhelms that resistance and recovers the previously reviewed full-wet transport. The archive's exact constants are evidence, not copied production truth.
+The v0.6 damp interval follows relationships recovered from the archived watercolor reference. The artist-facing brush-water control maps nonlinearly to delivered surface carrier, while canonical `STATE-003` paper saturation remains a separate slower store. Paper-held water supports only partial mobility. At lower surface-water levels, `SUBI-001` tooth restricts connected carrier flow and mechanically retains part of the pigment; abundant surface water progressively overwhelms that resistance and recovers the previously reviewed full-wet transport. The archive's exact constants are evidence, not copied production truth.
+
+The shared solver begins from a deliberately abstract material state, not from watercolor. Profiles supply phase, composition, transport, deposition, substrate interaction, evolution, and reactivation values. The same contact and state-update functions then derive behavior from those values. A medium name is only a convenient profile selector in this lab; it is not permission to invoke a private medium engine or effect.
 
 ## Canonical property inputs
 
@@ -27,6 +29,7 @@ The profiles in `shared-solver.js` use canonical IDs from `PROPERTY_REGISTRY.yam
 - `COMP-001` carrier fraction;
 - `COMP-003` pigment fraction;
 - `STATE-001` material phase;
+- `STATE-003` local liquid saturation;
 - `TRAN-001` diffusion coefficient;
 - `TRAN-002` permeability;
 - `DEPO-001` transfer efficiency;

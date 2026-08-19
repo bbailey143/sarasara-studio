@@ -50,3 +50,13 @@ ______________________________________________________________________________
 **What believable failure was missing or overdone?**
 
 ______________________________________________________________________________
+
+## Accepted diagnostic review — 2026-08-18
+
+- Review ID: `WC-LAB-1787100187504`
+- Prototype: `material.watercolor.diagnostic.v0.6`
+- Rating: **Good**
+- Decision: **Accept for this scope**
+- Artist note: “This is not perfect by any stretch. But, I think for the initial go we got some important pieces wired up and have a semi-convincing watercolor here.”
+- Accepted scope: shared substrate → carrier → pigment → applicator interaction produces a recognizable, useful initial watercolor diagnostic.
+- Still open: production-quality brush shape and reservoir behavior, spectral pigment appearance, multiple measured papers, layering/mixing, clean-water blooms, run-out, and believable failure ranges.

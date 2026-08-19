@@ -113,3 +113,13 @@ Every accepted calibration note should record material recipe, substrate, enviro
 - Preserved limit: at abundant surface water, tooth resistance fades and the v0.3/v0.5 full-wet carrier coefficient is recovered.
 - Automated guardrails: paper dampness creates saturation without a surface puddle; paper absorbs carrier from a damp stroke; a `0.35` damp stroke covers less area than a `1.00` wash; damp contact retains pigment; and pigment conservation remains required.
 - Validation status: **artist review required**. The key target is a dark, semi-wet stroke at brush water near `0.35` that stays stroke-shaped while remaining visibly damp. Full-wet fluid action must also be rechecked for regression.
+
+### 2026-08-18 — Watercolor diagnostic v0.6 artist acceptance (`WC-LAB-1787100187504`)
+
+- Artist rating: **Good**; decision: **Accept** for the initial diagnostic scope.
+- Review conditions: pigment load `1.00`, brush water `0.30`, paper dampness `0.24`, pressure `0.55`, speed `1.00`, diagnostic visibility `3.80`.
+- Artist conclusion: the result is not perfect, but is far improved and is a semi-convincing watercolor for the initial pass.
+- Accepted architectural relationship: reconnecting substrate, fluid, pigment, and brush was critical to the improvement.
+- Physics record: wet area `15.89%`, pigment area `21.40%`, and pigment conservation error below `0.001%` in the saved final state.
+- Scope boundary: this accepts the diagnostic wiring and recognizable behavior, not final watercolor realism, production calibration, spectral optics, full brush-reservoir depletion, multiple paper recipes, or all failure behaviors.
+- Canonical audit: paper saturation is explicitly declared as `STATE-003`; the implementation remains property- and interaction-driven and adds no `watercolorMode`, `dryBrushMode`, or private watercolor-only property.

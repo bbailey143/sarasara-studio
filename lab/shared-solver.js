@@ -1,19 +1,19 @@
 (function(global){
   'use strict';
 
-  const REQUIRED=['COMP-001','COMP-003','STATE-001','TRAN-001','TRAN-002','DEPO-001','SUBI-001','SUBI-003','EVOL-001','EVOL-003','REAC-001','REAC-002','REAC-003','REAC-004'];
+  const REQUIRED=['COMP-001','COMP-003','STATE-001','STATE-003','TRAN-001','TRAN-002','DEPO-001','SUBI-001','SUBI-003','EVOL-001','EVOL-003','REAC-001','REAC-002','REAC-003','REAC-004'];
   const MODELS=['MODEL-TRAN-001','MODEL-TRAN-002','MODEL-TRAN-003','MODEL-DEPO-001','MODEL-EVOL-001','MODEL-PART-001','MODEL-REAC-001'];
 
   const PROFILES={
     watercolor:{
       id:'material.watercolor.diagnostic.v0.6',version:'0.6.0',
-      state:{'COMP-001':.88,'COMP-003':.12,'STATE-001':'suspension','TRAN-001':.48,'TRAN-002':.055,'DEPO-001':.74,'SUBI-001':.28,'SUBI-003':.64,'EVOL-001':.0032,'EVOL-003':.016,'REAC-001':.22,'REAC-002':.58,'REAC-003':.18,'REAC-004':.025},
+      state:{'COMP-001':.88,'COMP-003':.12,'STATE-001':'suspension','STATE-003':0,'TRAN-001':.48,'TRAN-002':.055,'DEPO-001':.74,'SUBI-001':.28,'SUBI-003':.64,'EVOL-001':.0032,'EVOL-003':.016,'REAC-001':.22,'REAC-002':.58,'REAC-003':.18,'REAC-004':.025},
       display:{pigment_visibility_gain:2.6,note:'Diagnostic preview gain only; does not alter physical pigment mass.'},
       models:MODELS,provenance:[{status:'stand-in',note:'Artist-calibrated diagnostic values; not measured production constants.'}]
     },
     charcoal:{
       id:'material.charcoal.diagnostic.v0.2',version:'0.2.0',
-      state:{'COMP-001':0,'COMP-003':1,'STATE-001':'powder','TRAN-001':0,'TRAN-002':0,'DEPO-001':.68,'SUBI-001':.82,'SUBI-003':.45,'EVOL-001':0,'EVOL-003':0,'REAC-001':0,'REAC-002':0,'REAC-003':0,'REAC-004':1},
+      state:{'COMP-001':0,'COMP-003':1,'STATE-001':'powder','STATE-003':0,'TRAN-001':0,'TRAN-002':0,'DEPO-001':.68,'SUBI-001':.82,'SUBI-003':.45,'EVOL-001':0,'EVOL-003':0,'REAC-001':0,'REAC-002':0,'REAC-003':0,'REAC-004':1},
       models:['MODEL-DEPO-001'],provenance:[{status:'stand-in',note:'Artist-recognizable diagnostic profile; further calibration required.'}]
     }
   };
