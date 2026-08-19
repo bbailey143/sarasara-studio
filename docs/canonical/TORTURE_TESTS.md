@@ -2,7 +2,7 @@
 
 These are the two deliberately different materials used to challenge the canonical vocabulary. Watercolor tests mobile carrier, wetting, porous paper, evaporation, suspended particles, and optical mixing. Charcoal tests brittle solids, friction, fracture, particle detachment, anchoring, smearing, lifting, and compression.
 
-The machine-readable cases live in [`TORTURE_TESTS.yaml`](TORTURE_TESTS.yaml). They are a contract for the future reference laboratory, not a claim that the painting engine already passes them.
+The machine-readable cases live in [`TORTURE_TESTS.yaml`](TORTURE_TESTS.yaml). They are a contract for the diagnostic laboratory, not a claim that the current prototype or a future painting engine already passes them.
 
 ## Three validation gates
 
@@ -12,11 +12,11 @@ The machine-readable cases live in [`TORTURE_TESTS.yaml`](TORTURE_TESTS.yaml). T
 
 ### Gate 2 — Behavioral prototype test
 
-**PENDING.** Once the minimal diagnostic solver exists, it must reproduce observable phenomena such as damp-paper spread, pigment/carrier separation, drying edges, tooth capture, valley skipping, pressure-dependent deposition, and particle relocation. These tests belong in the dedicated [`docs/validation/`](../validation/) lab plans; they are not product artwork tests.
+**PARTIAL; GATE REMAINS OPEN.** The minimal shared solver now verifies several relationships automatically: separate watercolor carrier and pigment state, conservative pigment transport, porous uptake, moisture-dependent contact, clean-water reactivation, and dry charcoal deposition without carrier. It does not yet isolate every required phenomenon. In particular, spectral wet crossings, clean-water bloom geometry, multiple paper recipes, charcoal tooth/pressure progression, fracture, dust, smudging, lifting, burnishing, and both media's failure ranges remain open. The test-by-test evidence is recorded in [`docs/validation/`](../validation/).
 
 ### Gate 3 — Artist reality test
 
-**MANDATORY and PENDING.** A practicing artist must recognize the intended medium without being told what is being simulated. The review must cover pressure, speed, loading, run-out, layering, substrate response, irregularity, continuous wetness or brittleness, expressive gestures, and believable failure. “Indistinguishable” is not required for v0.1; “recognizable without prompting” is the minimum.
+**MANDATORY and PARTIAL; GATE REMAINS OPEN.** Watercolor diagnostic v0.6 received a **Good / Accept for this scope** artist decision for the shared substrate → carrier → pigment → applicator relationship. That does not approve spectral mixing, blooms, multiple papers, reservoir run-out, or believable failure ranges. No charcoal review is canonical in this repository yet. A practicing artist must still recognize each intended medium without prompting across the required pressure, speed, loading, run-out, layering, substrate, irregularity, expressive, and failure behaviors. “Indistinguishable” is not required for v0.1.
 
 The validation records live in:
 
@@ -27,11 +27,22 @@ No medium graduates from experimental to canonical without passing both the phys
 
 ## How to read the statuses
 
+The machine-readable case mappings use these evidence labels:
+
 | Status | Meaning |
 | --- | --- |
 | `schema_covered` | Existing canonical properties express the phenomenon directly enough to begin a reference test. |
 | `calibration_required` | The concepts are present, but ranges, equations, or pairwise values still need evidence. |
 | `artist_review_required` | The observable behavior must be judged visually and interactively; code checks alone are insufficient. |
+
+The behavioral test tables use these result labels:
+
+| Result | Meaning |
+| --- | --- |
+| `automated_relationship_verified` | A repeatable code check directly verifies the named relationship, but artist feel may still be open. |
+| `artist_accepted_limited_scope` | A saved artist review accepts a precisely written subset, not the entire medium. |
+| `partial_not_isolated` | A related mechanism or observation exists, but the full test has not been separated from confounding variables. |
+| `not_run` | The lab lacks the required scene, measurement, or canonical artist record. |
 
 ## Watercolor acceptance scenes
 

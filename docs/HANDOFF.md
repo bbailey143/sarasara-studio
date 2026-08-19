@@ -93,7 +93,7 @@ The user should be able to start another AI with one sentence:
 
 Prove that one shared, property-driven material architecture can describe and produce recognizable watercolor and charcoal without named-medium engines or hidden special cases. The current browser lab is a diagnostic instrument for that proof, not the production painting application.
 
-The immediate phase is validation closure: reconcile stale formal test statuses with the evidence already gathered, then complete the missing charcoal behavior tests before expanding watercolor realism.
+The validation-status reconciliation is complete. Gate 2 and Gate 3 are explicitly partial and remain open. The next phase is the first missing charcoal behavior test: conservative smudge transport through the shared surface-contact model.
 
 ## What exists now
 
@@ -163,36 +163,32 @@ Still open for watercolor:
 - Still required: tooth capture by height band, pressure progression into valleys, coarse/fine fracture populations, bounded dusting, smudge transport, lift, burnishing/rejection, and a continuous failure range.
 - Every visible charcoal conclusion requires artist review, with saved marks and settings.
 
-## Known documentation mismatch
+## Reconciled validation status
 
-`docs/canonical/TORTURE_TESTS.md`, `docs/canonical/TORTURE_TESTS.yaml`, and both `physics_tests.md` files still describe the behavioral and artist gates broadly as pending or “prototype pending.” That wording predates the current lab and the accepted watercolor v0.6 review. It must be corrected carefully, test by test, without turning limited watercolor acceptance into a claim that all watercolor tests pass.
+- Gate 1 remains **pass**: both media fit the canonical vocabulary without private named-medium properties.
+- Gate 2 is **partial and open**: several watercolor relationships and the dry-charcoal baseline are automated, while many numbered scenes remain unrun.
+- Gate 3 is **partial, mandatory, and open**: watercolor v0.6 is artist-accepted only for its initial shared-interaction scope; no canonical charcoal acceptance exists.
+- `docs/validation/watercolor/physics_tests.md` and `docs/validation/charcoal/physics_tests.md` now distinguish `automated_relationship_verified`, `artist_accepted_limited_scope`, `partial_not_isolated`, and `not_run` test by test.
 
 ## NEXT ACTION — start here
 
-Perform a **validation-status reconciliation pass** before changing simulation behavior.
+Implement **CH-P-05 conservative smudge transport** as a shared surface-contact action.
 
-1. Read:
-   - `docs/canonical/TORTURE_TESTS.md`
-   - `docs/canonical/TORTURE_TESTS.yaml`
-   - `docs/validation/watercolor/physics_tests.md`
-   - `docs/validation/watercolor/artist_review.md`
-   - `docs/validation/watercolor/calibration_notes.md`
-   - `docs/validation/charcoal/physics_tests.md`
-   - `docs/validation/charcoal/artist_review.md`
-   - `lab/shared-solver.test.js`
-2. Replace the blanket “prototype pending” language only where the present automated checks or saved artist review provide direct evidence.
-3. For every test, label it one of:
-   - automated relationship verified;
-   - artist accepted for a stated limited scope;
-   - partially observed but not isolated;
-   - not run / still requires a new lab scene.
-4. Keep Gate 2 and Gate 3 overall open unless every required v0.1 behavior has an explicit record. Watercolor v0.6 acceptance is not permission to pass spectral mixing, blooms, multiple papers, run-out, or failure behavior.
-5. Run `node lab/shared-solver.test.js` and `git diff --check`.
-6. Present the reconciled checklist to the artist in plain language. Any disputed visible status returns to artist review rather than being decided from code.
+1. Read `docs/validation/charcoal/physics_tests.md`, `docs/canonical/INTERACTION_MATRIX.yaml`, `docs/canonical/PROPERTY_REGISTRY.yaml`, `lab/shared-solver.js`, `lab/shared-solver.test.js`, and the pointer-handling section of `lab/diagnostic-lab.html`.
+2. Add a general deposited-particle relocation operation to `SharedSolver`; do not branch on the string `charcoal`. The action must be governed by shared contact/transport properties. If the required friction or sliding-transport property is absent from a profile, add it through the canonical profile contract rather than a medium flag.
+3. Add a lab action selector that clearly separates **Draw** from **Smudge**. Smudge must not draw new pigment. Save the selected action with each historical review record.
+4. Extend `lab/shared-solver.test.js` with a prepared mark and a later smudge gesture. Verify:
+   - source-region deposited mass decreases;
+   - destination-region deposited mass increases;
+   - `initialPigment` does not increase;
+   - a smudge on blank paper creates zero pigment;
+   - total pigment conservation error stays below 1%.
+5. Update `docs/validation/charcoal/physics_tests.md` to `automated_relationship_verified` only after those checks pass. Keep artist status open.
+6. Ask the artist to test whether the smudge feels like existing dusty material being pushed and softened rather than fresh charcoal being painted. Save the mark, settings, rating, and decision before any artistic acceptance.
 
-**Success condition:** a new AI can look at the formal tables and distinguish exactly what passed, what the artist accepted, and what has never been tested, with no contradiction between those tables and the v0.6 record.
+**Success condition:** CH-P-05 has a repeatable conservation check and a usable lab gesture, with no charcoal-only engine path and no invented pigment.
 
-**After success:** implement the next missing **charcoal** diagnostic in the shared solver, beginning with smudge transport if the current lab cannot already isolate it. Smudging must relocate existing particles, conserve the particle ledger, add no new pigment, and receive artist approval. If that requires a charcoal-only shortcut, stop and revise the shared interaction model instead.
+**Outcome rule:** if the mass ledger passes but the gesture feels wrong, recalibrate the shared friction/contact response. If convincing behavior requires a named charcoal shortcut, stop and revise the shared model. After artist approval, proceed to CH-P-01/CH-P-02 tooth and pressure height-band measurements.
 
 ## IN FLIGHT
 
@@ -208,10 +204,10 @@ Perform a **validation-status reconciliation pass** before changing simulation b
 - Added automated guards for conservation, clean water, dry contact, pressure response, paper dampness, carrier uptake, damp-versus-wet spread, pigment-load independence, reactivation, and dry charcoal deposition.
 - Recorded limited artist acceptance of watercolor v0.6 and confirmed the implementation still follows the shared abstract-medium architecture.
 - Restored the archived `OLDEYTIMEYCLAUDE.md` content exactly as root `CLAUDE.md`; it supplies Claude-specific caution, simplicity, surgical-change, and verification guidance alongside this model-neutral baton.
+- Reconciled every formal watercolor and charcoal behavioral row with current evidence. Gate 2 and Gate 3 now say **partial and open** rather than incorrectly implying that no prototype or artist review exists.
 
 ## Blocked and open questions
 
-- The exact minimum behavior set for declaring the entire v0.1 watercolor/charcoal torture test complete needs to be made explicit during reconciliation.
 - Charcoal artist evidence may exist in exported JSON files outside the repository, but it has not been established as canonical in the present docs.
 - The lab has no production brush reservoir, spectral color, measured papers, full particle fracture/dust system, or production renderer.
 - Rust is the intended production direction, but production implementation must wait until the shared foundation survives the stated validation scope.

@@ -11,13 +11,27 @@ test_suite:
       result: pass
     behavioral_prototype_test:
       pass_condition: A minimal diagnostic solver reproduces the listed observable phenomena with conservation and traceable inputs.
-      result: pending
+      result: partial
+      evidence:
+        - watercolor carrier and pigment state are separate
+        - watercolor pigment transport and clean-water reactivation conserve pigment within the diagnostic tolerance
+        - paper-held saturation is separate from mobile surface water
+        - charcoal deposits dry particles without carrier and conserves deposited pigment
+      remaining:
+        - complete the test-by-test scenes in docs/validation
+        - isolate charcoal tooth, pressure, fracture, dust, smudge, lift, and burnish behavior
     artist_reality_test:
       pass_condition: A practicing artist recognizes the medium without being told what is being simulated.
       minimum_v0_1: recognizable_without_prompting
-      result: mandatory_pending
+      result: partial_mandatory
+      evidence:
+        - watercolor diagnostic v0.6 accepted for the limited shared-interaction scope in WC-LAB-1787100187504
+      remaining:
+        - untested watercolor behaviors remain outside the accepted scope
+        - no canonical charcoal artist acceptance is recorded
   graduation_rule: No medium graduates from experimental to canonical without physics validation and artist validation.
   evidence_labels: [schema_covered, calibration_required, artist_review_required]
+  validation_result_labels: [automated_relationship_verified, artist_accepted_limited_scope, partial_not_isolated, not_run]
 
 cases:
   watercolor:
