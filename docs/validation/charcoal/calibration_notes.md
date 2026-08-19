@@ -85,3 +85,12 @@ Each accepted calibration note should record material recipe, substrate, environ
 - Architecture status: the samples calibrate an independent substrate pattern; they do not create charcoal-only contact equations. A photograph supplies appearance evidence, not measured height or friction.
 - Automated evidence: pastel relief is much shallower than Rough Watercolor Paper, grain is more frequent, both colors have identical tooth, light contact favors raised fibers, firm contact reaches more shallow gaps, and smudge/conservation checks still pass.
 - Artist status: **required** for visible scale, contact feel, pressure progression, and whether either ground supports believable charcoal gesture.
+
+### 2026-08-18 — CH-LAB-1787110275815 Pastel White acceptance
+
+- Artist verdict: **Convincing / Accept** for Pastel White appearance and low-pressure smudging.
+- Conditions: charcoal v0.4, Pastel Paper — White v0.2, smudge, pressure `0.26`, speed `1.00`, visibility `1.00`.
+- Saved state: pigment area `14.83%`, deposited pigment `2008.50`, relocated pigment `445.39`, conservation error `0.00012%`.
+- Artist response: “Pastel paper is gold!”
+- Accepted relationship: the sample-guided fine fibrous surface and existing loose-particle smudge behavior work together convincingly at low pressure.
+- Scope limit: this record does not compare Draw contact at light and firm pressure, so CH-P-01 and CH-P-02 remain artist-pending. Light Cream remains unreviewed.

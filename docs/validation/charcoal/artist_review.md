@@ -112,3 +112,17 @@ The v0.1 implementation had inverted the archived grain-scale direction. Substra
 The charcoal behavior remained good, so CH-P-05's limited acceptance stands. The artist again found the paper ugly and its peaks and valleys too dramatic, noting that this Rough preset was created for watercolor and was less exaggerated there. That is a substrate verdict, not a failure of charcoal smudging.
 
 The archived Rough profile remains available for wet-media comparison and is no longer the charcoal recommendation. A generic **Fine-Tooth Drawing Paper v0.1** candidate was added as an immediate response, then superseded before artist review when the artist supplied Pastel White and Pastel Light Cream samples. Charcoal now defaults to sample-guided **Pastel Paper — White**, with **Pastel Paper — Light Cream** sharing exactly the same physical tooth. These candidates have passed automated relationship checks but require fresh artist review before CH-P-01 or CH-P-02 can graduate.
+
+## Recorded review — CH-LAB-1787110275815
+
+- **Date:** 2026-08-18
+- **Material/build:** `material.charcoal.diagnostic.v0.4`
+- **Substrate:** `substrate.paper.pastel-white.reference-derived.experimental.v0.2` — Pastel Paper — White
+- **Action:** Smudge existing material
+- **Settings:** pressure `0.26`, speed `1.00`, diagnostic visibility `1.00`; the saved inactive pigment-load, brush-water, and paper-dampness values were `0.70`, `0.75`, and `0.25`.
+- **Rating:** **Convincing**
+- **Decision:** **Accept for Pastel White appearance and low-pressure smudge scope**
+- **Saved evidence:** pigment area `14.83%`, deposited pigment `2008.50`, loose pigment effectively settled at save time, cumulative relocated pigment `445.39`, conservation error `0.00012%`.
+- **Artist note:** “Pastel paper is gold!”
+
+This accepts the sample-guided Pastel White surface as an artist-convincing ground for the reviewed smudge and confirms that the already accepted loose-particle motion survives at low pressure on the new fibrous paper. It does **not** complete CH-P-01 or CH-P-02: the saved action was Smudge, not Draw, and there is no matched firm-pressure drawing record. Pastel Light Cream also remains unreviewed.
