@@ -74,3 +74,18 @@ The artist recognized the sense of pushing dense particles, but the movement als
 - **Saved evidence:** pigment area `17.13%`, deposited pigment `1580.78`, loose pigment effectively settled at save time, cumulative relocated pigment `2521.69`, conservation error `0.00045%`.
 
 The artist described the revised motion as “looking really good.” CH-P-05’s loose-ridge motion and settling are accepted for this diagnostic checkpoint. This is **not final charcoal approval**: the reviewer explicitly withheld that until the placeholder substrate is replaced and compared with better paper, pointing to the archived watercolor and charcoal/pastel-oriented paper work as useful evidence.
+
+## Recorded review — CH-LAB-1787107111788
+
+- **Date:** 2026-08-18
+- **Material/build:** `material.charcoal.diagnostic.v0.4`
+- **Substrate:** `substrate.paper.plain-white.archive-seed.v0.1` — Plain White
+- **Action:** Smudge existing material
+- **Settings:** pressure `0.96`, speed `1.00`, diagnostic visibility `1.00`; the saved inactive pigment-load, brush-water, and paper-dampness values were `0.70`, `0.75`, and `0.25`.
+- **Rating:** **Convincing**
+- **Decision:** **Accept for this smudge/substrate scope**
+- **Saved evidence:** pigment area `31.00%`, deposited pigment `3922.91`, loose pigment effectively settled at save time, cumulative relocated pigment `6220.98`, conservation error `0.00070%`.
+
+The artist reported that the smudge was “so much fun to use.” This strengthens CH-P-05’s limited artist acceptance and confirms that separating the paper profile did not break the accepted smudge motion on the flat control sheet. A desired minor improvement is believable small particle flicks. That belongs to CH-P-03 / CH-P-04 fracture and dusting, where detached particles must have a bounded physical source and mass ledger; it must not be added as arbitrary random decoration.
+
+This record does not decide CH-P-01 or CH-P-02: Plain White is intentionally flat, the action was smudge rather than draw, and pressure was `0.96`. Rough-paper light/firm drawing comparisons are still required.

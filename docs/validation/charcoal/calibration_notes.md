@@ -48,3 +48,12 @@ Each accepted calibration note should record material recipe, substrate, environ
 - Separation correction: intrinsic roughness, porosity/capacity, permeability, texture seed/scale, and paper color now belong to an independently selected substrate profile rather than the charcoal or watercolor material profile.
 - Automated evidence: Plain is flat; Rough has a meaningful peak/valley range; light charcoal deposits more per cell in the raised Rough band than the valley band; firm pressure increases valley-band deposit; matched Rough watercolor contact absorbs more carrier than Hot Press; conservation checks still pass.
 - Artist status: **pending**. The equations cannot decide whether the procedural Rough sheet looks natural, feels appropriate for charcoal/pastel, or preserves the accepted smudge character.
+
+### 2026-08-18 — CH-LAB-1787107111788 Plain White smudge review
+
+- Artist verdict: **Convincing / Accept for this smudge/substrate scope**.
+- Conditions: charcoal v0.4, Plain White, smudge, pressure `0.96`, speed `1.00`, visibility `1.00`.
+- Artist response: the interaction was notably fun and convincing; the independent substrate refactor did not destroy the accepted particle motion on the flat control sheet.
+- Desired improvement: occasional believable small particle flicks.
+- Model placement: particle flicks belong to future CH-P-03 / CH-P-04 fracture and dusting with detached coarse/fine populations and conservation. Do not add a visual random-speck shortcut.
+- Scope limit: this high-pressure Plain White smudge does not validate tooth capture or pressure-driven valley reach. Rough paper draw reviews remain required.

@@ -94,7 +94,7 @@ The user should be able to start another AI with one sentence:
 
 Prove that one shared, property-driven material architecture can describe and produce recognizable watercolor and charcoal without named-medium engines or hidden special cases. The current browser lab is a diagnostic instrument for that proof, not the production painting application.
 
-The validation-status reconciliation is complete. Gate 2 and Gate 3 are explicitly partial and remain open. Charcoal v0.4 smudge motion is now artist-accepted for that limited scope. The artist explicitly withheld final approval because the placeholder paper was poor, so the next phase is matched artist validation of the recovered independent paper profiles.
+The validation-status reconciliation is complete. Gate 2 and Gate 3 are explicitly partial and remain open. Charcoal v0.4 smudge motion is artist-accepted for that limited scope and was subsequently rated Convincing on the Plain White control. The next phase remains matched **Draw material** validation of the recovered independent paper profiles; the Plain smudge review does not substitute for tooth/pressure evidence.
 
 ## What exists now
 
@@ -166,11 +166,13 @@ Still open for watercolor:
 ### Charcoal
 
 - Correction history: `CH-LAB-1787103913509` rated v0.3 **Good / Recalibrate** because the displaced material stopped like putty.
-- Latest review: `CH-LAB-1787105475421`, profile `material.charcoal.diagnostic.v0.4`.
-- Rating: **Good**. Decision: **Accept for the smudge-motion scope**.
-- Reviewed settings: pressure `0.77`, speed `1.00`, diagnostic visibility `1.00`; saved inactive load `0.70`, brush water `0.75`, and paper dampness `0.25`.
-- Saved measurements: pigment area `17.13%`, deposited pigment `1580.78`, cumulative relocated pigment `2521.69`, conservation error `0.00045%`.
-- Artist conclusion: the revised motion is “looking really good,” but final charcoal approval is withheld until it is tested on a better substrate.
+- `CH-LAB-1787105475421` rated the v0.4 motion **Good / Accept for the smudge-motion scope**, while withholding final charcoal approval pending better paper.
+- Latest review: `CH-LAB-1787107111788`, charcoal v0.4 on the Plain White substrate.
+- Rating: **Convincing**. Decision: **Accept for this smudge/substrate scope**.
+- Reviewed action/settings: smudge, pressure `0.96`, speed `1.00`, diagnostic visibility `1.00`.
+- Saved measurements: pigment area `31.00%`, deposited pigment `3922.91`, cumulative relocated pigment `6220.98`, conservation error `0.00070%`.
+- Artist conclusion: the smudge was “so much fun to use.” Minor desired improvement: believable small particle flicks.
+- Scope correction: this was a high-pressure smudge on intentionally flat paper. It does not validate CH-P-01 tooth capture or CH-P-02 pressure-driven valley reach.
 - Still required: artist acceptance of paper tooth and pressure progression, coarse/fine fracture populations, bounded dusting, lift, burnishing/rejection, and a continuous failure range.
 - Every visible charcoal conclusion requires artist review, with saved marks and settings.
 
@@ -185,7 +187,7 @@ Still open for watercolor:
 
 Complete the **CH-P-01 / CH-P-02 paper and pressure artist comparison** in `lab/diagnostic-lab.html`.
 
-1. Refresh the lab, choose **Charcoal**, **Draw material**, and **Plain White**. Clear the surface.
+1. Refresh the lab, choose **Charcoal**, **Draw material**, and **Plain White**. Clear the surface. Do not use the already reviewed Smudge action for this comparison.
 2. Set pigment load `0.70`, speed `1.00`, pressure `0.25`, and diagnostic visibility `1.00`. Draw several steady strokes and save a rated review.
 3. Change only the paper to **Rough**, clear, and repeat the same strokes. Judge whether peaks catch charcoal, valleys remain broken, and the paper looks/cooperates like a plausible drawing sheet rather than decorative noise. Save a second review.
 4. Keep **Rough**, change only pressure to `0.75`, clear, and repeat. Judge whether greater pressure progressively reaches valleys while preserving paper character instead of merely scaling a dark stamp. Save a third review.
@@ -220,11 +222,14 @@ Complete the **CH-P-01 / CH-P-02 paper and pressure artist comparison** in `lab/
 - Recovered the archive's exact Plain White, Hot Press, Cold Press, and Rough paper seeds. Confirmed there is no separately named charcoal/pastel preset in the preserved branch.
 - Split paper properties out of the material profiles. The lab now saves substrate identity/provenance independently and uses deterministic multi-scale height texture plus paper-specific uptake and color.
 - Added automated checks for flat Plain paper, meaningful Rough height range, light peak capture, pressure-driven valley capture, Rough-versus-Hot-Press carrier uptake, and all existing conservation/smudge relationships.
+- Imported `CH-LAB-1787107111788`: a pressure-`0.96` Plain White smudge was rated **Convincing / Accept** with conservation error `0.00070%`. This strengthens CH-P-05 but does not complete CH-P-01/CH-P-02.
+- Recorded the artist's requested “little random bits” under future CH-P-03/CH-P-04 fracture/dusting rather than implementing arbitrary speckles.
 
 ## Blocked and open questions
 
 - Artist judgment of the recovered paper appearance and contact feel is pending. Automated height bands cannot determine whether Rough looks natural, feels appropriate for charcoal/pastel, or preserves expressive gesture.
 - The archive paper numbers are application presets, not scientific measurements. Their canonical `TRAN-002` mapping is explicitly a normalized diagnostic stand-in.
+- Small particle flicks require a physically bounded detached-particle population and mass ledger in CH-P-03/CH-P-04; no such state exists yet.
 - Live in-app browser inspection could not be completed in the implementation environment; page syntax, control structure, and solver behavior were checked, but the artist must refresh and inspect the actual lab.
 - The lab has no production brush reservoir, spectral color, measured papers, full particle fracture/dust system, or production renderer.
 - Rust is the intended production direction, but production implementation must wait until the shared foundation survives the stated validation scope.
@@ -238,4 +243,5 @@ Complete the **CH-P-01 / CH-P-02 paper and pressure artist comparison** in `lab/
 - Do not replace the accepted substrate → carrier → pigment → applicator relationship with a visual stamp or texture shortcut.
 - Do not claim final watercolor acceptance. The accepted review is deliberately limited.
 - Do not mark a formal physics row passed merely because the solver contains a related equation.
+- Do not satisfy the requested particle flicks with decorative randomness; they must come from conserved fracture/dusting state.
 - Do not begin a production Rust/GPU engine before the validation-status reconciliation and the agreed v0.1 gates are complete.
