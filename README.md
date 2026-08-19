@@ -2,6 +2,8 @@
 
 This repository is the foundation for Sarasara's next generation: a natural-media painting system grounded in a shared, physically meaningful vocabulary.
 
+> **Continuing this work with another AI?** Read [`docs/HANDOFF.md`](docs/HANDOFF.md) first. It contains the permanent relay rules, verified current state, artist decisions, and exact next action.
+
 This branch deliberately contains no application, painting engine, rendering code, or product interface. The legacy Flutter project is preserved separately at `archive/legacy-main` for careful reference and migration work.
 
 ## Foundation rules
