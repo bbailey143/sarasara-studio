@@ -36,6 +36,8 @@ The automated ledger passes CH-P-05's conservation requirements, v0.4 smudge mot
 
 The lab records offered material, material left on the applicator, settled pigment, loose pigment, coarse fragments, fine dust, off-canvas loss, and the artist's image/settings in the exported JSON and browser history. These quantities verify the ledger; they do not prove that the breakup looks or feels right.
 
-### v0.5.1 accepted smudge reference
+### v0.5.2 pressure-smear retest
 
-`CH-LAB-1787158644333` rated the v0.5.1 moderate smudge **Convincing / Accept** at pressure `0.55` and speed `1.00`. Treat that result as the reference: visible dust should remain surface-connected, lose energy, settle, and avoid both a pale frictionless veil and a stopped putty slab. Repeat it only as a regression check after later changes; do not keep polishing an accepted behavior toward an undefined “perfect.”
+`CH-LAB-1787158644333` rated the v0.5.1 moderate smudge **Convincing / Accept** at pressure `0.55` and speed `1.00`. `CH-LAB-1787159371656` then rated the strong pressure-`0.85`, speed-`1.60` smudge **Recognizable / Recalibrate** because it pushed the material away without pressing a dark smear into the paper. v0.5.2 preserves the accepted moderate path and adds pressure anchoring only above it.
+
+Make one dense source mark. Test the moderate reference first at `0.55` / `1.00`; it should remain dusty, surface-connected, and controllable. Without treating that as strong pressure, repeat from a fresh dense mark at `0.85` / `1.60`. The strong pass should leave rubbed charcoal in the contacted trail while some loose dust still moves ahead. Watch **Pressed into paper** rise. Reject it if the whole mark still sweeps away, if no dark smear remains, or if everything becomes a stopped putty slab. Save the v0.5.2 review before returning to the Draw comparison.

@@ -185,3 +185,29 @@ Charcoal v0.5.1 responds by reducing fine-particle launch and sideways spread, i
 This accepts v0.5.1's visible surface resistance, breakup, and settling for the saved moderate smudge. The correct response is to preserve this result rather than chase an undefined “perfect” endpoint. Future work may revisit it only if another change causes an obvious regression or broader artist testing exposes a repeatable problem.
 
 The evidence boundary matters: this export used Smudge at pressure `0.55` and speed `1.00`, not the prescribed strong `0.85` / `1.60` retest and not the light-versus-strong Draw comparison. It therefore does not complete the separate Draw judgment for CH-P-03 / CH-P-04, and it is not final approval of the entire charcoal medium or a production paper.
+
+## Recorded review — CH-LAB-1787159371656
+
+- **Date:** 2026-08-19
+- **Material/build:** `material.charcoal.diagnostic.v0.5.1`
+- **Substrate:** `substrate.paper.pastel-white.reference-derived.experimental.v0.2` — Pastel Paper — White
+- **Action:** Smudge existing material
+- **Settings:** pressure `0.85`, speed `1.60`, diagnostic visibility `6.40`; pigment load `1.00` was inactive during smudging.
+- **Rating:** **Recognizable**
+- **Decision:** **Recalibrate strong-pressure smudging**
+- **Artist note:** “The Strong test doesn't pass. It pushes all of the material around without leaving any marks or smears behind, and now that I think of it, all tests have shown this. In reality, there should be more material being pressed and smeared into the paper — otherwise we're just pushing dust around.”
+- **Saved evidence:** pigment area `20.56%`, deposited pigment `1919.76`, coarse fragments created `116.64`, fine dust created `190.31`, offered source `4352.52`, source remaining `2432.75`, cumulative relocated pigment `3323.37`, effectively zero off-canvas loss, conservation error `0.00066%`; coarse, fine, and loose populations were effectively settled at save time.
+
+This does not revoke the prior acceptance at pressure `0.55` / speed `1.00`; it establishes a failure at the stronger end of the pressure range. The missing behavior is immediate pressure anchoring: strong rubbing should press part of the relocated charcoal into paper tooth as a persistent darker smear while the remaining loose material can still move and settle. The failure is not solved by visibility gain because visibility cannot change where pigment mass resides.
+
+Charcoal v0.5.2 adds that relationship within shared `IM-009`: above the high-load compaction threshold, pressure, friction, deposited packing, paper roughness, and local tooth determine a bounded share that is deposited into the contacted trail. The remainder still follows the existing loose/coarse/fine paths. This adds no pigment and contains no named-medium branch.
+
+## Pending artist gate — charcoal v0.5.2 strong-pressure anchoring
+
+1. Make a fresh dense charcoal mark on **Pastel Paper — White**.
+2. Smudge at pressure `0.55`, speed `1.00`. Confirm the previously accepted moderate behavior still feels dusty, surface-connected, and controllable.
+3. From a fresh dense mark, smudge at pressure `0.85`, speed `1.60`.
+4. In the strong pass, look for rubbed charcoal left in the contacted trail while some loose dust still moves ahead. **Pressed into paper** should rise above zero.
+5. Recalibrate if the whole mark still sweeps away, the smear is too pale, or the result becomes a stopped putty slab. Confirm conservation remains below `1%` and save the review.
+
+Only after both settings pass should the work return to the separate light-versus-strong Draw fracture comparison.

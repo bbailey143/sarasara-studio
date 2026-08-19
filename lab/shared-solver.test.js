@@ -7,6 +7,7 @@ require('./shared-solver.js');
 const {SharedSolver,PROFILES,SUBSTRATES}=window.SarasaraLab;
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 
+assert(PROFILES.charcoal.id==='material.charcoal.diagnostic.v0.5.2','the pressure-anchoring change must remain versioned for artist review history');
 assert(PROFILES.watercolor.state['SUBI-001']===undefined&&PROFILES.charcoal.state['SUBI-001']===undefined,'material profiles must not own intrinsic paper roughness');
 assert(SUBSTRATES.rough.texture.tooth===.85&&SUBSTRATES.coldPress.texture.capacity===.5,'archived paper seed values must remain traceable');
 assert(SUBSTRATES.rough.version==='0.2.0','corrected paper scale must remain versioned for artist review history');
@@ -122,6 +123,7 @@ assert(dryState.deposited_pigment>0,'charcoal profile must deposit dry particles
 assert(dryState.pigment_conservation_error<.01,'charcoal deposition must remain conservative');
 
 const surfaceInRect=(solver,x0,y0,x1,y1)=>{let total=0;for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){const i=y*solver.w+x;total+=solver.deposited[i]+solver.loose[i]+solver.coarse[i]+solver.fineDust[i]}return total};
+const depositedInRect=(solver,x0,y0,x1,y1)=>{let total=0;for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++)total+=solver.deposited[y*solver.w+x];return total};
 const looseCentroidX=solver=>{let mass=0,moment=0;for(let i=0;i<solver.n;i++){mass+=solver.loose[i];moment+=(i%solver.w)*solver.loose[i]}return mass?moment/mass:0};
 const populationCentroidX=(solver,population)=>{let mass=0,moment=0;for(let i=0;i<solver.n;i++){mass+=population[i];moment+=(i%solver.w)*population[i]}return mass?moment/mass:0};
 const pigmentLedger=state=>state.mobile_pigment+state.deposited_pigment+state.loose_pigment+state.coarse_fragment_pigment+state.fine_dust_pigment+state.lost_off_canvas_pigment;
@@ -177,6 +179,16 @@ assert(settledState.pigment_conservation_error<.01,'post-contact motion and sett
 
 const smudgeMovedAtPressure=pressure=>{const solver=new SharedSolver(120,60,PROFILES.charcoal,SUBSTRATES.pastelWhite);solver.depositSegment(40,15,40,45,120,60,.75,.9,0,.8);return solver.smudgeSegment(35,30,68,30,120,60,pressure,.8)};
 assert(smudgeMovedAtPressure(.75)>smudgeMovedAtPressure(.25),'firmer smudge contact must relocate more existing pigment than light contact');
+
+const pressureSmearScene=pressure=>{const solver=new SharedSolver(120,60,PROFILES.charcoal,SUBSTRATES.pastelWhite);solver.depositSegment(40,15,40,45,120,60,.75,.9,0,.8);const before=depositedInRect(solver,44,25,65,36);solver.smudgeSegment(35,30,68,30,120,60,pressure,1.6);return{solver,before,after:depositedInRect(solver,44,25,65,36)}};
+const moderateSmear=pressureSmearScene(.55),strongSmear=pressureSmearScene(.85);
+assert(strongSmear.after-strongSmear.before>moderateSmear.after-moderateSmear.before,'strong pressure must anchor more relocated pigment into a deposited smear than the accepted moderate smudge');
+assert(strongSmear.after>strongSmear.before,'strong smudging must leave pressed pigment in the contacted paper trail instead of moving every particle as loose dust');
+assert(moderateSmear.solver.metrics().pressure_anchored_pigment===0,'the v0.5.2 high-load correction must preserve the accepted pressure-0.55 smudge path');
+assert(strongSmear.solver.metrics().pressure_anchored_pigment>moderateSmear.solver.metrics().pressure_anchored_pigment,'the pressure-anchoring ledger must distinguish strong contact from the accepted moderate reference');
+assert(strongSmear.solver.metrics().loose_pigment>0,'strong pressure anchoring must coexist with loose dusty movement rather than turn the whole smudge into putty');
+assert(strongSmear.solver.metrics().pigment_conservation_error<.01,'strong pressure anchoring must conserve the full pigment ledger');
+assert(!/watercolor|charcoal/i.test(SharedSolver.prototype.smudgeSegment.toString()),'smudge pressure anchoring must not branch on a named medium');
 
 const blankSmudge=new SharedSolver(120,60,PROFILES.charcoal,SUBSTRATES.pastelWhite);
 blankSmudge.smudgeSegment(20,30,90,30,120,60,.8,1.2);

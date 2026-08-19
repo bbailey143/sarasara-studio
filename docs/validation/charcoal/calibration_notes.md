@@ -132,3 +132,14 @@ Each accepted calibration note should record material recipe, substrate, environ
 - Saved state: pigment area `13.94%`, deposited `801.65`, coarse created `29.87`, fine dust created `48.73`, offered source `1819.08`, source remaining `1017.42`, relocated `1759.55`, effectively zero off-canvas loss, conservation error `0.00141%`.
 - Calibration decision: stop tuning this accepted smudge unless a later change creates a visible regression or broader artist testing identifies a repeatable issue.
 - Evidence boundary: this was a moderate Smudge review, not the planned pressure-`0.85` / speed-`1.60` repeat and not the prescribed light-versus-strong Draw comparison. Draw fracture remains the next artist question; do not infer that it was performed from this representative export.
+
+### 2026-08-19 — CH-LAB-1787159371656 and v0.5.2 pressure anchoring
+
+- Artist verdict on v0.5.1 strong smudging: **Recognizable / Recalibrate**.
+- Reviewed action: Smudge on Pastel Paper — White at pressure `0.85`, speed `1.60`, visibility `6.40`.
+- Artist diagnosis: strong contact pushed nearly all visible material around without leaving the expected rubbed mark or smear pressed into the paper; the system read as moving dust rather than compressing charcoal against tooth.
+- Saved state: pigment area `20.56%`, deposited `1919.76`, coarse created `116.64`, fine dust created `190.31`, offered source `4352.52`, source remaining `2432.75`, relocated `3323.37`, effectively zero off-canvas loss, conservation error `0.00066%`.
+- Evidence boundary: the saved action is Smudge, not Draw. It rejects the strong-pressure end of CH-P-05 while preserving the separately accepted pressure-`0.55` / speed-`1.00` scope. The matched Draw fracture comparison remains open.
+- v0.5.2 response: add a shared high-load anchoring share to `IM-009`. Above normalized pressure `0.55`, pressure, `TRIB-002` friction, `DEPO-004` packing, `SUBI-001` roughness, and local paper tooth determine how much relocated material deposits immediately into the contacted trail; all remaining material keeps the existing loose/coarse/fine behavior.
+- Matched code check: at pressure `0.55`, anchored mass is exactly `0` and the accepted path is unchanged. At pressure `0.85` / speed `1.60`, `0.06547` of `0.37697` relocated units (`17.37%`) anchor immediately; deposited mass in the checked clean trail rises from `0` to `0.04165`, loose mass remains `0.29237`, and conservation error is `0.00000112%`. `[1 RUN ONLY]`
+- Artist status: **mandatory retest pending** at both moderate and strong settings. The 17.37% relationship is an unmeasured calibration starting point, not an accepted physical constant.

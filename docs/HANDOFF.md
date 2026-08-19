@@ -80,10 +80,10 @@ The user should be able to start another AI with one sentence:
 
 - This foundation has no package install or production build yet. The lab is dependency-free HTML and JavaScript.
 - Verified command: `node lab/shared-solver.test.js`
-- Verified result again on 2026-08-19 after recording the v0.5.1 artist review: `shared solver checks passed`, including all earlier material/substrate, watercolor, paper, smudge, and fracture relationships plus a matched check that greater shared `TRIB-002` friction shortens fine-dust travel while coarse/fine ordering, determinism, source closure, off-canvas accounting, and conservation below 1% remain intact.
+- Verified result on 2026-08-19 after the v0.5.2 pressure-anchoring change: `shared solver checks passed`, including all earlier material/substrate, watercolor, paper, smudge, and fracture relationships plus matched checks that pressure `0.55` preserves zero added anchoring, pressure `0.85` leaves an immediate deposited smear while loose material remains, the full ledger stays below 1% error, and the shared smudge function contains no named-medium branch.
 - Verified command: `git diff --check`
-- Verified result on 2026-08-19 after the review/history update: passed with no whitespace errors.
-- Verified the inline lab script parses, every required reading/control ID occurs exactly once, and the fracture/dust functions contain no `watercolor` or `charcoal` branch. Browser control could not connect because its trusted runtime path was rejected; visual and feel inspection therefore remains the mandatory artist task.
+- Verified result on 2026-08-19 after the v0.5.2 implementation and review/history update: passed with no whitespace errors.
+- Verified the inline lab script parses, every required reading/control ID occurs exactly once, and the fracture/dust and smudge-pressure functions contain no `watercolor` or `charcoal` branch. Browser control could not connect because its trusted runtime path was rejected; visual and feel inspection therefore remains the mandatory artist task.
 - The baton was introduced in local commit `f1be021` (`docs: add durable AI handoff baton`).
 - The original nine-commit checkpoint was published through `bcc0e6b` on `origin/vnext-bootstrap`.
 - Archived AI guidance was restored exactly as root `CLAUDE.md` in commit `9c48cc6`.
@@ -98,7 +98,7 @@ The user should be able to start another AI with one sentence:
 
 Prove that one shared, property-driven material architecture can describe and produce recognizable watercolor and charcoal without named-medium engines or hidden special cases. The current browser lab is a diagnostic instrument for that proof, not the production painting application.
 
-The validation-status reconciliation is complete. Gate 2 and Gate 3 are explicitly partial and remain open. Charcoal v0.4 smudge motion, Pastel Paper fiber capture, pressure-driven gap reach, and v0.5.1 moderate-smudge breakup/drag are artist-accepted for their stated diagnostic scopes. `CH-LAB-1787158644333` rated v0.5.1 **Convincing / Accept** at pressure `0.55` and speed `1.00`. Preserve that accepted smudge; the remaining CH-P-03/04 artist question is the prescribed light-versus-strong Draw comparison.
+The validation-status reconciliation is complete. Gate 2 and Gate 3 are explicitly partial and remain open. Charcoal v0.4 smudge motion, Pastel Paper fiber capture, pressure-driven gap reach, and v0.5.1 moderate smudging are artist-accepted for their stated scopes. `CH-LAB-1787159371656` rated v0.5.1 strong smudging **Recognizable / Recalibrate** because it swept charcoal away without pressing a smear into the paper. v0.5.2 adds shared high-load pressure anchoring and now requires artist review before the separate Draw comparison resumes.
 
 ## What exists now
 
@@ -117,7 +117,7 @@ The validation-status reconciliation is complete. Gate 2 and Gate 3 are explicit
 - `lab/shared-solver.js` contains one solver used by both profiles.
 - `lab/ARCHITECTURE.md` maps the solver to canonical properties and named models.
 - The solver begins from an abstract material state. `watercolor` and `charcoal` are profile selectors, not separate engines.
-- Current profiles are `material.watercolor.diagnostic.v0.6.1` and `material.charcoal.diagnostic.v0.5.1`. Watercolor v0.6.1 preserves the artist-reviewed v0.6 drawing constants and adds only stand-in friction/packing inputs for the shared smudge action; smudge itself is not artist-accepted for watercolor. Charcoal v0.5.1 preserves v0.4's accepted loose-particle smudge relationship, keeps v0.5's conserved fracture ledger, and increases shared fine-dust drag/settling after the v0.5 artist review.
+- Current profiles are `material.watercolor.diagnostic.v0.6.1` and `material.charcoal.diagnostic.v0.5.2`. Watercolor v0.6.1 preserves the artist-reviewed v0.6 drawing constants and adds only stand-in friction/packing inputs for the shared smudge action; smudge itself is not artist-accepted for watercolor. Charcoal v0.5.2 preserves v0.5.1 at the accepted pressure-`0.55` setting and adds only a shared high-load anchoring share for stronger smudging.
 - Paper is now a separate participant selected independently from material. The lab offers archive-seeded Plain White, Hot Press, Cold Press, and Rough Watercolor Paper plus reference-derived experimental Pastel Paper — White and Light Cream; saved reviews record the selected substrate ID, name, and provenance.
 - The commercial 5100 × 5100 samples are not copied into the repository. Their measured base color, low contrast, and visible fiber scale guide the procedural profiles; physical height/friction remain stand-ins. White and Cream share exactly the same physical tooth, so color cannot alter charcoal behavior.
 - The archive contains no separately named charcoal/pastel paper. Charcoal now selects Pastel Paper — White by default. This UI default does not change material physics or create a named-medium engine branch.
@@ -137,6 +137,7 @@ The validation-status reconciliation is complete. Gate 2 and Gate 3 are explicit
 - Clean water uses the same contact transaction and may reactivate pigment without inventing pigment mass.
 - Charcoal deposits dry particles with no carrier through the same shared contact/state framework.
 - A shared **Smudge existing material** action lifts deposited pigment into a short-lived loose state using friction, packing, pressure, speed, and substrate roughness. Loose particles retain gesture-direction momentum, coast briefly after contact, lose energy, and settle without calling the deposition path or branching on a medium name.
+- Above the shared high-load compaction threshold, smudging immediately anchors a bounded share of relocated material into the contacted paper trail using pressure, friction, packing, roughness, and local tooth. The remainder still moves as loose/coarse/fine material. The cumulative **Pressed into paper** reading and saved JSON field `pressure_anchored_pigment` expose this relationship.
 - Shared fracture contact can split transferred or already deposited/loose material into coarse fragments and fine dust only when the property profile defines a brittle particulate source. Coarse pieces travel less and settle faster; fine dust travels farther and settles slower; off-canvas mass is recorded.
 - The dry-material ledger now exposes offered source, material remaining on the tool, settled, loose, coarse, fine, and lost/off-canvas pigment. The artist-facing history and exported JSON retain these quantities with the mark and verdict.
 
@@ -175,12 +176,12 @@ Still open for watercolor:
 - Correction history: `CH-LAB-1787103913509` rated v0.3 **Good / Recalibrate** because the displaced material stopped like putty.
 - `CH-LAB-1787105475421` rated the v0.4 motion **Good / Accept for the smudge-motion scope**, while withholding final charcoal approval pending better paper.
 - `CH-LAB-1787107111788` rated a Plain White smudge **Convincing / Accept** and described it as “so much fun to use.” Minor desired improvement: believable small particle flicks.
-- Latest review: `CH-LAB-1787158644333`, charcoal v0.5.1 on Pastel White v0.2. Rating **Convincing**; decision **Accept for the reviewed moderate-smudge fracture/dust/drag scope**.
-- Latest settings: smudge, pressure `0.55`, speed `1.00`, diagnostic visibility `1.00`. Measurements: pigment area `13.94%`, deposited pigment `801.65`, coarse created `29.87`, fine created `48.73`, cumulative relocated pigment `1759.55`, conservation error `0.00141%`.
-- Artist conclusion: “This looks pretty darn good.” Preserve the accepted moderate smudge rather than tuning toward an undefined perfect endpoint. This export does not establish the prescribed strong-smudge or light-versus-strong Draw scenes.
+- Latest review: `CH-LAB-1787159371656`, charcoal v0.5.1 on Pastel White v0.2. Rating **Recognizable**; decision **Recalibrate strong-pressure smudging**.
+- Latest settings: smudge, pressure `0.85`, speed `1.60`, diagnostic visibility `6.40`. Measurements: pigment area `20.56%`, deposited pigment `1919.76`, coarse created `116.64`, fine created `190.31`, cumulative relocated pigment `3323.37`, conservation error `0.00066%`.
+- Artist conclusion: the strong pass pushed material around without leaving the darker rubbed smear that real pressure should force into paper. This does not revoke the accepted moderate result; it identifies the missing strong-pressure transition.
 - Correction: fixing the inverted archived grain scale was necessary but did not make Rough suitable for charcoal. Do not keep tuning that wet-media paper toward dry-media needs.
 - Generic Fine-Tooth v0.1 was superseded before artist review. Sample-guided Pastel White/Cream v0.2 use identical fibrous tooth with different ground colors. Automated relationships pass. `CH-LAB-1787110275815` artist-accepted Pastel White appearance and low-pressure smudging as Convincing; direct follow-up confirms all prescribed light/firm Draw and Light Cream comparisons were also performed and approved.
-- CH-P-01 and CH-P-02 are artist-accepted for Pastel Paper v0.2's diagnostic scope. CH-P-03 and CH-P-04 have automated relationship evidence plus limited artist acceptance for v0.5.1 moderate smudging; the matched light-versus-strong Draw comparison remains open. Lift, burnishing/rejection, and a continuous failure range remain unbuilt.
+- CH-P-01 and CH-P-02 are artist-accepted for Pastel Paper v0.2's diagnostic scope. CH-P-03 and CH-P-04 have automated relationship evidence plus limited artist acceptance for v0.5.1 moderate smudging; the matched light-versus-strong Draw comparison remains open. CH-P-05's moderate behavior is accepted, while its new v0.5.2 strong-pressure anchoring extension awaits review. Lift, burnishing/rejection, and a continuous failure range remain unbuilt.
 - Every visible charcoal conclusion requires artist review, with saved marks and settings.
 
 ## Reconciled validation status
@@ -192,25 +193,27 @@ Still open for watercolor:
 
 ## NEXT ACTION — start here
 
-Run the mandatory charcoal v0.5.1 **light-versus-strong Draw comparison** in `lab/diagnostic-lab.html`. Do not alter the accepted smudge first.
+Run the mandatory charcoal v0.5.2 **moderate regression plus strong pressure-smear retest** in `lab/diagnostic-lab.html` before returning to Draw fracture.
 
-1. Choose **Charcoal**, **Pastel Paper — White**, and **Draw material**.
-2. Make a short stroke at pigment load `0.35`, pressure `0.25`, speed `0.35`.
-3. Clear the surface, then repeat the same kind of gesture at load `1.00`, pressure `0.85`, speed `1.60`.
-4. Judge whether the stronger stroke produces continuously more breakup, with a few coarse crumbs staying nearer the stroke and fine dust traveling only a little farther. Reject an even spray, glitter, decorative dots, or breakup disconnected from the contacted stroke.
-5. Confirm the main stroke still catches the accepted Pastel Paper fibers, conservation remains below `1%`, and a blank smudge invents no particles. Save/export the review. If the artist already performed both comparisons but exported only one representative iteration, record that only after the artist says so directly.
-6. Import the review into `docs/validation/charcoal/artist_review.md` and `calibration_notes.md`. If accepted, close CH-P-03/04 for the limited diagnostic scope and advance to shared CH-P-06 lift. If recalibration is needed, adjust only Draw fracture behavior and preserve the accepted v0.5.1 smudge.
+1. Choose **Charcoal**, **Pastel Paper — White**, and **Draw material**. Make a dense source mark.
+2. Switch to **Smudge existing material**. At pressure `0.55`, speed `1.00`, confirm the previously accepted dusty, surface-connected moderate behavior still feels convincing. **Pressed into paper** should remain `0` at this exact reference setting.
+3. Clear, make a fresh dense source mark, then smudge at pressure `0.85`, speed `1.60`.
+4. In the strong pass, judge whether rubbed charcoal now remains in the contacted trail while some loose dust still travels ahead. **Pressed into paper** must rise above `0`.
+5. Recalibrate if the whole mark still sweeps away, the trail is too pale, the pressure transition is abrupt, or the result becomes a stopped putty slab. Confirm conservation remains below `1%` and blank smudging invents nothing. Save/export the review.
+6. Import both judgments. If moderate and strong pass, return to the light-versus-strong Draw comparison already specified in `docs/validation/charcoal/artist_review.md`. If either fails, adjust only the shared pressure-anchoring relationship; do not retune accepted dust drag or paper.
 
-**Why this action:** v0.5.1 moderate smudging is now artist-accepted. The code already proves that stronger loading creates more conserved coarse/fine material, but only the artist can decide whether the Draw transition looks like charcoal breaking against paper.
+**Why this action:** the artist identified missing compression at strong load. v0.5.2 adds only that relationship while deliberately preserving pressure `0.55`; code checks cannot decide whether the resulting smear looks naturally pressed into paper.
 
-**Success condition:** the artist accepts the matched Draw progression as believable, bounded breakup without requiring changes to the accepted smudge.
+**Success condition:** the artist accepts both the unchanged moderate smudge and the new strong-pressure balance of persistent rubbed smear plus moving dust.
 
 ## IN FLIGHT
 
-- Nothing in code. Charcoal v0.5.1 moderate smudging is accepted; the matched Draw comparison above is ready for artist review.
+- Nothing in code. Charcoal v0.5.2 is implemented and code-verified; artist review is the next action.
 
 ## Recently completed
 
+- Imported `CH-LAB-1787159371656`: charcoal v0.5.1, Pastel White, strong smudge at pressure `0.85` / speed `1.60`, rated **Recognizable / Recalibrate** because the contact swept material without leaving a pressed smear. Saved pigment area `20.56%`, deposited `1919.76`, coarse created `116.64`, fine created `190.31`, offered source `4352.52`, source remaining `2432.75`, relocated `3323.37`, conservation error `0.00066%`. `[1 RUN ONLY]`
+- Added v0.5.2 shared high-load pressure anchoring plus a cumulative `pressure_anchored_pigment` ledger and **Pressed into paper** lab reading. In the matched test, pressure `0.55` anchors exactly `0`; pressure `0.85` anchors `0.06547` of `0.37697` relocated units (`17.37%`), leaves `0.29237` loose, raises clean-trail deposited mass from `0` to `0.04165`, and keeps conservation error at `0.00000112%`. `[1 RUN ONLY]`
 - Imported `CH-LAB-1787158644333`: charcoal v0.5.1, Pastel White, moderate smudge at pressure `0.55` / speed `1.00`, rated **Convincing / Accept**. Saved pigment area `13.94%`, deposited `801.65`, coarse created `29.87`, fine created `48.73`, offered source `1819.08`, source remaining `1017.42`, relocated `1759.55`, effectively zero off-canvas loss, conservation error `0.00141%`. This accepts moderate-smudge breakup/drag only; it does not prove the separate strong-smudge or matched Draw scenes. `[1 RUN ONLY]`
 - Imported `CH-LAB-1787112551932`: charcoal v0.5, Pastel White, strong smudge at pressure `0.85` / speed `1.60`, rated **Good / Recalibrate** because it was too light, wispy, and nearly frictionless. Saved pigment area `33.27%`, deposited `3241.69`, coarse created `144.29`, fine created `235.42`, relocated `3033.75`, conservation error `0.00114%`.
 - Added v0.5.1 shared recalibration: reduced fine-particle forward/side launch, increased fine-particle energy loss from kinetic friction and substrate roughness, and increased settling without changing the accepted base loose-ridge smudge path or adding a named-medium branch.
@@ -257,7 +260,8 @@ Run the mandatory charcoal v0.5.1 **light-versus-strong Draw comparison** in `la
 - Pastel White/Light Cream appearance, light/firm Draw contact, and smudge behavior are artist-accepted for the v0.2 diagnostic scope. Only the representative smudge has exported JSON evidence; the broader approval is a direct artist statement.
 - The photographs provide color and visible-pattern evidence, not surface-height or friction measurements. Those values remain diagnostic stand-ins and may require recalibration.
 - The archive paper numbers are application presets, not scientific measurements. Their canonical `TRAN-002` mapping is explicitly a normalized diagnostic stand-in.
-- CH-P-03/04 v0.5 received a Good / Recalibrate verdict for nearly frictionless strong-smudge dust. v0.5.1 moderate-smudge breakup/drag is now Convincing / Accept; the prescribed light-versus-strong Draw comparison remains artist-pending.
+- CH-P-03/04 v0.5 received a Good / Recalibrate verdict for nearly frictionless strong-smudge dust. v0.5.1 moderate-smudge breakup/drag is Convincing / Accept; the prescribed light-versus-strong Draw comparison remains artist-pending.
+- CH-P-05 strong pressure failed in `CH-LAB-1787159371656` because it swept material without a pressed smear. v0.5.2's 17.37% matched anchoring result is code evidence only and requires artist approval at moderate and strong settings.
 - Live in-app browser inspection could not be completed in the implementation environment; page syntax, control structure, and solver behavior were checked, but the artist must refresh and inspect the actual lab.
 - The lab has no production brush reservoir, spectral color, measured papers, physically measured fracture constants/particle sizes, lift/burnish system, or production renderer.
 - Rust is the intended production direction, but production implementation must wait until the shared foundation survives the stated validation scope.
@@ -267,6 +271,7 @@ Run the mandatory charcoal v0.5.1 **light-versus-strong Draw comparison** in `la
 - Do not make a new watercolor-specific or charcoal-specific engine.
 - Do not add flags such as `watercolorMode`, `charcoalMode`, `dryBrushMode`, or `bloomEffect` to make a test pass.
 - Do not confuse stronger diagnostic visibility with more physical pigment.
+- Do not solve the missing strong-pressure smear by increasing display gain; `CH-LAB-1787159371656` already used `6.40×`, and visibility cannot change deposited mass.
 - Do not rejoin paper dampness and mobile surface water; that caused weak, swollen moderate-water marks.
 - Do not replace the accepted substrate → carrier → pigment → applicator relationship with a visual stamp or texture shortcut.
 - Do not claim final watercolor acceptance. The accepted review is deliberately limited.
