@@ -50,10 +50,13 @@ Three materially different results, no medium-name branch anywhere in the path.
 
 ## Known residual issue
 
-The deposit loop includes both segment endpoints, so the same line drawn as one long segment versus twenty-four short ones deposits  against  — about 20% more paint for the same gesture. This predates the oil work, affects watercolor and charcoal equally, and changing it would move already-approved charcoal results. It needs its own work.
+The deposit loop includes both segment endpoints, so the same line drawn as one long segment versus twenty-four short ones deposits `69.4` against `83.5` — about 20% more paint for the same gesture. This predates the oil work, affects watercolor and charcoal equally, and changing it would move already-approved charcoal results. It needs its own work.
 
 ## Not yet evidence of anything visual
 
-No artist has drawn with this. The stand-in yield stress, viscosity, packing,
-density, transfer efficiency, relief shading, and colour are all unmeasured.
-OL-P-09 is the gate that matters, and it is open.
+Artist review OIL-001 has happened and rejected v0.1 for scraping the sheet;
+see [artist_review.md](artist_review.md). The fix that followed is code
+evidence only and has not been looked at. The stand-in yield stress,
+viscosity, packing, density, detachment threshold, transfer efficiency,
+relief shading, and colour all remain unmeasured. OL-P-09 is still the gate
+that matters, and it is still open.
