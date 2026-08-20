@@ -75,11 +75,11 @@
     getCalibration(){return calibrationCopy(this.calibration)}
     transformPressure(value){return interpolatePressure(this.calibration.curve,value)}
     calibratedSpeed(value){return Math.max(.1,Math.min(2,.1+(Math.max(.1,Math.min(2,Number(value)||.1))-.1)*this.calibration.speed))}
-    setProfile(profile){this.profile=validateProfile(profile);this.p=profile.state;this.displayGain=profile.display?.pigment_visibility_gain||1;this.water=new Float32Array(this.n);this.mobile=new Float32Array(this.n);this.deposited=new Float32Array(this.n);this.loose=new Float32Array(this.n);this.looseVx=new Float32Array(this.n);this.looseVy=new Float32Array(this.n);this.nextLoose=new Float32Array(this.n);this.nextLooseMx=new Float32Array(this.n);this.nextLooseMy=new Float32Array(this.n);this.coarse=new Float32Array(this.n);this.coarseVx=new Float32Array(this.n);this.coarseVy=new Float32Array(this.n);this.nextCoarse=new Float32Array(this.n);this.nextCoarseMx=new Float32Array(this.n);this.nextCoarseMy=new Float32Array(this.n);this.fineDust=new Float32Array(this.n);this.fineDustVx=new Float32Array(this.n);this.fineDustVy=new Float32Array(this.n);this.nextFineDust=new Float32Array(this.n);this.nextFineDustMx=new Float32Array(this.n);this.nextFineDustMy=new Float32Array(this.n);this.absorbed=new Float32Array(this.n);this.nextWater=new Float32Array(this.n);this.nextMobile=new Float32Array(this.n);this.nextDeposited=new Float32Array(this.n);this.initialPigment=0;this.lostPigment=0;this.relocatedPigment=0;this.pressureAnchoredPigment=0;this.sourceOfferedPigment=0;this.sourceRemainingPigment=0;this.coarseCreatedPigment=0;this.fineCreatedPigment=0;this.dryBoost=1;this.elapsed=0}
+    setProfile(profile){this.profile=validateProfile(profile);this.p=profile.state;this.displayGain=profile.display?.pigment_visibility_gain||1;this.water=new Float32Array(this.n);this.mobile=new Float32Array(this.n);this.deposited=new Float32Array(this.n);this.loose=new Float32Array(this.n);this.looseVx=new Float32Array(this.n);this.looseVy=new Float32Array(this.n);this.nextLoose=new Float32Array(this.n);this.nextLooseMx=new Float32Array(this.n);this.nextLooseMy=new Float32Array(this.n);this.coarse=new Float32Array(this.n);this.coarseVx=new Float32Array(this.n);this.coarseVy=new Float32Array(this.n);this.nextCoarse=new Float32Array(this.n);this.nextCoarseMx=new Float32Array(this.n);this.nextCoarseMy=new Float32Array(this.n);this.fineDust=new Float32Array(this.n);this.fineDustVx=new Float32Array(this.n);this.fineDustVy=new Float32Array(this.n);this.nextFineDust=new Float32Array(this.n);this.nextFineDustMx=new Float32Array(this.n);this.nextFineDustMy=new Float32Array(this.n);this.absorbed=new Float32Array(this.n);this.nextWater=new Float32Array(this.n);this.nextMobile=new Float32Array(this.n);this.nextDeposited=new Float32Array(this.n);this.initialPigment=0;this.lostPigment=0;this.relocatedPigment=0;this.pressureAnchoredPigment=0;this.sourceOfferedPigment=0;this.sourceRemainingPigment=0;this.coarseCreatedPigment=0;this.fineCreatedPigment=0;this.carriedPigment=0;this.dryBoost=1;this.elapsed=0}
     setSubstrate(substrate){this.substrate=validateSubstrate(substrate);this.s=substrate.state;this.buildPaperSurface()}
     setSmoothing(enabled){this.smoothing=enabled!==false}
     setDisplayGain(value){this.displayGain=Math.max(1,Math.min(12,Number(value)||1))}
-    clear(substrateDampness=0){const saturation=this.regime()==='flowing'?Math.max(0,Math.min(1,substrateDampness))*this.s['SUBI-003']:0;this.water.fill(0);this.mobile.fill(0);this.deposited.fill(0);this.loose.fill(0);this.looseVx.fill(0);this.looseVy.fill(0);this.coarse.fill(0);this.coarseVx.fill(0);this.coarseVy.fill(0);this.fineDust.fill(0);this.fineDustVx.fill(0);this.fineDustVy.fill(0);this.absorbed.fill(saturation);this.initialPigment=0;this.lostPigment=0;this.relocatedPigment=0;this.pressureAnchoredPigment=0;this.sourceOfferedPigment=0;this.sourceRemainingPigment=0;this.coarseCreatedPigment=0;this.fineCreatedPigment=0;this.dryBoost=1;this.elapsed=0}
+    clear(substrateDampness=0){const saturation=this.regime()==='flowing'?Math.max(0,Math.min(1,substrateDampness))*this.s['SUBI-003']:0;this.water.fill(0);this.mobile.fill(0);this.deposited.fill(0);this.loose.fill(0);this.looseVx.fill(0);this.looseVy.fill(0);this.coarse.fill(0);this.coarseVx.fill(0);this.coarseVy.fill(0);this.fineDust.fill(0);this.fineDustVx.fill(0);this.fineDustVy.fill(0);this.absorbed.fill(saturation);this.initialPigment=0;this.lostPigment=0;this.relocatedPigment=0;this.pressureAnchoredPigment=0;this.sourceOfferedPigment=0;this.sourceRemainingPigment=0;this.coarseCreatedPigment=0;this.fineCreatedPigment=0;this.carriedPigment=0;this.dryBoost=1;this.elapsed=0}
     regime(){const yieldStress=Number(this.p['RHEO-002']);if(Number.isFinite(yieldStress)&&yieldStress>0)return'body';return this.p['COMP-001']<.02?'granular':'flowing'}
     hasYieldingBody(){return this.regime()==='body'}
     reliefHeight(index){const packing=Math.max(.05,Math.min(1,Number(this.p['DEPO-004'])||.05)),density=Math.max(.05,Math.min(1,Number(this.p['PART-002'])||.05));return this.deposited[index]/(packing*density)}
@@ -102,16 +102,26 @@
     }
     /** `sweep` is the share of one footprint crossing this contact represents,
         so the total displaced over a crossing does not depend on sampling rate. */
-    pushLayer(index,targetIndex,pressure,sweep=1){
-      if(!this.hasYieldingBody()||index===targetIndex)return 0;
+    /** How readily the tool takes material off the sheet and gives it back.
+        Picking up is gated by yield stress; laying down favours emptier ground,
+        which is what lets a loaded brush drag colour out onto bare canvas. */
+    smearBody(index,pressure,sweep=1){
+      if(!this.hasYieldingBody())return 0;
       const yieldStress=Math.max(0,Number(this.p['RHEO-002'])||0),stress=this.bodyStress(pressure);
-      if(stress<=yieldStress)return 0;
-      const mobile=Math.max(0,this.deposited[index]-this.retainedFilmMass());
-      if(mobile<=0)return 0;
-      const share=Math.max(0,Math.min(.6,(stress-yieldStress)/Math.max(.05,1-yieldStress)));
-      const amount=mobile*share*Math.max(0,Math.min(1,sweep));
-      if(amount<=0)return 0;
-      this.deposited[index]-=amount;this.deposited[targetIndex]+=amount;this.relocatedPigment+=amount;return amount;
+      const floor=this.retainedFilmMass(),reach=Math.max(0,Math.min(1,sweep));
+      let lifted=0;
+      if(stress>yieldStress){
+        const share=Math.max(0,Math.min(.6,(stress-yieldStress)/Math.max(.05,1-yieldStress)));
+        const available=Math.max(0,this.deposited[index]-floor);
+        lifted=available*share*reach;
+        if(lifted>0){this.deposited[index]-=lifted;this.carriedPigment+=lifted}
+      }
+      if(this.carriedPigment>0){
+        const full=Math.max(1e-9,floor*4),room=Math.max(0,Math.min(1,1-this.deposited[index]/full));
+        const laid=this.carriedPigment*Math.min(1,(.02+.12*room)*reach);
+        if(laid>0){this.carriedPigment-=laid;this.deposited[index]+=laid;this.relocatedPigment+=laid}
+      }
+      return lifted;
     }
     hasBrittleParticleSource(){const phase=this.p['STATE-001'],distribution=this.p['PART-001'];return(phase==='powder'||phase==='brittle_solid')&&this.p['COMP-003']>0&&Number.isFinite(this.p['TRIB-003'])&&distribution&&typeof distribution==='object'}
     fractureSplit(pressure,speed,tooth){if(!this.hasBrittleParticleSource())return{coarse:0,fine:0};const clamp=value=>Math.max(0,Math.min(1,value)),packing=clamp(this.p['DEPO-004']),toughness=clamp(this.p['TRIB-003']),abrasion=clamp(this.p['TRIB-004']),normal=clamp(pressure*this.calibration.particleBreakup),sliding=clamp((this.calibratedSpeed(speed)-.1)/1.9),roughness=clamp(this.s['SUBI-001']),distribution=this.p['PART-001'],coarseShare=clamp(Number(distribution.coarse_fraction)||0),fineShare=clamp(Number(distribution.fine_fraction)||0),shareTotal=coarseShare+fineShare||1;const detached=clamp((1-toughness*.65)*(1-abrasion*.4)*(1-packing*.38)*(.08+normal*.52)*(.15+sliding*.5)*(.35+roughness*tooth*.65));return{coarse:detached*coarseShare/shareTotal,fine:detached*fineShare/shareTotal}}
@@ -131,7 +141,7 @@
         if(body){
           const relief=this.reliefHeight(i),amount=pigment*k/(1+relief*.55);
           this.deposited[i]+=amount;addedPigment+=amount;
-          if(strokeX||strokeY){const tx=Math.max(0,Math.min(this.w-1,Math.round(x+strokeX))),ty=Math.max(0,Math.min(this.h-1,Math.round(y+strokeY)));this.pushLayer(i,ty*this.w+tx,pressure,sweep)}
+          this.smearBody(i,pressure,sweep);
         }
         else if(dry){const tooth=this.tooth(x,y),texturePressure=Math.max(0,Math.min(1,pressure*this.calibration.paperTexture)),gestureSpeed=this.calibratedSpeed(speed),contact=tooth*.72+texturePressure*.48,potential=pigment*k,particleDensity=Math.max(0,Math.min(1,Number(this.p['PART-002'])||0)),shape=Math.max(0,Math.min(1,Number(this.p['PART-003'])||0)),grain=this.noise(x*1.91,y*2.37,this.substrate.texture.seed+1231),coverage=Math.max(.12,Math.min(.92,.02+texturePressure*.34+particleDensity*.18+tooth*.5-shape*.08));this.sourceOfferedPigment+=potential;if(contact<.34||grain>coverage||(gestureSpeed>1.05&&contact<.58&&((x+y)%3===0))){this.sourceRemainingPigment+=potential;continue}const captureVariation=.58+grain*.78,amount=Math.min(potential,potential*(.16+tooth*.32+particleDensity*.14)*captureVariation),split=this.fractureSplit(pressure,speed,tooth),coarseMass=amount*split.coarse,fineMass=amount*split.fine,settledMass=Math.max(0,amount-coarseMass-fineMass),side=this.noise(x,y,this.substrate.texture.seed+997)*2-1,normalX=-strokeY,normalY=strokeX,coarseSpeed=.7+pressure*.85+gestureSpeed*.45,fineSpeed=2+pressure*1.3+gestureSpeed*2.1;this.sourceRemainingPigment+=potential-amount;this.deposited[i]+=settledMass;this.addParticlePopulation(coarseMass,i,strokeX*coarseSpeed+normalX*side*.35,strokeY*coarseSpeed+normalY*side*.35,this.coarse,this.coarseVx,this.coarseVy);this.addParticlePopulation(fineMass,i,strokeX*fineSpeed+normalX*side,strokeY*fineSpeed+normalY*side,this.fineDust,this.fineDustVx,this.fineDustVy);this.coarseCreatedPigment+=coarseMass;this.fineCreatedPigment+=fineMass;addedPigment+=amount}
         else{
@@ -211,7 +221,7 @@
       if(this.dryBoost>1)this.dryBoost=Math.max(1,this.dryBoost-dt*4);
     }
     dry(){this.dryBoost=35}
-    metrics(){let water=0,mobile=0,deposited=0,loose=0,coarse=0,fine=0,absorbed=0,wetCells=0,pigmentCells=0;for(let i=0;i<this.n;i++){water+=this.water[i];mobile+=this.mobile[i];deposited+=this.deposited[i];loose+=this.loose[i];coarse+=this.coarse[i];fine+=this.fineDust[i];absorbed+=this.absorbed[i];if(this.water[i]>.008||this.absorbed[i]>.008)wetCells++;if(this.mobile[i]+this.deposited[i]+this.loose[i]+this.coarse[i]+this.fineDust[i]>.0001)pigmentCells++}const pigment=mobile+deposited+loose+coarse+fine,error=this.initialPigment?Math.abs(this.initialPigment-pigment-this.lostPigment)/this.initialPigment:0;return{water,wet_area_fraction:wetCells/this.n,pigment_area_fraction:pigmentCells/this.n,mobile_pigment:mobile,deposited_pigment:deposited,settled_pigment:deposited,loose_pigment:loose,coarse_fragment_pigment:coarse,fine_dust_pigment:fine,coarse_fragment_created:this.coarseCreatedPigment,fine_dust_created:this.fineCreatedPigment,source_offered_pigment:this.sourceOfferedPigment,source_remaining_pigment:this.sourceRemainingPigment,lost_off_canvas_pigment:this.lostPigment,absorbed_water:absorbed,relocated_pigment:this.relocatedPigment,pressure_anchored_pigment:this.pressureAnchoredPigment,pigment_conservation_error:error}}
+    metrics(){let water=0,mobile=0,deposited=0,loose=0,coarse=0,fine=0,absorbed=0,wetCells=0,pigmentCells=0;for(let i=0;i<this.n;i++){water+=this.water[i];mobile+=this.mobile[i];deposited+=this.deposited[i];loose+=this.loose[i];coarse+=this.coarse[i];fine+=this.fineDust[i];absorbed+=this.absorbed[i];if(this.water[i]>.008||this.absorbed[i]>.008)wetCells++;if(this.mobile[i]+this.deposited[i]+this.loose[i]+this.coarse[i]+this.fineDust[i]>.0001)pigmentCells++}const pigment=mobile+deposited+loose+coarse+fine+this.carriedPigment,error=this.initialPigment?Math.abs(this.initialPigment-pigment-this.lostPigment)/this.initialPigment:0;return{water,wet_area_fraction:wetCells/this.n,pigment_area_fraction:pigmentCells/this.n,mobile_pigment:mobile,deposited_pigment:deposited,settled_pigment:deposited,loose_pigment:loose,coarse_fragment_pigment:coarse,fine_dust_pigment:fine,coarse_fragment_created:this.coarseCreatedPigment,fine_dust_created:this.fineCreatedPigment,source_offered_pigment:this.sourceOfferedPigment,source_remaining_pigment:this.sourceRemainingPigment,lost_off_canvas_pigment:this.lostPigment,absorbed_water:absorbed,carried_pigment:this.carriedPigment,relocated_pigment:this.relocatedPigment,pressure_anchored_pigment:this.pressureAnchoredPigment,pigment_conservation_error:error}}
     render(target,canvas){
       const data=this.image.data,renderRegime=this.regime(),body=renderRegime==='body',dry=renderRegime==='granular';
       for(let i=0;i<this.n;i++){

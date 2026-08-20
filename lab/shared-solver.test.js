@@ -246,7 +246,7 @@ assert(chSolver.regime() === 'granular', 'charcoal must still select the granula
 assert(!/watercolor|charcoal|oil(?![A-Za-z])/i.test(
   SharedSolver.prototype.regime.toString() +
   SharedSolver.prototype.flowLayer.toString() +
-  SharedSolver.prototype.pushLayer.toString() +
+  SharedSolver.prototype.smearBody.toString() +
   SharedSolver.prototype.reliefHeight.toString()
 ), 'the shared layer must not branch on a named medium');
 
@@ -324,22 +324,28 @@ let standing = 0;
 for (let i = 0; i < oilStroke.n; i++) if (oilStroke.reliefHeight(i) > 0) standing++;
 assert(standing > 0, 'an oil stroke must produce standing relief');
 
-// the brush pushes an existing body forward, conserving what it moves
+// the brush takes material off the sheet and gives it back, conserving both ways
 const pushTest = new SharedSolver(30, 30, PROFILES.oil, SUBSTRATES.coldPress);
 pushTest.clear(0);
 pushTest.deposited[465] = 1;
 const pushTotalBefore = pushTest.deposited.reduce((a, b) => a + b, 0);
-const pushed = pushTest.pushLayer(465, 466, .9);
-assert(pushed > 0, 'pressure above the yield stress must displace an existing body');
-assert(pushTest.deposited[465] < 1 && pushTest.deposited[466] > 0, 'displaced material must leave the source and arrive ahead');
-assert(Math.abs(pushTest.deposited.reduce((a, b) => a + b, 0) - pushTotalBefore) < 1e-9, 'displacing a body must conserve its mass');
-assert(pushTest.pushLayer(465, 466, PROFILES.oil.state['RHEO-002'] * .5) === 0, 'pressure below the yield stress must not displace a body');
+const lifted = pushTest.smearBody(465, .9, 1);
+assert(lifted > 0, 'pressure above the yield stress must lift material onto the tool');
+assert(pushTest.deposited[465] < 1, 'lifting must take material off the sheet');
+assert(Math.abs(pushTest.deposited.reduce((a, b) => a + b, 0) + pushTest.carriedPigment - pushTotalBefore) < 1e-6, 'material must be either on the sheet or on the tool, never lost');
+
+const gentleTest = new SharedSolver(30, 30, PROFILES.oil, SUBSTRATES.coldPress);
+gentleTest.clear(0);
+gentleTest.deposited[465] = 1;
+assert(gentleTest.smearBody(465, PROFILES.oil.state['RHEO-002'] * .5, 1) === 0, 'pressure below the yield stress must lift nothing');
 
 // determinism
 const runOil = () => { const s = new SharedSolver(30, 30, PROFILES.oil, SUBSTRATES.coldPress); s.clear(0); s.depositSegment(5, 15, 25, 15, 30, 30, .7, 1, 0, .9); for (let f = 0; f < 10; f++) s.step(1 / 60); return s.metrics().deposited_pigment };
 assert(Math.abs(runOil() - runOil()) < 1e-9, 'identical oil commands must produce identical results');
 
 /* ---- the brush must not scrape the sheet clean (artist review 2026-08-20) ---- */
+// Tolerances here are 1e-6, not 1e-9: the canvas stores mass in Float32Array,
+// so a lift-and-lay round trip carries about 2e-8 of storage rounding on unit mass.
 
 // A retained film comes from DEPO-003, a property oil already declared and
 // nothing consumed. Below that thickness the material adheres to the sheet.
@@ -367,25 +373,25 @@ const mound = new SharedSolver(20, 20, PROFILES.oil, SUBSTRATES.coldPress);
 mound.clear(0);
 mound.deposited[210] = 1;
 const moundBefore = mound.deposited.reduce((a, b) => a + b, 0);
-assert(mound.pushLayer(210, 211, .9) > 0, 'pressure above the yield stress must still displace a thick body');
-assert(Math.abs(mound.deposited.reduce((a, b) => a + b, 0) - moundBefore) < 1e-9, 'displacement must still conserve mass');
-assert(mound.deposited[210] >= mound.retainedFilmMass() - 1e-9, 'displacement must leave the retained film behind');
+assert(mound.smearBody(210, .9, 1) > 0, 'pressure above the yield stress must still lift from a thick body');
+assert(Math.abs(mound.deposited.reduce((a, b) => a + b, 0) + mound.carriedPigment - moundBefore) < 1e-6, 'lifting must still conserve mass across sheet and tool');
+assert(mound.deposited[210] >= mound.retainedFilmMass() - 1e-9, 'lifting must leave the retained film behind');
 
 // a film already at the floor cannot be pushed at all
 const thin = new SharedSolver(20, 20, PROFILES.oil, SUBSTRATES.coldPress);
 thin.clear(0);
 thin.deposited[210] = thin.retainedFilmMass();
-assert(thin.pushLayer(210, 211, 1) === 0, 'a film at the retained thickness must not move under any pressure');
+assert(thin.smearBody(210, 1, 1) === 0, 'a film at the retained thickness must not lift under any pressure');
 
 // sweep scales displacement: half a crossing displaces less than a whole one
 const sweepA = new SharedSolver(20, 20, PROFILES.oil, SUBSTRATES.coldPress);
 sweepA.clear(0); sweepA.deposited[210] = 1;
 const sweepB = new SharedSolver(20, 20, PROFILES.oil, SUBSTRATES.coldPress);
 sweepB.clear(0); sweepB.deposited[210] = 1;
-const wholeCrossing = sweepA.pushLayer(210, 211, .9, 1);
-const halfCrossing = sweepB.pushLayer(210, 211, .9, .5);
-assert(halfCrossing > 0 && halfCrossing < wholeCrossing, 'a partial crossing must displace less than a whole one');
-assert(Math.abs(halfCrossing * 2 - wholeCrossing) < 1e-9, 'displacement must be proportional to the crossing travelled');
+const wholeCrossing = sweepA.smearBody(210, .9, 1);
+const halfCrossing = sweepB.smearBody(210, .9, .5);
+assert(halfCrossing > 0 && halfCrossing < wholeCrossing, 'a partial crossing must lift less than a whole one');
+assert(Math.abs(halfCrossing * 2 - wholeCrossing) < 1e-9, 'lifting must be proportional to the crossing travelled');
 
 // the media without a yield stress are untouched by any of this
 for (const [name, profile, paper] of [['watercolor', PROFILES.watercolor, SUBSTRATES.coldPress], ['charcoal', PROFILES.charcoal, SUBSTRATES.pastelWhite]]) {
@@ -393,9 +399,22 @@ for (const [name, profile, paper] of [['watercolor', PROFILES.watercolor, SUBSTR
   solver.clear(0);
   solver.depositSegment(10, 30, 50, 30, 60, 60, .6, 1, name === 'watercolor' ? .4 : 0, .8);
   const snapshot = solver.deposited.slice();
-  assert(solver.pushLayer(100, 101, 1, 1) === 0, name + ' must never displace a body');
+  assert(solver.smearBody(100, 1, 1) === 0, name + ' must never lift material as a body');
   assert(solver.retainedFilmMass() === 0, name + ' declares no detachment threshold and must retain no film');
   for (let i = 0; i < snapshot.length; i++) assert(snapshot[i] === solver.deposited[i], name + ' must be bit-for-bit unchanged by body displacement');
 }
+
+// OIL-002: an empty brush dragged out of thick paint must carry colour onto
+// bare canvas and taper, rather than stopping dead at the paint's edge.
+const drag = new SharedSolver(190, 140, PROFILES.oil, SUBSTRATES.coldPress);
+drag.clear(0);
+for (let pass = 0; pass < 6; pass++) drag.depositSegment(.25 * 760, .5 * 560, .40 * 760, .5 * 560, 760, 560, .8, 1, .3, .6);
+const edgeOf = () => { let last = -1; for (let x = 0; x < 190; x++) if (drag.deposited[70 * 190 + x] > 1e-6) last = x; return last; };
+const edgeBefore = edgeOf();
+drag.depositSegment(.32 * 760, .5 * 560, .75 * 760, .5 * 560, 760, 560, .8, 0, .3, .8);
+const edgeAfter = edgeOf();
+assert(edgeAfter - edgeBefore >= 12, 'an empty brush must drag colour well past the edge of the paint it started in');
+assert(drag.deposited[70 * 190 + edgeAfter] < drag.deposited[70 * 190 + edgeBefore], 'dragged-out colour must taper, not end in a hard wall');
+assert(drag.metrics().pigment_conservation_error < 1, 'dragging colour out must conserve pigment');
 
 console.log('shared solver checks passed');

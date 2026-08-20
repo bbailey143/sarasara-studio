@@ -68,6 +68,61 @@ The streak is closed and layers now build instead of being scraped away.
 - Pressure was a flat `0.55` throughout; the threshold between light and heavy
   cannot be felt without a stylus or deliberate slider changes between strokes.
 
+## OIL-002 — after the scraping fix
+
+- **Recorded:** 2026-08-20, `docs/validation/sessions/2026-08-20t03-11-31-oil.json`
+- **Settings:** Draw, load `0`, **stylus pressure**, speed `0.80`, Cold Press
+- **Measurements:** deposited `1789.60`, tallest point `2.462`, marked area `15.11%`,
+  surface water `0`, suspended pigment `0`, conservation error `1.0e-6%`
+- **Rating:** Recognizable
+- **Decision:** Recalibrate
+
+**Artist accepted, on the board, at the same sitting:** OL-01 holds its shape,
+OL-03 the brush shoves it, OL-05 never wets the sheet, OL-06 never bleeds.
+These are oil’s first green marks.
+
+**Artist’s words:**
+
+> So, it doesn’t smear at all now. It feels like once you lay it down, no
+> matter how thick, if you try to pull it out across bare canvas (in other
+> spread w/out much paint on the brush), it stays in place. It should smear
+> onto the bare canvas - not just stay in place.
+
+### Cause
+
+Correct, and it named something the model never had. The brush could only
+nudge paint into the neighbouring cell. It could not **pick paint up, carry it,
+and lay it back down** — which is what smearing is. Measured before the fix: an
+empty brush dragged 82 cells out of a thick blob advanced the paint’s edge by
+**0 cells**.
+
+### Fix
+
+The tool now holds material. Contact above the yield stress lifts from the
+sheet onto the brush, leaving the `DEPO-003` retained film behind; the brush
+then lays material back down, favouring emptier ground, which is what lets it
+drag colour out onto bare canvas. One mechanism replaced the old shove.
+Carried material stays in the ledger — it is on the brush, not gone — and the
+studio now shows it as **Held on the brush**.
+
+Measured after the fix, same gesture:
+
+| | Before | After |
+| --- | --- | --- |
+| Colour carried onto bare canvas | 0 cells | **21 cells** (~6 brush widths) |
+| Tail from the source outward | — | 0.726 → 0.521 → 0.214 → 0.020 → bare |
+| Ledger error | — | 2.0e-8% |
+
+### Still open
+
+- **Not re-reviewed.** The drag length and taper were chosen by measurement,
+  not by eye. Whether six brush widths is right, and whether the taper reads
+  as paint rather than as fading, is the artist’s call.
+- Paint can now end up held on the brush at the end of a stroke. That is real
+  — a dirty brush — but it means the canvas can appear to lose material. The
+  readout shows the amount so it is never a mystery.
+- There is still no rinse, so the brush never empties on purpose.
+
 ## Known stand-ins to stay sceptical of
 
 - Yield stress `0.34`, viscosity `0.82`, packing `0.78`, particle density

@@ -1,5 +1,5 @@
 {
-  "updatedAt": null,
+  "updatedAt": "2026-08-20T03:09:09.699Z",
   "rows": {
     "watercolor": {
       "WC-01": {
@@ -87,9 +87,9 @@
     },
     "oil": {
       "OL-01": {
-        "mark": "checked",
+        "mark": "approved",
         "note": "",
-        "decidedAt": null
+        "decidedAt": "2026-08-20T03:08:22.314Z"
       },
       "OL-02": {
         "mark": "checked",
@@ -97,9 +97,9 @@
         "decidedAt": null
       },
       "OL-03": {
-        "mark": "checked",
+        "mark": "approved",
         "note": "",
-        "decidedAt": null
+        "decidedAt": "2026-08-20T03:08:41.589Z"
       },
       "OL-04": {
         "mark": "checked",
@@ -107,14 +107,14 @@
         "decidedAt": null
       },
       "OL-05": {
-        "mark": "checked",
+        "mark": "approved",
         "note": "",
-        "decidedAt": null
+        "decidedAt": "2026-08-20T03:09:00.428Z"
       },
       "OL-06": {
-        "mark": "checked",
+        "mark": "approved",
         "note": "",
-        "decidedAt": null
+        "decidedAt": "2026-08-20T03:09:09.699Z"
       },
       "OL-09": {
         "mark": "partial",

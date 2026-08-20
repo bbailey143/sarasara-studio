@@ -41,7 +41,7 @@ const REGIME_READOUTS = {
   ],
   body: [
     'pigment_area_fraction', 'deposited_pigment', 'relief_peak', 'relief_area_fraction',
-    'relocated_pigment', 'water', 'mobile_pigment', 'pigment_conservation_error',
+    'carried_pigment', 'relocated_pigment', 'water', 'mobile_pigment', 'pigment_conservation_error',
   ],
 };
 
@@ -59,6 +59,7 @@ export const READOUT_LABELS = {
   source_remaining_pigment: ['Left on the tool', ''],
   pressure_anchored_pigment: ['Pressed into paper', ''],
   lost_off_canvas_pigment: ['Left the page', ''],
+  carried_pigment: ['Held on the brush', ''],
   relocated_pigment: ['Pushed by contact (running total)', ''],
   relief_peak: ['Tallest point', ''],
   relief_area_fraction: ['Area standing up', '%'],
