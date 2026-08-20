@@ -4,8 +4,15 @@ import { createEngine, listMaterials, listSubstrates } from './engine/index.js';
 import { BTN, BTN_PRIMARY, Button, Notes, Select, Slider, ToggleRow } from './components/Controls.jsx';
 import { BOARD_ROWS, MARKS, MARK_ORDER, seedBoard } from './data/board.js';
 
+// The grid the material constants were tuned against. Raising it makes the brush
+// physically smaller, because brush radius is measured in cells - that is the
+// unfinished physical-size calibration, not something to change in passing.
 const SIM = { width: 190, height: 140 };
-const VIEW = { width: 760, height: 560 };
+// The engine sizes its brush in cells, so the coordinate space we hand it must
+// scale with the grid; otherwise a finer grid silently shrinks the tool. Four
+// view units per cell is what the material constants were tuned against.
+const VIEW = { width: SIM.width * 4, height: SIM.height * 4 };
+const CANVAS = { width: 760, height: 560 };
 const ACTIONS = [{ id: 'draw', name: 'Draw' }, { id: 'smudge', name: 'Smudge' }];
 const RATINGS = [
   { id: 'convincing', name: 'Convincing' },
@@ -75,6 +82,7 @@ export default function App() {
       // diagnosing a mark. Never referenced by application code.
       if (import.meta.env.DEV) window.__studio = { engine, readout: () => engine.readout() };
       engine.setViewGain(viewGain);
+      engine.setSmoothing(false);
       engine.clear(dampness);
       setRegime(engine.regime());
       setProfileId(engine.profile().id);
@@ -197,8 +205,8 @@ export default function App() {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
     return {
-      x: ((event.clientX - rect.left) / rect.width) * canvas.width,
-      y: ((event.clientY - rect.top) / rect.height) * canvas.height,
+      x: ((event.clientX - rect.left) / rect.width) * VIEW.width,
+      y: ((event.clientY - rect.top) / rect.height) * VIEW.height,
     };
   };
 
@@ -385,8 +393,8 @@ export default function App() {
           <div className="overflow-hidden rounded-sm border border-rule2 bg-white leading-none shadow-xl">
             <canvas
               ref={canvasRef}
-              width={VIEW.width}
-              height={VIEW.height}
+              width={CANVAS.width}
+              height={CANVAS.height}
               className="block h-auto max-w-full cursor-crosshair touch-none"
               onPointerDown={onPointerDown}
               onPointerMove={onPointerMove}

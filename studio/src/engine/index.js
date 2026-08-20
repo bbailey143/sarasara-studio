@@ -59,7 +59,7 @@ export const READOUT_LABELS = {
   source_remaining_pigment: ['Left on the tool', ''],
   pressure_anchored_pigment: ['Pressed into paper', ''],
   lost_off_canvas_pigment: ['Left the page', ''],
-  relocated_pigment: ['Moved by later contact', ''],
+  relocated_pigment: ['Pushed by contact (running total)', ''],
   relief_peak: ['Tallest point', ''],
   relief_area_fraction: ['Area standing up', '%'],
   pigment_conservation_error: ['Ledger error', '%'],
@@ -113,6 +113,9 @@ export async function createEngine({ width, height, material, substrate }) {
     },
 
     setViewGain(value) { solver.setDisplayGain(value); },
+
+    /** Off means one simulation cell per screen block: honest edges, visible pixels. */
+    setSmoothing(enabled) { solver.setSmoothing(enabled); },
 
     clear(dampness = 0) { solver.clear(dampness); },
 
