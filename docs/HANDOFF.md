@@ -202,28 +202,53 @@ Still open for watercolor:
 
 ## NEXT ACTION — start here
 
-Run `npm run lab`, draw with **Oil** in the studio, and record the first artist review of a third material. Saving writes the whole session — settings, measurements, your words, and the mark itself — into `docs/validation/sessions/`, so nothing needs retyping. Oil v0.1 has code evidence only; nothing about how it looks has been judged.
+**Design the brush studio. Do not start building it.**
 
-1. Choose **Oil**, any paper, and **Draw material**.
-2. Make one firm stroke. It should leave a raised body with a lit and a shadowed side, not a flat tone.
-3. Stroke across the first mark. Paint should be shoved along and pile up ahead, not smear thin.
-4. Try a light stroke and a heavy one over existing paint. Below the yield stress nothing should move at all; the change should arrive as a threshold, not a fade.
-5. Watch a thick mound for a few seconds. It should hold. If it relaxes into a pool, the yield stress is too low.
-6. Confirm no soft edges anywhere. Oil must not bleed, spread, or halo.
-7. Save one rating and decision. Name any failure by its `OL-P-` id from `docs/validation/oil/physics_tests.md`.
+The artist has set a direction that is bigger than adding a brush, recorded in
+[`ADR-0003`](decisions/ADR-0003-BRUSHES-ARE-DRAWN-NOT-CONFIGURED.md): a brush is
+**drawn**, not configured. Its silhouette is a vector outline, its tufts are
+placed and counted visibly, and the physical numbers the engine needs are
+derived from the shape rather than authored beside it. The legacy brush engine
+described everything in numbers; the artist approved how it felt but could never
+see what he was making.
 
-**Why this action:** the automated checks prove the layer holds below yield, slumps above it, displaces under the brush, conserves mass, and leaves watercolor and charcoal bit-for-bit unchanged. None of that says whether it reads as paint.
+Before any code:
 
-**Success condition:** oil is recognizable as a body of paint — it holds marks, moves as a mass, takes light on its relief, and never bleeds. “Indistinguishable from oil” is not required for v0.1.
+1. Read ADR-0003 and its open questions. None of them are answered.
+2. Work out with the artist how a drawn outline becomes contact — whether the
+   shape drives the contact model directly, or produces the values the existing
+   contact model already consumes.
+3. Decide what survives from the legacy brush engine. Its *feel* was approved by
+   the artist on 11 July; its *authoring* is what is being replaced.
+4. Decide where a brush studio lives. The diagnostic bench answers whether a
+   material behaves; a brush studio answers what a tool looks like. That is
+   closer to a sibling than a panel.
+5. Agree how a brush gets reviewed. The board records material behaviours; a
+   tool needs its own rows, or the material rows need to name the brush they
+   were judged with.
 
-**Deferred at the artist’s request:** the charcoal Stamp / 1 Layer / Multi-Layer / Smudge comparison. Every charcoal mark and decision already recorded still stands. It is worth resuming after burnishing (`CH-P-07`) is built on the new shared layer, so the grain and the burnish can be judged in one sitting.
+**Why this action:** the applicator is the least-developed of the five
+participants. The sheet, the recipe and the bench all have real contracts; the
+hand is a disc. Deciding what a brush *is* comes before building one.
+
+**Warning to carry into it:** all ten approved behaviours across oil and charcoal
+were painted with a disc. Changing the tool changes every one of them. Expect to
+re-examine the board when the brush lands, and say so plainly rather than
+quietly leaving old green marks standing.
+
+**Deferred, not dropped:** real colour. It unblocks more board rows than anything
+else — watercolor has no approved behaviours at all, and every grey row it has
+waits on there being more than one flat tone. The artist chose the brush first.
 
 ## IN FLIGHT
 
-- Nothing in code. The shared deposited layer and oil v0.1 are implemented, mutation-tested, and committed. The first oil look is artist work, not an implementation task.
+- Nothing in code. Oil is closed at five approved behaviours. The brush direction is set but nothing about it is designed.
 
 ## Recently completed
 
+- Closed leg 01. Oil stands at five artist-approved behaviours — holds its shape, the brush shoves it, never wets the sheet, never bleeds, drags colour out — plus two machine-checked, one partial, and three not built (dries, picks colour up into another, scrapes back). Two of the five approvals came only after the artist rejected the work twice: first for scraping the sheet clean, then for a drag that carried nothing.
+- Recorded ADR-0003: brushes are drawn, not configured. Direction only; nothing designed.
+- Corrected a board row of my own making. The artist approved the pickup-and-drag pass but clicked the only row mentioning pickup, which lumped drying, dirty-brush pickup and scraping together — two of which do not exist. Split into four honest rows; the real decision was preserved and only the mis-click undone.
 - Rebuilt the bench as `studio/`, a three-column React app: controls left, the sheet alone in the middle, measurements and approvals right. The pressure-curve card and its four influence multipliers were removed. `studio/src/engine/index.js` is the seam — the only file that knows how the engine is implemented, with `createEngine()` async and everything else synchronous so a compiled engine can replace the JavaScript solver without any panel changing. The UI asks the engine for its regime and lets that drive what is shown, so the water controls are absent for oil and charcoal rather than present and inert; no panel branches on a material name. `npm run lab` serves an API that writes `docs/validation/sessions/*.json` and `docs/validation/board.json` straight into the repository; with no server the studio still paints but shows "offline · not recording" and writes nothing. Verified: clean production build; columns resolve to 292 / 796 / 352 at 1440×900; an oil stroke through the real pointer handlers deposited 63.73 with relief peak 0.31, zero surface water, zero suspended pigment, and 5.6e-9% conservation error; a save wrote a complete 17 KB session file; a board mark persisted and read back. Test artifacts were deleted and the board reset to seed. `[1 RUN ONLY]`
 - Fixed a regression introduced by that work: adding `"type": "module"` to `package.json` broke `node lab/shared-solver.test.js`. The field was removed and the Vite config renamed to `vite.config.mjs`, so the documented command works unchanged.
 - The board now lives where the looking happens. `docs/validation/board.json` is seeded from the statuses recorded in `docs/validation/`; automated checks reach `checked` and stop, and only the artist sets `approved`.
