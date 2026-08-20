@@ -54,11 +54,42 @@ export const BOARD_ROWS = {
   ],
 };
 
+/**
+ * The tool gets its own rows. A brush is not a material and the material rows
+ * cannot score it — asking "does it hold its shape?" of a brush means something
+ * completely different from asking it of oil paint.
+ *
+ * These are keyed by brush, not by material. A drawn brush judged on oil and
+ * the same brush judged on watercolour are the same tool; what changes is the
+ * paint it was carrying, and the session records that.
+ */
+export const BRUSH_ROWS = {
+  disc: [
+    { id: 'BR-00', name: 'It is deliberately plain', hint: 'the reference footprint every early review used', seed: 'approved' },
+  ],
+  filbert: [
+    { id: 'BR-01', name: 'Holds its true size', hint: 'a 12 mm brush marks 12 mm', seed: 'checked' },
+    { id: 'BR-02', name: 'Knows how it is held', hint: 'edge stroke and broad stroke differ', seed: 'checked' },
+    { id: 'BR-03', name: 'Opens with pressure', hint: 'tip only, then the belly comes down', seed: 'checked' },
+    { id: 'BR-04', name: 'Feathers its edge', hint: 'a head of hair, not a cookie cutter', seed: 'checked' },
+    { id: 'BR-05', name: 'Runs out of paint', hint: 'a reservoir that empties as you work', seed: 'none' },
+    { id: 'BR-06', name: 'Bends and lags', hint: 'the head trails the hand and catches up', seed: 'none' },
+    { id: 'BR-07', name: 'Splays and splits', hint: 'press hard and the hairs separate', seed: 'none' },
+    { id: 'BR-08', name: 'Springs back', hint: 'lift off and it recovers its shape', seed: 'none' },
+  ],
+};
+BRUSH_ROWS.flat = BRUSH_ROWS.filbert.map((row) => ({ ...row }));
+
 export const seedBoard = () => {
   const board = { updatedAt: null, rows: {} };
   for (const [material, rows] of Object.entries(BOARD_ROWS)) {
     board.rows[material] = {};
     for (const row of rows) board.rows[material][row.id] = { mark: row.seed, note: '', decidedAt: null };
+  }
+  board.brushes = {};
+  for (const [brush, rows] of Object.entries(BRUSH_ROWS)) {
+    board.brushes[brush] = {};
+    for (const row of rows) board.brushes[brush][row.id] = { mark: row.seed, note: '', decidedAt: null };
   }
   return board;
 };

@@ -521,4 +521,91 @@ assert(!/watercolor|charcoal|oil(?![A-Za-z])/i.test(
   SharedSolver.prototype.setBrush.toString() + SharedSolver.prototype.getBrush.toString()
 ), 'the tool must not branch on a named medium');
 
+/* ---- canvas is woven, and a weave is not noise ------------------------- */
+
+// Counting peaks alone cannot tell cloth from paper - both have plenty. What
+// separates them is that a weave's threads are EVENLY SPACED. So measure the
+// spacing between peaks and how much it varies.
+const threadSpacing = (substrate, down) => {
+  const solver = new SharedSolver(140, 140, PROFILES.oil, SUBSTRATES[substrate]);
+  const line = [];
+  for (let i = 0; i < 140; i++) line.push(down ? solver.tooth(70, i) : solver.tooth(i, 70));
+  const peaks = [];
+  for (let i = 1; i < 139; i++) if (line[i] > line[i - 1] && line[i] >= line[i + 1]) peaks.push(i);
+  const gaps = [];
+  for (let i = 1; i < peaks.length; i++) gaps.push(peaks[i] - peaks[i - 1]);
+  const mean = gaps.reduce((a, b) => a + b, 0) / Math.max(1, gaps.length);
+  const spread = Math.sqrt(gaps.reduce((a, g) => a + (g - mean) * (g - mean), 0) / Math.max(1, gaps.length));
+  return { count: peaks.length, mean, wobble: spread / Math.max(.001, mean) };
+};
+
+for (const cloth of ['roughCanvas', 'linenCanvas']) {
+  const across = threadSpacing(cloth, false), down = threadSpacing(cloth, true);
+  assert(across.wobble < .3 && down.wobble < .3,
+    cloth + ' must have evenly spaced threads, which is what makes it cloth rather than noise');
+  assert(Math.abs(across.mean - down.mean) < 1.5,
+    cloth + ' is a plain weave: warp and weft must be spaced alike');
+  assert(Math.abs(across.mean - SUBSTRATES[cloth].texture.threadPeriod) < 1,
+    cloth + ' must actually weave at the thread spacing its profile states');
+  assert(SUBSTRATES[cloth].state['TRAN-002'] < SUBSTRATES.hotPress.state['TRAN-002'] * .5,
+    cloth + ' is primed cloth and must drink far less than the least thirsty paper');
+  assert(SUBSTRATES[cloth].texture.pattern === 'woven', cloth + ' must use the woven surface');
+  assert(SUBSTRATES[cloth].version && /reference-derived/.test(JSON.stringify(SUBSTRATES[cloth].provenance)),
+    cloth + ' must be versioned and say where it came from');
+}
+
+// THE INTERLACING. Even thread spacing is not enough - a twill and a plain grid
+// of bumps both have that. What makes plain weave is that which thread lies on
+// top SWAPS at every crossing. Walk along one line of warp crests: every other
+// one is the thread that dipped under, so the raised ones must sit measurably
+// higher than the dipped ones. Counting wobbles is not enough; slub variation
+// alone can fake that. Measure the depth of the dip.
+for (const cloth of ['roughCanvas', 'linenCanvas']) {
+  const solver = new SharedSolver(140, 140, PROFILES.oil, SUBSTRATES[cloth]);
+  const period = SUBSTRATES[cloth].texture.threadPeriod;
+  const overs = [], unders = [];
+  for (let i = 0; i < 14; i++) {
+    const height = solver.tooth((i + .5) * period, 4 * period);
+    (i % 2 === 0 ? overs : unders).push(height);
+  }
+  const mean = (a) => a.reduce((x, y) => x + y, 0) / a.length;
+  const raised = Math.max(mean(overs), mean(unders));
+  const dipped = Math.min(mean(overs), mean(unders));
+  assert(raised - dipped > .12,
+    cloth + ' must interlace: alternate crossings have to sit clearly lower, because that thread passed underneath (gap ' + (raised - dipped).toFixed(3) + ')');
+}
+// paper is not cloth: its grain must be irregular
+for (const paper of ['coldPress', 'rough']) {
+  assert(threadSpacing(paper, false).wobble > .3,
+    paper + ' is paper and must not fall into an even weave');
+}
+
+// linen is the finer cloth
+assert(threadSpacing('linenCanvas', false).mean < threadSpacing('roughCanvas', false).mean,
+  'linen must be woven finer than the rough canvas');
+
+// Cloth sits LOWER on average than paper, and should: a weave is mostly valley
+// with threads raised above it, which is what gives oil on canvas its broken
+// bite. What matters is that it stays in a sane band and never drifts to one
+// extreme, where everything would either catch or miss.
+for (const cloth of ['roughCanvas', 'linenCanvas']) {
+  const solver = new SharedSolver(140, 140, PROFILES.oil, SUBSTRATES[cloth]);
+  let sum = 0;
+  for (let y = 0; y < 140; y++) for (let x = 0; x < 140; x++) sum += solver.tooth(x, y);
+  const mean = sum / (140 * 140);
+  assert(mean > .3 && mean < .6, cloth + ' must stay in a usable height band, lower than paper but not collapsed (got ' + mean.toFixed(3) + ')');
+}
+
+// the same cloth twice is the same cloth
+assert(threadSpacing('linenCanvas', false).count === threadSpacing('linenCanvas', false).count, 'a weave must be repeatable');
+
+// and a drawn brush can paint oil on it
+const onCloth = new SharedSolver(190, 140, PROFILES.oil, SUBSTRATES.roughCanvas);
+onCloth.setBrush('filbert');
+onCloth.clear(0);
+onCloth.depositSegment(140, 220, 620, 330, 760, 560, .8, 1, .3, .9, 0);
+for (let f = 0; f < 20; f++) onCloth.step(1 / 60);
+assert(onCloth.metrics().deposited_pigment > 0, 'a drawn brush must lay paint on canvas');
+assert(onCloth.metrics().pigment_conservation_error < 1, 'painting on canvas must conserve pigment');
+
 console.log('shared solver checks passed');

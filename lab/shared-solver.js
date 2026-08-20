@@ -38,7 +38,15 @@
     coldPress:{id:'substrate.paper.cold-press.archive-seed.v0.2',name:'Cold Press',version:'0.2.0',state:{'TRAN-002':.055,'SUBI-001':.5,'SUBI-003':.5},texture:{tooth:.5,absorbency:.5,sizing:.6,capacity:.5,dryBrushBreakup:.5,seed:42,noiseScale:1,paperColor:'#faf8f5'},provenance:[{status:'archive-seed',note:'Legacy preset values preserved; v0.2 corrects grain-scale direction; permeability remains normalized to the reviewed uptake rate.'}]},
     rough:{id:'substrate.paper.rough.archive-seed.v0.2',name:'Rough Watercolor Paper',version:'0.2.0',state:{'TRAN-002':.073,'SUBI-001':.85,'SUBI-003':.7},texture:{tooth:.85,absorbency:.6,sizing:.5,capacity:.7,dryBrushBreakup:.8,seed:7,noiseScale:.6,paperColor:'#f5f0e8'},provenance:[{status:'archive-seed',note:'Values preserved from the legacy watercolor Paper.rough preset; not approved as a charcoal drawing sheet.'}]},
     pastelWhite:{id:'substrate.paper.pastel-white.reference-derived.experimental.v0.2',name:'Pastel Paper — White',version:'0.2.0',state:{'TRAN-002':.014,'SUBI-001':.18,'SUBI-003':.28},texture:{pattern:'fibrous',tooth:.18,absorbency:.18,sizing:.82,capacity:.28,dryBrushBreakup:.32,seed:811,noiseScale:.2,paperColor:'#eeeeed',visualFiberContrast:5.5},provenance:[{status:'reference-derived',note:'Sample-guided from the artist-supplied 5100 px Pastel White image: sampled mean RGB 238.1/238.0/237.0 and luminance spread 8.81. Color and visible fiber scale are evidence; physical height remains an artist-tested stand-in.'}]},
-    pastelCream:{id:'substrate.paper.pastel-light-cream.reference-derived.experimental.v0.2',name:'Pastel Paper — Light Cream',version:'0.2.0',state:{'TRAN-002':.014,'SUBI-001':.18,'SUBI-003':.28},texture:{pattern:'fibrous',tooth:.18,absorbency:.18,sizing:.82,capacity:.28,dryBrushBreakup:.32,seed:811,noiseScale:.2,paperColor:'#eeebdf',visualFiberContrast:6.2},provenance:[{status:'reference-derived',note:'Sample-guided from the artist-supplied 5100 px Pastel Light Cream image: sampled mean RGB 238.1/235.0/223.0 and luminance spread 10.30. Color and visible fiber scale are evidence; physical height remains an artist-tested stand-in.'}]}
+    pastelCream:{id:'substrate.paper.pastel-light-cream.reference-derived.experimental.v0.2',name:'Pastel Paper — Light Cream',version:'0.2.0',state:{'TRAN-002':.014,'SUBI-001':.18,'SUBI-003':.28},texture:{pattern:'fibrous',tooth:.18,absorbency:.18,sizing:.82,capacity:.28,dryBrushBreakup:.32,seed:811,noiseScale:.2,paperColor:'#eeebdf',visualFiberContrast:6.2},provenance:[{status:'reference-derived',note:'Sample-guided from the artist-supplied 5100 px Pastel Light Cream image: sampled mean RGB 238.1/235.0/223.0 and luminance spread 10.30. Color and visible fiber scale are evidence; physical height remains an artist-tested stand-in.'}]},
+    roughCanvas:{id:'substrate.canvas.rough.reference-derived.experimental.v0.1',name:'Canvas — Rough',version:'0.1.0',
+      state:{'TRAN-002':.004,'SUBI-001':.72,'SUBI-003':.10},
+      texture:{pattern:'woven',tooth:.72,absorbency:.06,sizing:.95,capacity:.10,dryBrushBreakup:.68,seed:1201,noiseScale:1,threadPeriod:6,slub:.22,weaveDrift:.07,paperColor:'#d8d2c6',visualFiberContrast:9},
+      provenance:[{status:'reference-derived',note:'Eye-guided from an artist-supplied coarse plain-weave canvas photograph. The weave period, thread thickness variation and colour follow that image; permeability, porosity and tooth height remain unmeasured stand-ins. Primed canvas barely absorbs, so permeability is near zero on purpose - it is not paper.'}]},
+    linenCanvas:{id:'substrate.canvas.linen.reference-derived.experimental.v0.1',name:'Canvas — Linen',version:'0.1.0',
+      state:{'TRAN-002':.006,'SUBI-001':.44,'SUBI-003':.14},
+      texture:{pattern:'woven',tooth:.44,absorbency:.09,sizing:.92,capacity:.14,dryBrushBreakup:.42,seed:733,noiseScale:1,threadPeriod:4,slub:.55,weaveDrift:.10,paperColor:'#d5cfc4',visualFiberContrast:6},
+      provenance:[{status:'reference-derived',note:'Eye-guided from an artist-supplied fine linen photograph. Finer thread period and much stronger slub than the rough canvas, which is what makes linen read as irregular rather than gridded. Physical values are unmeasured stand-ins.'}]}
   };
 
 
@@ -242,7 +250,37 @@
     addParticlePopulation(mass,index,vx,vy,population,vxField,vyField){if(mass<=0)return;const old=population[index],combined=old+mass;vxField[index]=(vxField[index]*old+vx*mass)/combined;vyField[index]=(vyField[index]*old+vy*mass)/combined;population[index]=combined}
     noise(x,y,seed){const v=Math.sin(x*127.1+y*311.7+seed*74.7)*43758.5453123;return v-Math.floor(v)}
     smoothNoise(x,y,seed){const x0=Math.floor(x),y0=Math.floor(y),fx=x-x0,fy=y-y0,u=fx*fx*(3-2*fx),v=fy*fy*(3-2*fy),a=this.noise(x0,y0,seed),b=this.noise(x0+1,y0,seed),c=this.noise(x0,y0+1,seed),d=this.noise(x0+1,y0+1,seed);return(a+(b-a)*u)*(1-v)+(c+(d-c)*u)*v}
-    samplePaperSurface(x,y){const a=this.substrate.texture,rough=this.s['SUBI-001'];if(rough<=0)return{height:.5,visual:0};if(a.pattern==='fibrous'){const layer=(angle,along,cross,seed)=>{const c=Math.cos(angle),s=Math.sin(angle),u=x*c+y*s,v=-x*s+y*c,field=this.smoothNoise(u*along,v*cross,seed),ridge=Math.pow(Math.max(0,1-Math.abs(field-.5)*2),7);return ridge};const f1=layer(.18,.055,.72,a.seed+17),f2=layer(1.19,.07,.62,a.seed+71),f3=layer(2.34,.05,.82,a.seed+131),fibers=Math.max(f1,f2*.88,f3*.72),grain=this.smoothNoise(x*.78,y*.78,a.seed+307),natural=.5+(grain-.5)*.18+(fibers-.28)*.16,spread=.22+rough*.58;return{height:Math.max(0,Math.min(1,.5+(natural-.5)*spread*1.45)),visual:fibers-.28}}let total=0,amplitude=.55,norm=0,frequency=Math.max(.025,.11/Math.max(.1,a.noiseScale));for(let octave=0;octave<4;octave++){total+=this.smoothNoise(x*frequency,y*frequency,a.seed+octave*7919)*amplitude;norm+=amplitude;amplitude*=.5;frequency*=2}const natural=total/norm,spread=.28+rough*.72;return{height:Math.max(0,Math.min(1,.5+(natural-.5)*spread*1.65)),visual:0}}
+    samplePaperSurface(x,y){const a=this.substrate.texture,rough=this.s['SUBI-001'];if(rough<=0)return{height:.5,visual:0};if(a.pattern==='woven'){
+        /* A warp thread runs the whole width and simply dips under at alternate
+           crossings - it never breaks. So over-and-under is a smooth swell along
+           each thread, not a hard swap at every square. Slub is thick-and-thin
+           patches running ALONG a thread, which is what keeps linen from looking
+           like a printed grid. */
+        const period=Math.max(2,a.threadPeriod||6);
+        const cord=t=>{const f=t-Math.floor(t);return Math.sin(Math.PI*f)};
+        const u=x/period,v=y/period;
+        /* Plain weave alternates square by square, so the over-under term is a
+           product of two cosines (a chequerboard). Using cos(u+v) instead bands
+           along the diagonal and quietly makes twill. */
+        /* Plain weave: within one square, the warp crest and the weft crest both
+           sit, and one of them is raised. The raised one swaps square by square,
+           so each thread runs at one height for a whole segment and then dips.
+           Holding it constant per square is what keeps the threads continuous;
+           varying it smoothly turns the cloth into a grid of beads. */
+        const overWarp=((Math.floor(u)+Math.floor(v))%2+2)%2===0?1:0;
+        const slub=a.slub||0;
+        const warpThick=1+(this.smoothNoise(Math.floor(u)*2.3,y*.16,a.seed+53)-.5)*1.6*slub;
+        const weftThick=1+(this.smoothNoise(x*.16,Math.floor(v)*2.3,a.seed+91)-.5)*1.6*slub;
+        const warp=cord(u)*Math.max(.2,warpThick)*(.38+.62*overWarp);
+        const weft=cord(v)*Math.max(.2,weftThick)*(.38+.62*(1-overWarp));
+        const drift=(this.smoothNoise(x*.07,y*.07,a.seed+311)-.5)*(a.weaveDrift||.12);
+        /* Centre the cloth on the same neutral height the papers use, so a weave
+           and a paper mean the same thing to everything downstream. */
+        const natural=Math.max(0,Math.min(1,(warp+weft)*.62-.12+drift));
+        const spread=.30+rough*.70;
+        return{height:Math.max(0,Math.min(1,.5+(natural-.5)*spread*1.5)),visual:(warp-weft)*.6};
+      }
+      if(a.pattern==='fibrous'){const layer=(angle,along,cross,seed)=>{const c=Math.cos(angle),s=Math.sin(angle),u=x*c+y*s,v=-x*s+y*c,field=this.smoothNoise(u*along,v*cross,seed),ridge=Math.pow(Math.max(0,1-Math.abs(field-.5)*2),7);return ridge};const f1=layer(.18,.055,.72,a.seed+17),f2=layer(1.19,.07,.62,a.seed+71),f3=layer(2.34,.05,.82,a.seed+131),fibers=Math.max(f1,f2*.88,f3*.72),grain=this.smoothNoise(x*.78,y*.78,a.seed+307),natural=.5+(grain-.5)*.18+(fibers-.28)*.16,spread=.22+rough*.58;return{height:Math.max(0,Math.min(1,.5+(natural-.5)*spread*1.45)),visual:fibers-.28}}let total=0,amplitude=.55,norm=0,frequency=Math.max(.025,.11/Math.max(.1,a.noiseScale));for(let octave=0;octave<4;octave++){total+=this.smoothNoise(x*frequency,y*frequency,a.seed+octave*7919)*amplitude;norm+=amplitude;amplitude*=.5;frequency*=2}const natural=total/norm,spread=.28+rough*.72;return{height:Math.max(0,Math.min(1,.5+(natural-.5)*spread*1.65)),visual:0}}
     buildPaperSurface(){this.paperHeight=new Float32Array(this.n);this.paperVisual=new Float32Array(this.n);for(let y=0;y<this.h;y++)for(let x=0;x<this.w;x++){const i=y*this.w+x,sample=this.samplePaperSurface(x,y);this.paperHeight[i]=sample.height;this.paperVisual[i]=sample.visual}}
     tooth(x,y){const ix=Math.max(0,Math.min(this.w-1,Math.round(x))),iy=Math.max(0,Math.min(this.h-1,Math.round(y)));return this.paperHeight[iy*this.w+ix]}
     addDisk(cx,cy,radius,water,pigment,pressure,speed,brushMoisture,strokeX=0,strokeY=0,sweep=1,shape=null){

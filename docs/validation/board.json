@@ -142,5 +142,98 @@
         "decidedAt": null
       }
     }
+  },
+  "brushes": {
+    "disc": {
+      "BR-00": {
+        "mark": "approved",
+        "note": "",
+        "decidedAt": null
+      }
+    },
+    "filbert": {
+      "BR-01": {
+        "mark": "checked",
+        "note": "",
+        "decidedAt": null
+      },
+      "BR-02": {
+        "mark": "checked",
+        "note": "",
+        "decidedAt": null
+      },
+      "BR-03": {
+        "mark": "checked",
+        "note": "",
+        "decidedAt": null
+      },
+      "BR-04": {
+        "mark": "checked",
+        "note": "",
+        "decidedAt": null
+      },
+      "BR-05": {
+        "mark": "none",
+        "note": "",
+        "decidedAt": null
+      },
+      "BR-06": {
+        "mark": "none",
+        "note": "",
+        "decidedAt": null
+      },
+      "BR-07": {
+        "mark": "none",
+        "note": "",
+        "decidedAt": null
+      },
+      "BR-08": {
+        "mark": "none",
+        "note": "",
+        "decidedAt": null
+      }
+    },
+    "flat": {
+      "BR-01": {
+        "mark": "checked",
+        "note": "",
+        "decidedAt": null
+      },
+      "BR-02": {
+        "mark": "checked",
+        "note": "",
+        "decidedAt": null
+      },
+      "BR-03": {
+        "mark": "checked",
+        "note": "",
+        "decidedAt": null
+      },
+      "BR-04": {
+        "mark": "checked",
+        "note": "",
+        "decidedAt": null
+      },
+      "BR-05": {
+        "mark": "none",
+        "note": "",
+        "decidedAt": null
+      },
+      "BR-06": {
+        "mark": "none",
+        "note": "",
+        "decidedAt": null
+      },
+      "BR-07": {
+        "mark": "none",
+        "note": "",
+        "decidedAt": null
+      },
+      "BR-08": {
+        "mark": "none",
+        "note": "",
+        "decidedAt": null
+      }
+    }
   }
 }

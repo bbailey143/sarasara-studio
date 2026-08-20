@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Tab, TabList, TabPanel, Tabs } from 'react-aria-components';
 import { createEngine, listBrushes, listMaterials, listSubstrates } from './engine/index.js';
 import { BTN, BTN_PRIMARY, Button, Notes, Select, Slider, ToggleRow } from './components/Controls.jsx';
-import { BOARD_ROWS, MARKS, MARK_ORDER, seedBoard } from './data/board.js';
+import { BOARD_ROWS, BRUSH_ROWS, MARKS, MARK_ORDER, seedBoard } from './data/board.js';
 
 // The grid the material constants were tuned against. Raising it makes the brush
 // physically smaller, because brush radius is measured in cells - that is the
@@ -193,6 +193,22 @@ export default function App() {
     }
   }, []);
 
+  const setBrushMark = (rowId, mark) => {
+    if (!board) return;
+    const now = new Date().toISOString();
+    persistBoard({
+      ...board,
+      updatedAt: now,
+      brushes: {
+        ...(board.brushes || {}),
+        [brush]: {
+          ...((board.brushes || {})[brush] || {}),
+          [rowId]: { ...(((board.brushes || {})[brush] || {})[rowId] || {}), mark, decidedAt: now },
+        },
+      },
+    });
+  };
+
   const setMark = (rowId, mark) => {
     if (!board) return;
     const now = new Date().toISOString();
@@ -295,7 +311,7 @@ export default function App() {
       },
       measurements: snapshot.measurements,
       review: { rating, decision, behavior: behavior.trim(), notes: notes.trim() },
-      board: board?.rows?.[material] || null,
+      board: { paint: board?.rows?.[material] || null, tool: board?.brushes?.[brush] || null },
       provenance: engine.profile().provenance,
       image: canvas.toDataURL('image/png'),
     };
@@ -319,6 +335,8 @@ export default function App() {
 
   const rows = BOARD_ROWS[material] || [];
   const marks = board?.rows?.[material] || {};
+  const brushRows = BRUSH_ROWS[brush] || [];
+  const brushMarks = board?.brushes?.[brush] || {};
 
   return (
     <div
@@ -547,6 +565,9 @@ export default function App() {
                 </span>
               ))}
             </div>
+            <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.12em] text-ink3">
+              The paint · {materials.find((m) => m.id === material)?.name}
+            </p>
             <div className="flex flex-col">
               {rows.map((row) => {
                 const current = marks[row.id]?.mark || row.seed;
@@ -570,6 +591,49 @@ export default function App() {
                             type="button"
                             key={key}
                             onClick={() => setMark(row.id, key)}
+                            aria-label={`${row.name}: ${MARKS[key].label}`}
+                            aria-pressed={current === key}
+                            className={`flex cursor-pointer items-center gap-1.5 rounded-sm border bg-panel2 px-1.5 py-1
+                                        font-mono text-[9.5px] uppercase tracking-wide ${
+                                          current === key ? 'border-ink2 text-ink' : 'border-rule2 text-ink3'
+                                        }`}
+                          >
+                            <span className="mk !h-2.5 !w-2.5" data-mark={key} />
+                            {MARKS[key].short}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="mb-2 mt-5 font-mono text-[9px] uppercase tracking-[0.12em] text-ink3">
+              The tool · {brushes.find((b) => b.id === brush)?.name}
+            </p>
+            <div className="flex flex-col">
+              {brushRows.map((row) => {
+                const current = brushMarks[row.id]?.mark || row.seed;
+                return (
+                  <div
+                    key={row.id}
+                    className="grid grid-cols-[16px_1fr] items-start gap-2.5 border-b border-rule py-2.5 last:border-b-0"
+                  >
+                    <span className="mk mt-1" data-mark={current} />
+                    <div>
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-[12.5px] font-medium leading-tight">
+                          {row.name}
+                          <small className="mt-px block text-[11.5px] font-normal text-ink3">{row.hint}</small>
+                        </span>
+                        <span className="font-mono text-[9.5px] tracking-wide text-ink3">{row.id}</span>
+                      </div>
+                      <div className="mt-1.5 flex gap-1">
+                        {MARK_ORDER.map((key) => (
+                          <button
+                            type="button"
+                            key={key}
+                            onClick={() => setBrushMark(row.id, key)}
                             aria-label={`${row.name}: ${MARKS[key].label}`}
                             aria-pressed={current === key}
                             className={`flex cursor-pointer items-center gap-1.5 rounded-sm border bg-panel2 px-1.5 py-1
