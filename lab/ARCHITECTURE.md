@@ -37,6 +37,36 @@ Dry transfer is spatially incomplete rather than a filled footprint. Local tooth
 
 The dry optical preview also distinguishes populations instead of converting their sum to one flat opacity. Deposited packing and particle density control the darkness of settled/coarse material, while loose and fine dust contribute a lighter veil. This changes only how conserved state is observed; it does not alter the pigment ledger. The artist must decide whether that separation resembles loose charcoal.
 
+## The shared deposited layer
+
+Deposited material has a thickness. `DEPO-005` relief height is derived from
+deposited mass, `DEPO-004` packing, and `PART-002` particle density; it is never
+written into a profile. Any material with deposited mass therefore has a height,
+but only a material that declares a yield stress can *move* that layer.
+
+The bench selects one of three physical regimes from properties alone:
+
+- **body** — the profile declares a finite `RHEO-002` yield stress above zero.
+- **granular** — no mobile carrier (`COMP-001` below 0.02).
+- **flowing** — everything else.
+
+No regime is chosen by a material name, and the automated tests assert that the
+layer methods contain no medium name.
+
+A body regime deposits material as a layer instead of as a wet suspension or a
+granular scatter. It refuses carrier water at the contact, so a brush-water
+control cannot wet an oil sheet. Contact stress above the yield stress relocates
+existing deposited material along the stroke, conserving what it moves; below the
+yield stress it relocates nothing. Between frames, `flowLayer()` slumps the layer
+wherever the local height difference exceeds the yield stress, at a rate set by
+`RHEO-001` viscosity. For a profile without a yield stress the pass returns
+immediately and leaves the deposited array bit-for-bit unchanged — the regression
+is asserted for both watercolor and charcoal rather than assumed.
+
+This state was added for oil, but it is the concept charcoal burnishing and
+watercolor finite-thickness glazing were both already blocked on. See
+[ADR-0002](../docs/decisions/ADR-0002-OIL-VOCABULARY-TEST.md).
+
 ## Canonical property inputs
 
 The profiles in `shared-solver.js` use canonical IDs from `PROPERTY_REGISTRY.yaml`:
@@ -57,6 +87,10 @@ The profiles in `shared-solver.js` use canonical IDs from `PROPERTY_REGISTRY.yam
 - `PART-001` particle diameter population, represented here as coarse/fine shares;
 - `PART-002` particle density stand-in;
 - `PART-003` particle shape stand-in;
+- `RHEO-001` dynamic viscosity (body regime);
+- `RHEO-002` yield stress (selects the body regime);
+- `RHEO-003` shear-rate response (body regime);
+- `DEPO-005` deposited relief height (derived, never authored);
 - `EVOL-001` evaporation flux;
 - `EVOL-003` settling velocity;
 - `REAC-001` rewetting sensitivity;
@@ -94,4 +128,4 @@ The lab places an editable pressure response between raw hand/stylus pressure an
 
 ## Current limits
 
-This is a small CPU grid intended to expose behavior for review. It is not the production Rust/GPU solver. Spectral color, brush reservoirs, measured paper profiles, and artist-accepted clean-water blooms remain future work. The watercolor v0.6.1 patch preserves the accepted v0.6 material constants while paper physics now comes from an independent selected substrate. Charcoal v0.5 added mass-bounded coarse/fine fracture and dusting to the already accepted v0.4 loose-particle smudge motion; v0.5.1 increased shared fine-particle drag and settling. v0.5.2 added the shared high-load anchoring relationship. Charcoal v0.6 now targets the artist's loose, grainy **Stamp / 1 Layer / Multi-Layer / Smudge** reference by adding incomplete granular capture and population-specific optical density. That entire visible target, including the carried-forward pressure smear, requires fresh artist review. Grain scale, optical density, fracture shares, pressure anchoring, and travel/settling remain unmeasured stand-ins.
+Oil v0.1 is a third-material vocabulary test with code evidence only and no artist review; its yield stress, viscosity, packing, density, relief shading, and colour are unmeasured stand-ins, and cure, pickup, and scraping are unbuilt. This is a small CPU grid intended to expose behavior for review. It is not the production Rust/GPU solver. Spectral color, brush reservoirs, measured paper profiles, and artist-accepted clean-water blooms remain future work. The watercolor v0.6.1 patch preserves the accepted v0.6 material constants while paper physics now comes from an independent selected substrate. Charcoal v0.5 added mass-bounded coarse/fine fracture and dusting to the already accepted v0.4 loose-particle smudge motion; v0.5.1 increased shared fine-particle drag and settling. v0.5.2 added the shared high-load anchoring relationship. Charcoal v0.6 now targets the artist's loose, grainy **Stamp / 1 Layer / Multi-Layer / Smudge** reference by adding incomplete granular capture and population-specific optical density. That entire visible target, including the carried-forward pressure smear, requires fresh artist review. Grain scale, optical density, fracture shares, pressure anchoring, and travel/settling remain unmeasured stand-ins.

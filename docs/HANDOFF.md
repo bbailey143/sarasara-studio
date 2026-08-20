@@ -71,7 +71,7 @@ The user should be able to start another AI with one sentence:
 ## Last updated / by
 
 - **Date:** 2026-08-19
-- **By:** Codex
+- **By:** Claude (Opus 5)
 - **Repository:** `https://github.com/bbailey143/sarasara-studio.git`
 - **Local branch:** `vnext-bootstrap`
 - **Archived application:** Git branch `archive/legacy-main`
@@ -80,6 +80,8 @@ The user should be able to start another AI with one sentence:
 
 - This foundation has no package install or production build yet. The lab is dependency-free HTML and JavaScript.
 - Verified command: `node lab/shared-solver.test.js`
+- Verified result on 2026-08-19 after the shared deposited layer and oil v0.1: `shared solver checks passed`, including all earlier relationships plus regime selection by property, yield-gated slumping and holding, yield-gated brush displacement, derived relief height, a body refusing carrier water, zero oil pigment diffusion, oil determinism, conservation, and a bit-for-bit regression proving watercolor and charcoal are untouched by the new pass.
+- The new checks were mutation-tested on 2026-08-19: removing the yield gate, letting a body write carrier water, dropping packing from relief height, breaking slump conservation, and selecting the regime by material name were each deliberately introduced and each was caught by a named assertion.
 - Verified result on 2026-08-19 after the artist pressure-calibration change: `shared solver checks passed`, including all earlier relationships plus default identity, monotonic curve interpolation, fixed endpoints, serializable calibration, directional checks for paper texture, particle breakup, smear, and speed influences, conservation below 1%, and no named-medium calibration branch.
 - Verified command: `git diff --check`
 - Verified result on 2026-08-19 after the pressure-calibration implementation: passed with no whitespace errors.
@@ -198,27 +200,31 @@ Still open for watercolor:
 
 ## NEXT ACTION — start here
 
-Use the new **Pressure behavior** card to calibrate charcoal v0.6 against the mandatory **Stamp / 1 Layer / Multi-Layer / Smudge** comparison in `lab/diagnostic-lab.html`, using `docs/reference/material-studies/LOOSE_GRAIN_CHARCOAL_TARGET.md`.
+Draw with **Oil** in `lab/diagnostic-lab.html` and record the first artist review of a third material. Oil v0.1 has code evidence only; nothing about how it looks has been judged.
 
-1. Choose **Charcoal**, **Pastel Paper — White**, and **Draw material**.
-2. **Stamp:** make a brief dab. Reject a filled circular disk or soft airbrush dot; look for irregular particulate contact and paper gaps.
-3. Begin with **Reset all** so the curve is Linear and every influence reads `1.00`. Set load `0.70`, fallback pressure `0.55`, and speed `0.80`.
-4. Tune fresh contacts directly. Use **Paper texture** for valley reach, **Particle breakup** for coarse/fine shedding, **Smear** for relocation/anchoring, and **Speed** for speed-driven skipping, breakup, and smudge travel. Existing marks must remain unchanged.
-5. **1 Layer:** make one steady stroke. Reject a flat gray ribbon; paper should remain visible inside uneven, directional grain.
-6. **Multi-Layer:** cross the same area three times at those settings. Overlaps should deepen without widening or flattening into an opaque slab.
-7. **Smudge:** move material from a dark layered source at pressure `0.55`, speed `1.00`; then repeat from a fresh source at `0.85` / `1.60`. The moderate pass should form a lighter veil without erasing the source. The strong pass should also leave rubbed charcoal in the trail while loose dust moves ahead and **Pressed into paper** rises.
-8. Save/export one overall rating and decision. The JSON and history card preserve the chosen curve and all four influences. Name any failure as **Stamp**, **1 Layer**, **Multi-Layer**, or **Smudge**.
+1. Choose **Oil**, any paper, and **Draw material**.
+2. Make one firm stroke. It should leave a raised body with a lit and a shadowed side, not a flat tone.
+3. Stroke across the first mark. Paint should be shoved along and pile up ahead, not smear thin.
+4. Try a light stroke and a heavy one over existing paint. Below the yield stress nothing should move at all; the change should arrive as a threshold, not a fade.
+5. Watch a thick mound for a few seconds. It should hold. If it relaxes into a pool, the yield stress is too low.
+6. Confirm no soft edges anywhere. Oil must not bleed, spread, or halo.
+7. Save one rating and decision. Name any failure by its `OL-P-` id from `docs/validation/oil/physics_tests.md`.
 
-**Why this action:** automated checks prove that coverage is incomplete, layers accumulate mass, and the preview darkens, but only the artist can determine whether the full mark resembles the supplied loose-charcoal target.
+**Why this action:** the automated checks prove the layer holds below yield, slumps above it, displaces under the brush, conserves mass, and leaves watercolor and charcoal bit-for-bit unchanged. None of that says whether it reads as paint.
 
-**Success condition:** all four behaviors read as the same loose, grainy charcoal family without stampiness, flat heaviness, decorative spray, source-erasing blur, or putty motion.
+**Success condition:** oil is recognizable as a body of paint — it holds marks, moves as a mass, takes light on its relief, and never bleeds. “Indistinguishable from oil” is not required for v0.1.
+
+**Deferred at the artist’s request:** the charcoal Stamp / 1 Layer / Multi-Layer / Smudge comparison. Every charcoal mark and decision already recorded still stands. It is worth resuming after burnishing (`CH-P-07`) is built on the new shared layer, so the grain and the burnish can be judged in one sitting.
 
 ## IN FLIGHT
 
-- Nothing in code. The artist-controlled pressure instrument is implemented, code-verified, visually checked, and published. The four-part material comparison remains artist work, not an implementation task.
+- Nothing in code. The shared deposited layer and oil v0.1 are implemented, mutation-tested, and committed. The first oil look is artist work, not an implementation task.
 
 ## Recently completed
 
+- Added the shared deposited layer with derived `DEPO-005` relief height and yield-gated motion, plus oil v0.1 assembled entirely from existing canonical properties. Regime is selected by physical properties (`body` / `granular` / `flowing`), never by material name. In the matched three-recipe scene the same gesture yields deposited 3.043 / suspended 22.003 / water 62.050 for watercolor, 10.486 / 0 / 0 for charcoal, and 42.841 / 0 / 0 for oil, all at 0.000000% conservation error. A mound at or below the yield stress keeps 100% of its peak and moves exactly zero mass; at 8x yield it keeps 31.7%, at 40x it keeps 19.5%. Brush displacement is 0% at pressures 0.20 and 0.34 against a yield stress of 0.34, then 8.8% at 0.50, 38.9% at 0.75, and 60.0% at 1.00. Watercolor and charcoal deposited arrays are bit-for-bit identical across the new pass. `[1 RUN ONLY]`
+- Recorded ADR-0002, the third-material vocabulary test. Twelve of thirteen required oil behaviors resolve to existing canonical properties; no new property family was introduced. The single gap, how tall deposited material stands, is derivable from mass, packing, and particle density and was therefore added as a derived property inside an existing family. The finding that matters is that the new shared layer is what charcoal burnishing (`CH-P-07`) and watercolor finite-thickness glazing were already blocked on.
+- Added `docs/BUILD_MAP.html`, a visual orientation sheet kept current with the build. Only the pin, the board marks, and the next action change at a checkpoint. A board mark turns green only on artist review.
 - Added the artist-controlled **Pressure behavior** card to the right of the desktop drawing surface, with a live input/output dot, draggable and keyboard-accessible curve controls, Linear/Soft/Firm/Reset presets, four shared influence controls, local persistence, and review JSON/history capture. Default calibration reproduces the previously tested behavior. Browser QA passed at `1440 × 1000` and `375 × 812`; Soft produced `0.48 / 0.80` and Reset restored `0.33 / 0.67`. `[1 RUN ONLY]`
 - Recorded the artist's loose, grainy charcoal reference as `docs/reference/material-studies/LOOSE_GRAIN_CHARCOAL_TARGET.md`, preserving the labeled Stamp / 1 Layer / Multi-Layer / Smudge relationships without treating the screenshot as measured science.
 - Added charcoal v0.6 property-driven granular transfer and population-specific optical density. In the matched load-`0.70`, pressure-`0.55`, speed-`0.80` scene, one pass marks `33.20%` of the checked corridor and leaves `66.80%` as paper/gaps. Three passes retain the same footprint, increase deposited mass from `4.41292` to `13.23877`, and lower mean corridor RGB from `232.02` to `222.72`; conservation remains below `0.000001%`. `[1 RUN ONLY]`

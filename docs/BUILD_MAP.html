@@ -243,8 +243,8 @@
   .mk.partial{background:radial-gradient(circle at 50% 50%,var(--sienna) 0 36%,transparent 37%);border-color:var(--sienna)}
   .mk.none{background:transparent;border-style:dashed;border-color:var(--rule-2)}
 
-  .boards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  @media (max-width:820px){.boards{grid-template-columns:1fr}}
+  .boards{display:grid;grid-template-columns:repeat(auto-fit,minmax(288px,1fr));gap:16px}
+  @media (max-width:640px){.boards{grid-template-columns:1fr}}
   .board{border:1px solid var(--rule-2);border-radius:6px;overflow:hidden;background:var(--sheet)}
   .board-hd{
     padding:14px 16px;background:var(--sheet-2);border-bottom:1px solid var(--rule-2);
@@ -340,11 +340,11 @@
     <div class="pin">
       <div>
         <dt>Active leg</dt>
-        <dd>01 · Oil goes in</dd>
+        <dd>01 · Oil is in</dd>
       </div>
       <div>
         <dt>Waiting on you</dt>
-        <dd class="ok">Nothing — mine to build</dd>
+        <dd class="hot">First look at oil</dd>
       </div>
       <div>
         <dt>Parked by you</dt>
@@ -357,8 +357,8 @@
   <section>
     <div class="plate-head">
       <p class="eyebrow">Leg 01 result · 19 August</p>
-      <h2>Oil went in. The foundation held.</h2>
-      <p class="lede">This was the first test that could actually have proved you wrong. Thirteen things oil must do — twelve already had a word for them.</p>
+      <h2>Oil went in. The foundation held, and it is built.</h2>
+      <p class="lede">This was the first test that could actually have proved you wrong. Thirteen things oil must do — twelve already had a word for them. The thirteenth turned out to be the piece your other two materials were stuck behind.</p>
     </div>
 
     <div class="verdict">
@@ -659,16 +659,28 @@
         <div class="b-row"><span class="b-mk"><span class="mk partial"></span></span><span class="b-name">Failure range<small>loose grain across load and speed</small></span><span class="b-id">CH-08</span></div>
         <div class="board-ft">Parked at your call — every mark here stands. Coming back to it after the shared layer lands means you review the grain <em>and</em> burnishing in one sitting instead of two.</div>
       </div>
+      <div class="board">
+        <div class="board-hd"><h3>Oil</h3><span class="v">recipe v0.1 · new</span></div>
+        <div class="b-row"><span class="b-mk"><span class="mk checked"></span></span><span class="b-name">Holds its shape<small>a ridge stays a ridge</small></span><span class="b-id">OL-01</span></div>
+        <div class="b-row"><span class="b-mk"><span class="mk checked"></span></span><span class="b-name">Slumps when overloaded<small>pile it too high and it gives</small></span><span class="b-id">OL-02</span></div>
+        <div class="b-row"><span class="b-mk"><span class="mk checked"></span></span><span class="b-name">The brush shoves it<small>press hard enough, it moves as a mass</small></span><span class="b-id">OL-03</span></div>
+        <div class="b-row"><span class="b-mk"><span class="mk checked"></span></span><span class="b-name">It stands up<small>real thickness off the sheet</small></span><span class="b-id">OL-04</span></div>
+        <div class="b-row"><span class="b-mk"><span class="mk checked"></span></span><span class="b-name">Never wets the sheet<small>refuses water even when offered</small></span><span class="b-id">OL-05</span></div>
+        <div class="b-row"><span class="b-mk"><span class="mk checked"></span></span><span class="b-name">Never bleeds<small>pigment goes where you put it</small></span><span class="b-id">OL-06</span></div>
+        <div class="b-row"><span class="b-mk"><span class="mk partial"></span></span><span class="b-name">Takes light<small>relief shading exists — unjudged</small></span><span class="b-id">OL-09</span></div>
+        <div class="b-row"><span class="b-mk"><span class="mk none"></span></span><span class="b-name">Dries, picks up, scrapes<small>curing, dirty brush, wiping back</small></span><span class="b-id">OL-07/08/10</span></div>
+        <div class="board-ft">Six blue marks in one sitting, and <strong>not one green</strong>. Every one of these is the machine agreeing with itself. None of it has been seen by a person.</div>
+      </div>
     </div>
 
-    <p class="note" style="margin-top:22px"><strong>Read the two boards against each other.</strong> Charcoal is carrying the proof right now. Oil is about to become the third column here — and the architecture only earns its keep if all three get pushed.</p>
+    <p class="note" style="margin-top:22px"><strong>Read the three boards against each other.</strong> Charcoal has five greens. Watercolor has none. Oil has none. Blue marks are cheap — I can produce those in an afternoon. Green is the only column that costs anything, and it is the only one that counts.</p>
   </section>
 
   <!-- ============ THE ROAD ============ -->
   <section>
     <div class="plate-head">
       <p class="eyebrow">The road · reordered at your call</p>
-      <h2>Seven legs. You own two of them.</h2>
+      <h2>Seven legs. You own three of them.</h2>
       <p class="lede">Oil moved to the front because it's the leg that could disprove everything — better to know now than after the rewrite.</p>
     </div>
 
@@ -677,9 +689,9 @@
         <span class="leg-n">01</span>
         <div>
           <h3>Slot in oil</h3>
-          <p>Vocabulary test <strong>passed</strong>. Now build it: one shared layer with real thickness that moves only when pushed hard enough, the oil recipe written from existing properties, and proof that watercolor and charcoal come out unchanged.</p>
+          <p>Vocabulary test passed, layer built, oil drawable. Watercolor and charcoal come out <strong>bit-for-bit unchanged</strong> — checked, not assumed. All that is left is you looking at it.</p>
         </div>
-        <span class="who me">Mine · building</span>
+        <span class="who you">Yours · looking</span>
       </div>
       <div class="leg">
         <span class="leg-n">02</span>
@@ -736,43 +748,43 @@
   <section>
     <div class="plate-head">
       <p class="eyebrow">Next</p>
-      <h2>Building the layer that stands up.</h2>
-      <p class="lede">Four pieces of work, in order. None of it needs you until the last one.</p>
+      <h2>Go and paint with it.</h2>
+      <p class="lede">The layer is built, tested and committed. Whether it reads as paint is the one thing no test can answer.</p>
     </div>
 
     <div class="next">
       <div class="next-t">
-        <h3 style="font-size:20px">Leg 01 · second half</h3>
-        <span class="mono" style="font-size:12px;color:var(--pigment)">on the bench · no app changes</span>
+        <h3 style="font-size:20px">Oil v0.1 · the first look</h3>
+        <span class="mono" style="font-size:12px;color:var(--pigment)">open the bench · choose Oil · Draw material</span>
       </div>
 
       <div class="four">
         <div class="step">
-          <div class="s-k">Add the word</div>
-          <div class="s-d">Relief height goes into the vocabulary as a derived value, naming its three inputs.</div>
-          <div class="s-r">Cheapest piece. Bookkeeping only.</div>
+          <div class="s-k">Does it hold?</div>
+          <div class="s-d">One firm stroke, then watch it.</div>
+          <div class="s-r">A ridge should stay a ridge. If it relaxes into a pool, the stiffness is wrong.</div>
         </div>
         <div class="step">
-          <div class="s-k">Add the layer</div>
-          <div class="s-d">A deposited layer with real thickness that moves only above its yield point — shared by every recipe.</div>
-          <div class="s-r">The real work. Selected by numbers, never by material name.</div>
+          <div class="s-k">Does it shove?</div>
+          <div class="s-d">Stroke across the first mark.</div>
+          <div class="s-r">Paint should pile up ahead of the brush, not smear thin.</div>
         </div>
         <div class="step">
-          <div class="s-k">Write oil</div>
-          <div class="s-d">The oil recipe assembled from properties that already exist, seeded from the July recipe file.</div>
-          <div class="s-r">If this needs new code, the finding was wrong and I'll say so.</div>
+          <div class="s-k">Is there a threshold?</div>
+          <div class="s-d">A light pass, then a heavy one, over the same paint.</div>
+          <div class="s-r">Light should move nothing at all. The change should arrive suddenly, not fade in.</div>
         </div>
         <div class="step">
-          <div class="s-k">Prove nothing broke</div>
-          <div class="s-d">Watercolor and charcoal must come out bit-for-bit as they are today.</div>
-          <div class="s-r">Then it's your eye on oil — first look at a third material.</div>
+          <div class="s-k">Does it take light?</div>
+          <div class="s-d">Look at a thick mark.</div>
+          <div class="s-r">A lit side and a shadow side. If it only looks darker, the relief is not reading.</div>
         </div>
       </div>
 
-      <p class="note">The honest risk: a layer that can be pushed is the most invasive thing added to the bench so far. If watercolor or charcoal shift even slightly, that's a real regression and it gets reported as one — not smoothed over.</p>
+      <p class="note"><strong>One thing that must never appear:</strong> a soft edge. Oil does not bleed, spread, or halo. If you see any, that is a real failure — say so and I will chase it.</p>
+      <p class="note">Be sceptical. The stiffness, thickness, packing and colour are unmeasured guesses, and the colour is one flat earth tone because the bench has no real colour yet. Judge the <em>behaviour</em>, not the hue.</p>
     </div>
   </section>
-
   <!-- ============ STAYING ORIENTED ============ -->
   <section style="border-bottom:0">
     <div class="plate-head">
@@ -808,7 +820,7 @@ and why. Nothing turns green unless I said yes to it.</pre>
 
     <p class="rule-strong">The rule that keeps all of this honest, and the reason you got lost without it: <strong>a mark is a claim about what you have seen with your own eyes</strong> — never about what the code manages to do.</p>
 
-    <footer>Sarasara Studio · build map v2 · 19 August 2026</footer>
+    <footer>Sarasara Studio · build map v3 · 19 August 2026</footer>
   </section>
 
 </div>

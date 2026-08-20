@@ -226,4 +226,117 @@ blankSmudge.smudgeSegment(20,30,90,30,120,60,.8,1.2);
 const blankSmudgeState=blankSmudge.metrics();
 assert(blankSmudgeState.deposited_pigment===0&&blankSmudgeState.loose_pigment===0&&blankSmudgeState.coarse_fragment_pigment===0&&blankSmudgeState.fine_dust_pigment===0&&blankSmudgeState.relocated_pigment===0,'smudging blank paper must not create pigment or detached particles');
 
+/* ---- ADR-0002: shared deposited layer + oil as the third recipe ---- */
+
+assert(PROFILES.oil && PROFILES.oil.id === 'material.oil.diagnostic.v0.1', 'the oil recipe must remain versioned for artist review history');
+assert(PROFILES.oil.state['SUBI-001'] === undefined && PROFILES.oil.state['SUBI-003'] === undefined, 'the oil recipe must not own intrinsic paper properties');
+assert(PROFILES.oil.state['TRAN-001'] === 0, 'oil pigment must never diffuse on its own');
+
+// every property oil uses must already exist in the canonical vocabulary
+const CANONICAL = new Set(['COMP-001','COMP-002','COMP-003','COMP-004','STATE-001','STATE-002','STATE-003','STATE-004','RHEO-001','RHEO-002','RHEO-003','RHEO-004','TRIB-001','TRIB-002','TRIB-003','TRIB-004','PART-001','PART-002','PART-003','PART-004','INTF-001','INTF-002','INTF-003','INTF-004','TRAN-001','TRAN-002','TRAN-003','TRAN-004','DEPO-001','DEPO-002','DEPO-003','DEPO-004','DEPO-005','SUBI-001','SUBI-002','SUBI-003','SUBI-004','EVOL-001','EVOL-002','EVOL-003','EVOL-004','REAC-001','REAC-002','REAC-003','REAC-004','OPT-001','OPT-002','OPT-003','OPT-004']);
+for (const id of Object.keys(PROFILES.oil.state)) assert(CANONICAL.has(id), 'oil introduced a property outside the canonical vocabulary: ' + id);
+
+// the regime is chosen by physical properties, never by a material name
+const oilSolver = new SharedSolver(40, 40, PROFILES.oil, SUBSTRATES.coldPress);
+const wcSolver = new SharedSolver(40, 40, PROFILES.watercolor, SUBSTRATES.coldPress);
+const chSolver = new SharedSolver(40, 40, PROFILES.charcoal, SUBSTRATES.pastelWhite);
+assert(oilSolver.regime() === 'body', 'a material with a yield stress must select the body regime');
+assert(wcSolver.regime() === 'flowing', 'watercolor must still select the flowing regime');
+assert(chSolver.regime() === 'granular', 'charcoal must still select the granular regime');
+assert(!/watercolor|charcoal|oil(?![A-Za-z])/i.test(
+  SharedSolver.prototype.regime.toString() +
+  SharedSolver.prototype.flowLayer.toString() +
+  SharedSolver.prototype.pushLayer.toString() +
+  SharedSolver.prototype.reliefHeight.toString()
+), 'the shared layer must not branch on a named medium');
+
+// REGRESSION: the new pass must be a bit-for-bit no-op for the existing media
+for (const [name, solver] of [['watercolor', wcSolver], ['charcoal', chSolver]]) {
+  solver.clear(0);
+  solver.depositSegment(6, 20, 34, 20, 40, 40, .6, 1, name === 'watercolor' ? .4 : 0, .8);
+  const before = solver.deposited.slice();
+  const moved = solver.flowLayer(1 / 60);
+  assert(moved === 0, name + ' must not participate in yield-gated layer motion');
+  for (let i = 0; i < before.length; i++) assert(before[i] === solver.deposited[i], name + ' deposited material must be bit-for-bit unchanged by the shared layer pass');
+}
+
+// relief height is derived from mass, packing and density — not stored
+oilSolver.clear(0);
+const packing = PROFILES.oil.state['DEPO-004'], density = PROFILES.oil.state['PART-002'];
+oilSolver.deposited[820] = .5;
+assert(Math.abs(oilSolver.reliefHeight(820) - .5 / (packing * density)) < 1e-9, 'relief height must equal deposited mass over packing times density');
+oilSolver.deposited[820] = 1;
+assert(oilSolver.reliefHeight(820) > .5 / (packing * density), 'more deposited mass must stand taller');
+
+// below yield nothing slumps; above yield it does, and mass is conserved
+const belowYield = new SharedSolver(20, 20, PROFILES.oil, SUBSTRATES.coldPress);
+belowYield.clear(0);
+belowYield.deposited[210] = PROFILES.oil.state['RHEO-002'] * packing * density * .5;
+const belowTotal = belowYield.deposited.reduce((a, b) => a + b, 0);
+assert(belowYield.flowLayer(1 / 60) === 0, 'a mound below the yield stress must hold its shape');
+assert(Math.abs(belowYield.deposited.reduce((a, b) => a + b, 0) - belowTotal) < 1e-9, 'a held mound must not lose mass');
+
+const aboveYield = new SharedSolver(20, 20, PROFILES.oil, SUBSTRATES.coldPress);
+aboveYield.clear(0);
+aboveYield.deposited[210] = PROFILES.oil.state['RHEO-002'] * packing * density * 40;
+const aboveTotal = aboveYield.deposited.reduce((a, b) => a + b, 0);
+const peakBefore = aboveYield.deposited[210];
+let slumped = 0;
+for (let f = 0; f < 30; f++) slumped += aboveYield.flowLayer(1 / 60);
+assert(slumped > 0, 'a mound above the yield stress must slump');
+assert(aboveYield.deposited[210] < peakBefore, 'the slumping peak must lose height');
+assert(aboveYield.deposited[211] > 0, 'slumped material must arrive at a neighbour');
+const aboveAfter = aboveYield.deposited.reduce((a, b) => a + b, 0);
+assert(Math.abs(aboveAfter - aboveTotal) / aboveTotal < .00001, 'slumping must conserve deposited mass');
+for (let i = 0; i < aboveYield.deposited.length; i++) assert(aboveYield.deposited[i] >= 0, 'slumping must never drive a cell negative');
+
+// a stiffer body holds its shape better than a softer one, with no name involved
+const softProfile = JSON.parse(JSON.stringify(PROFILES.oil));
+softProfile.id = 'material.oil.diagnostic.v0.1-soft';
+softProfile.state['RHEO-002'] = PROFILES.oil.state['RHEO-002'] * .25;
+const softMound = new SharedSolver(20, 20, softProfile, SUBSTRATES.coldPress);
+softMound.clear(0);
+softMound.deposited[210] = aboveYield.deposited === null ? 0 : PROFILES.oil.state['RHEO-002'] * packing * density * 40;
+let softSlump = 0;
+for (let f = 0; f < 30; f++) softSlump += softMound.flowLayer(1 / 60);
+assert(softSlump > slumped, 'a lower yield stress must slump more from the same mound');
+
+// drawing oil: mass conserves, pigment never diffuses, and the layer stands up
+const oilStroke = new SharedSolver(60, 60, PROFILES.oil, SUBSTRATES.coldPress);
+oilStroke.clear(0);
+oilStroke.depositSegment(10, 30, 50, 30, 60, 60, .75, 1, .6, .8); // brush water deliberately non-zero: a body must ignore it
+for (let f = 0; f < 20; f++) oilStroke.step(1 / 60);
+const oilState = oilStroke.metrics();
+assert(oilState.deposited_pigment > 0, 'an oil stroke must leave material on the sheet');
+assert(oilState.pigment_conservation_error < 1, 'an oil stroke must conserve pigment within 1%');
+assert(oilStroke.water.reduce((a, b) => a + b, 0) === 0, 'an oil body must never wet the sheet');
+assert(oilStroke.absorbed.reduce((a, b) => a + b, 0) === 0, 'an oil body must never soak into the sheet');
+assert(oilStroke.mobile.reduce((a, b) => a + b, 0) === 0, 'oil pigment must never enter the suspended state');
+// carrier water offered straight at the contact must still be refused by a body
+const bodyIgnoresWater = new SharedSolver(20, 20, PROFILES.oil, SUBSTRATES.coldPress);
+bodyIgnoresWater.clear(0);
+bodyIgnoresWater.addDisk(10, 10, 3, .9, .5, .7, .8, .9, 0, 0);
+assert(bodyIgnoresWater.water.reduce((a, b) => a + b, 0) === 0, 'a body must ignore carrier water even when it is offered directly at the contact');
+assert(bodyIgnoresWater.absorbed.reduce((a, b) => a + b, 0) === 0, 'a body must not soak the sheet even when offered carrier water');
+assert(bodyIgnoresWater.deposited.reduce((a, b) => a + b, 0) > 0, 'the body contact must still deposit material');
+
+let standing = 0;
+for (let i = 0; i < oilStroke.n; i++) if (oilStroke.reliefHeight(i) > 0) standing++;
+assert(standing > 0, 'an oil stroke must produce standing relief');
+
+// the brush pushes an existing body forward, conserving what it moves
+const pushTest = new SharedSolver(30, 30, PROFILES.oil, SUBSTRATES.coldPress);
+pushTest.clear(0);
+pushTest.deposited[465] = 1;
+const pushTotalBefore = pushTest.deposited.reduce((a, b) => a + b, 0);
+const pushed = pushTest.pushLayer(465, 466, .9);
+assert(pushed > 0, 'pressure above the yield stress must displace an existing body');
+assert(pushTest.deposited[465] < 1 && pushTest.deposited[466] > 0, 'displaced material must leave the source and arrive ahead');
+assert(Math.abs(pushTest.deposited.reduce((a, b) => a + b, 0) - pushTotalBefore) < 1e-9, 'displacing a body must conserve its mass');
+assert(pushTest.pushLayer(465, 466, PROFILES.oil.state['RHEO-002'] * .5) === 0, 'pressure below the yield stress must not displace a body');
+
+// determinism
+const runOil = () => { const s = new SharedSolver(30, 30, PROFILES.oil, SUBSTRATES.coldPress); s.clear(0); s.depositSegment(5, 15, 25, 15, 30, 30, .7, 1, 0, .9); for (let f = 0; f < 10; f++) s.step(1 / 60); return s.metrics().deposited_pigment };
+assert(Math.abs(runOil() - runOil()) < 1e-9, 'identical oil commands must produce identical results');
+
 console.log('shared solver checks passed');

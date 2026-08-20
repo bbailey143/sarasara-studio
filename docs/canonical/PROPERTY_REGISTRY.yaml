@@ -430,6 +430,25 @@ properties:
     solver_owners: [layer_builder, packing_model, optical_model]
 
   - <<: *common
+    id: DEPO-005
+    name: deposited_relief_height
+    display_name: Deposited Relief Height
+    definition: >-
+      Height that deposited material stands above the substrate surface. Derived,
+      never authored: a material profile states packing and particle density, and
+      the canvas holds deposited mass. It exists so a body-forming material can
+      carry impasto, ridges, and relief lighting without a private property family.
+    symbol: h_d
+    classification: {scope: interaction_derived, representation: derived}
+    unit: {canonical: 1, display: normalized}
+    domain: {minimum: 0}
+    applicability: {fluid: possible, paste: common, plastic_solid: common, brittle_solid: possible}
+    derived_from: [deposited_mass, DEPO-004, PART-002]
+    dependencies: [deposited_mass, deposited_packing_fraction, particle_density]
+    solver_owners: [layer_builder, bulk_motion_solver, optical_model]
+    evidence: {status: seed, note: ADR-0002 third-material vocabulary test. Derived bookkeeping added inside an existing family; no new property family was introduced.}
+    ui_mapping: {exposure: none, note: Observed as thickness and relief lighting; never edited directly by the artist.}
+  - <<: *common
     id: SUBI-001
     name: surface_roughness
     display_name: Surface Roughness
