@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-20T03:27:23.171Z",
+  "updatedAt": "2026-08-20T03:35:00.000Z",
   "rows": {
     "watercolor": {
       "WC-01": {
@@ -116,15 +116,30 @@
         "note": "",
         "decidedAt": "2026-08-20T03:09:09.699Z"
       },
+      "OL-12": {
+        "mark": "approved",
+        "note": "Approved as the pickup-and-drag pass; the artist clicked the only row that mentioned picking up.",
+        "decidedAt": "2026-08-20T03:29:24.669Z"
+      },
       "OL-09": {
         "mark": "partial",
         "note": "",
         "decidedAt": null
       },
       "OL-07": {
-        "mark": "partial",
+        "mark": "none",
         "note": "",
-        "decidedAt": "2026-08-20T03:27:23.171Z"
+        "decidedAt": null
+      },
+      "OL-08": {
+        "mark": "none",
+        "note": "",
+        "decidedAt": null
+      },
+      "OL-10": {
+        "mark": "none",
+        "note": "",
+        "decidedAt": null
       }
     }
   }

@@ -46,8 +46,11 @@ export const BOARD_ROWS = {
     { id: 'OL-04', name: 'It stands up', hint: 'real thickness off the sheet', seed: 'checked' },
     { id: 'OL-05', name: 'Never wets the sheet', hint: 'refuses water even when offered', seed: 'checked' },
     { id: 'OL-06', name: 'Never bleeds', hint: 'pigment goes where you put it', seed: 'checked' },
+    { id: 'OL-12', name: 'Drags colour out', hint: 'a near-empty brush pulls paint onto bare canvas', seed: 'checked' },
     { id: 'OL-09', name: 'Takes light', hint: 'relief shading exists — unjudged', seed: 'partial' },
-    { id: 'OL-07', name: 'Dries, picks up, scrapes', hint: 'curing, dirty brush, wiping back', seed: 'none' },
+    { id: 'OL-07', name: 'Picks colour up into another', hint: 'a dirty brush; needs a rinse and a second colour', seed: 'none' },
+    { id: 'OL-08', name: 'Dries', hint: 'sets over days and stops taking rework', seed: 'none' },
+    { id: 'OL-10', name: 'Scrapes back', hint: 'wiping paint off with a blade or rag', seed: 'none' },
   ],
 };
 
