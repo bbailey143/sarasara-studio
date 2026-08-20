@@ -1,0 +1,131 @@
+{
+  "updatedAt": null,
+  "rows": {
+    "watercolor": {
+      "WC-01": {
+        "mark": "partial",
+        "note": "",
+        "decidedAt": null
+      },
+      "WC-02": {
+        "mark": "checked",
+        "note": "",
+        "decidedAt": null
+      },
+      "WC-03": {
+        "mark": "none",
+        "note": "",
+        "decidedAt": null
+      },
+      "WC-04": {
+        "mark": "partial",
+        "note": "",
+        "decidedAt": null
+      },
+      "WC-05": {
+        "mark": "none",
+        "note": "",
+        "decidedAt": null
+      },
+      "WC-06": {
+        "mark": "partial",
+        "note": "",
+        "decidedAt": null
+      },
+      "WC-07": {
+        "mark": "checked",
+        "note": "",
+        "decidedAt": null
+      },
+      "WC-08": {
+        "mark": "none",
+        "note": "",
+        "decidedAt": null
+      }
+    },
+    "charcoal": {
+      "CH-01": {
+        "mark": "approved",
+        "note": "",
+        "decidedAt": null
+      },
+      "CH-02": {
+        "mark": "approved",
+        "note": "",
+        "decidedAt": null
+      },
+      "CH-03": {
+        "mark": "approved",
+        "note": "",
+        "decidedAt": null
+      },
+      "CH-04": {
+        "mark": "approved",
+        "note": "",
+        "decidedAt": null
+      },
+      "CH-05": {
+        "mark": "approved",
+        "note": "",
+        "decidedAt": null
+      },
+      "CH-06": {
+        "mark": "none",
+        "note": "",
+        "decidedAt": null
+      },
+      "CH-07": {
+        "mark": "none",
+        "note": "",
+        "decidedAt": null
+      },
+      "CH-08": {
+        "mark": "partial",
+        "note": "",
+        "decidedAt": null
+      }
+    },
+    "oil": {
+      "OL-01": {
+        "mark": "checked",
+        "note": "",
+        "decidedAt": null
+      },
+      "OL-02": {
+        "mark": "checked",
+        "note": "",
+        "decidedAt": null
+      },
+      "OL-03": {
+        "mark": "checked",
+        "note": "",
+        "decidedAt": null
+      },
+      "OL-04": {
+        "mark": "checked",
+        "note": "",
+        "decidedAt": null
+      },
+      "OL-05": {
+        "mark": "checked",
+        "note": "",
+        "decidedAt": null
+      },
+      "OL-06": {
+        "mark": "checked",
+        "note": "",
+        "decidedAt": null
+      },
+      "OL-09": {
+        "mark": "partial",
+        "note": "",
+        "decidedAt": null
+      },
+      "OL-07": {
+        "mark": "none",
+        "note": "",
+        "decidedAt": null
+      }
+    }
+  }
+}

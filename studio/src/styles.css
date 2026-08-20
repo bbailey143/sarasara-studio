@@ -1,0 +1,123 @@
+@import "tailwindcss";
+@plugin "tailwindcss-react-aria-components";
+
+/* Sarasara diagnostic studio — theme.
+   Palette lives as CSS variables so utilities (bg-panel, text-ink…) follow a
+   theme swap automatically: redefining the variable restyles every utility
+   that references it. No dark: variant needed on individual elements. */
+
+@theme {
+  --color-ground: #eeeeec;
+  --color-panel: #f7f7f6;
+  --color-panel2: #e6e7e4;
+  --color-ink: #16191c;
+  --color-ink2: #4d535a;
+  --color-ink3: #7b828a;
+  --color-rule: #d5d7d3;
+  --color-rule2: #bfc2be;
+  --color-pigment: #1d3f5e;
+  --color-pigmentsoft: #dde5ec;
+  --color-terre: #4c6a46;
+  --color-terresoft: #dfe7dc;
+  --color-sienna: #94682d;
+  --color-siennasoft: #efe4d2;
+  --color-danger: #8c3b32;
+  --color-onaccent: #ffffff;
+
+  --font-ui: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", "Courier New", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-ground: #131619;
+    --color-panel: #1a1e22;
+    --color-panel2: #23282d;
+    --color-ink: #e7e9eb;
+    --color-ink2: #a9b1b8;
+    --color-ink3: #7d858d;
+    --color-rule: #2c3238;
+    --color-rule2: #3b4249;
+    --color-pigment: #83aacd;
+    --color-pigmentsoft: #1c2a36;
+    --color-terre: #94b48b;
+    --color-terresoft: #1e291e;
+    --color-sienna: #cd9d5f;
+    --color-siennasoft: #2b2318;
+    --color-danger: #d98a80;
+    --color-onaccent: #0e1418;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-ground: #131619;
+  --color-panel: #1a1e22;
+  --color-panel2: #23282d;
+  --color-ink: #e7e9eb;
+  --color-ink2: #a9b1b8;
+  --color-ink3: #7d858d;
+  --color-rule: #2c3238;
+  --color-rule2: #3b4249;
+  --color-pigment: #83aacd;
+  --color-pigmentsoft: #1c2a36;
+  --color-terre: #94b48b;
+  --color-terresoft: #1e291e;
+  --color-sienna: #cd9d5f;
+  --color-siennasoft: #2b2318;
+  --color-danger: #d98a80;
+  --color-onaccent: #0e1418;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background: var(--color-ground);
+  color: var(--color-ink);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (max-width: 1180px) {
+  body {
+    overflow: auto;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-pigment);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* The board mark is a small painted disc whose fill encodes the status.
+   Four gradients are clearer as one rule than as four utility soups. */
+.mk {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-rule2);
+  display: block;
+  flex: none;
+}
+.mk[data-mark="approved"] {
+  background: var(--color-terre);
+  border-color: var(--color-terre);
+}
+.mk[data-mark="checked"] {
+  background: linear-gradient(90deg, var(--color-pigment) 0 50%, transparent 50% 100%);
+  border-color: var(--color-pigment);
+}
+.mk[data-mark="partial"] {
+  background: radial-gradient(circle at 50% 50%, var(--color-sienna) 0 36%, transparent 37%);
+  border-color: var(--color-sienna);
+}
+.mk[data-mark="none"] {
+  background: transparent;
+  border-style: dashed;
+}
