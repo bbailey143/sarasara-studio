@@ -23,7 +23,7 @@ import '../../../lab/shared-solver.js';
 const lab = globalThis.window?.SarasaraLab;
 if (!lab) throw new Error('The shared solver did not register. Check lab/shared-solver.js.');
 
-const { SharedSolver, PROFILES, SUBSTRATES } = lab;
+const { SharedSolver, PROFILES, SUBSTRATES, BRUSHES } = lab;
 
 /** Artist-facing names for things the profiles only know by id. */
 const MATERIAL_LABELS = { watercolor: 'Watercolor', charcoal: 'Charcoal', oil: 'Oil' };
@@ -72,6 +72,7 @@ export async function createEngine({ width, height, material, substrate }) {
   let solver = new SharedSolver(width, height, PROFILES[material], SUBSTRATES[substrate]);
   let materialId = material;
   let substrateId = substrate;
+  let brushId = 'disc';
 
   const reliefStats = () => {
     let peak = 0;
@@ -107,6 +108,18 @@ export async function createEngine({ width, height, material, substrate }) {
       solver.setProfile(PROFILES[id]);
     },
 
+    /** The tool. 'disc' is the plain footprint every earlier review used. */
+    setBrush(id) {
+      if (!BRUSHES[id]) throw new Error('Unknown brush: ' + id);
+      brushId = id;
+      solver.setBrush(id);
+    },
+
+    brushInfo() {
+      const b = BRUSHES[brushId];
+      return { id: b.id, key: brushId, name: b.name, version: b.version, kind: b.kind, widthMm: b.widthMm || null };
+    },
+
     setSubstrate(id) {
       if (!SUBSTRATES[id]) throw new Error('Unknown substrate: ' + id);
       substrateId = id;
@@ -127,7 +140,7 @@ export async function createEngine({ width, height, material, substrate }) {
       } else {
         solver.depositSegment(
           a.x, a.y, b.x, b.y, view.width, view.height,
-          opts.pressure, opts.load, opts.water, opts.speed,
+          opts.pressure, opts.load, opts.water, opts.speed, opts.angle || 0,
         );
       }
     },
@@ -156,6 +169,13 @@ export async function createEngine({ width, height, material, substrate }) {
     },
   };
 }
+
+export const listBrushes = () =>
+  Object.keys(BRUSHES).map((id) => ({
+    id,
+    name: BRUSHES[id].widthMm ? `${BRUSHES[id].name} · ${BRUSHES[id].widthMm} mm` : BRUSHES[id].name,
+    version: BRUSHES[id].version,
+  }));
 
 export const listMaterials = () =>
   Object.keys(PROFILES).map((id) => ({

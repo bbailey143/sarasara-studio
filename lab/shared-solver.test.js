@@ -4,7 +4,7 @@ global.window={};
 global.document={createElement(){return{width:0,height:0,getContext(){return{createImageData(w,h){return{data:new Uint8ClampedArray(w*h*4)}},putImageData(){}}}}}};
 require('./shared-solver.js');
 
-const {SharedSolver,PROFILES,SUBSTRATES,DEFAULT_CALIBRATION,validateCalibration,interpolatePressure}=window.SarasaraLab;
+const {SharedSolver,PROFILES,SUBSTRATES,BRUSHES,DEFAULT_CALIBRATION,validateCalibration,interpolatePressure}=window.SarasaraLab;
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 
 assert(PROFILES.charcoal.id==='material.charcoal.diagnostic.v0.6','the loose-grain target must remain versioned for artist review history');
@@ -416,5 +416,109 @@ const edgeAfter = edgeOf();
 assert(edgeAfter - edgeBefore >= 12, 'an empty brush must drag colour well past the edge of the paint it started in');
 assert(drag.deposited[70 * 190 + edgeAfter] < drag.deposited[70 * 190 + edgeBefore], 'dragged-out colour must taper, not end in a hard wall');
 assert(drag.metrics().pigment_conservation_error < 1, 'dragging colour out must conserve pigment');
+
+/* ---- the tool: a drawn shape must become a brush (first pass) ---------- */
+
+const CELLS_PER_MM = 190 / 120;
+
+// The disc is the default and stays the default. Every material review so far
+// was made with it, and none of them may move because drawn brushes now exist.
+const defaultTool = new SharedSolver(60, 60, PROFILES.oil, SUBSTRATES.coldPress);
+assert(defaultTool.getBrush().kind === 'disc', 'a solver must reach for the disc unless told otherwise');
+
+// A golden mark, so any future change to the disc footprint is caught here.
+const goldenDisc = new SharedSolver(120, 90, PROFILES.oil, SUBSTRATES.coldPress);
+goldenDisc.clear(0);
+goldenDisc.depositSegment(72, 180, 408, 151, 480, 360, .68, 1, .42, .9);
+assert(Math.abs(goldenDisc.metrics().deposited_pigment - 81.7515) < .01,
+  'the disc footprint must keep laying exactly the paint it always has (got ' + goldenDisc.metrics().deposited_pigment.toFixed(4) + ')');
+
+// Geometry only. A brush may never carry a look.
+for (const key of Object.keys(BRUSHES)) {
+  const brush = BRUSHES[key];
+  const text = JSON.stringify({ o: brush.outline, b: brush.belly, s: brush.softness, w: brush.widthMm });
+  assert(!/color|colour|pigment|grain|texture|bloom|ridge|image/i.test(text),
+    key + ' must carry geometry only — never a baked mark');
+  assert(brush.id && brush.version, key + ' must be versioned, so a review can name the tool that made it');
+}
+
+// how wide a mark is, measured across the stroke, in whole cells
+const markWidth = (brush, angle, dirX, dirY, pressure) => {
+  const solver = new SharedSolver(190, 140, PROFILES.oil, SUBSTRATES.coldPress);
+  solver.setBrush(brush);
+  solver.clear(0);
+  solver.depositSegment(380 - dirX * 150, 280 - dirY * 150, 380 + dirX * 150, 280 + dirY * 150,
+    760, 560, pressure, 1, .3, .8, angle);
+  let cells = 0;
+  if (dirY !== 0) { for (let x = 0; x < 190; x++) if (solver.deposited[70 * 190 + x] > 1e-6) cells++; }
+  else { for (let y = 0; y < 140; y++) if (solver.deposited[y * 190 + 95] > 1e-6) cells++; }
+  return { cells, mm: cells / CELLS_PER_MM, error: solver.metrics().pigment_conservation_error };
+};
+
+// A flat brush must care which way it is dragged. This is the whole proof.
+const broadStroke = markWidth('flat', 0, 0, 1, .7);
+const edgeStroke = markWidth('flat', 0, 1, 0, .7);
+assert(broadStroke.cells >= edgeStroke.cells * 3,
+  'a flat brush dragged across its face must make a far broader mark than the same brush dragged along it');
+assert(edgeStroke.mm < 4, 'the edge of a 12 mm flat must draw a thin line, not a band');
+
+// The disc cannot tell the difference, and must not pretend to.
+const discAcross = markWidth('disc', 0, 0, 1, .7);
+const discAlong = markWidth('disc', 0, 1, 0, .7);
+assert(Math.abs(discAcross.cells - discAlong.cells) <= 1, 'a round footprint must mark the same in every direction');
+
+// The wrist matters: turning the brush without changing the drag changes the mark.
+const turned = [0, 45, 90].map((deg) => markWidth('flat', deg * Math.PI / 180, 0, 1, .7).cells);
+assert(turned[0] > turned[1] && turned[1] > turned[2],
+  'turning the brush must narrow the mark steadily, not jump');
+
+// Sized in millimetres, so the mark keeps its real size whatever the grid does.
+const pressedFull = markWidth('filbert', 0, 0, 1, 1);
+assert(Math.abs(pressedFull.mm - BRUSHES.filbert.widthMm) < 1.5,
+  'a 12 mm filbert pressed fully down must make a mark about 12 mm across (got ' + pressedFull.mm.toFixed(1) + ')');
+
+// The belly: light contact is the tip only, heavy contact is the whole head.
+const tipOnly = markWidth('filbert', 0, 0, 1, .15);
+assert(tipOnly.cells < pressedFull.cells * .55, 'light pressure must touch with the tip, not the whole head');
+const bellySteps = [.15, .4, .7, 1].map((p) => markWidth('filbert', 0, 0, 1, p).cells);
+for (let i = 1; i < bellySteps.length; i++)
+  assert(bellySteps[i] >= bellySteps[i - 1], 'pressing harder must never make the mark narrower');
+
+// The head is hair, not a cookie cutter: it must lay more in the middle of its
+// footprint than at the rim, or every mark is a stamp with a hard edge.
+const feather = new SharedSolver(190, 140, PROFILES.oil, SUBSTRATES.coldPress);
+feather.setBrush('filbert');
+feather.clear(0);
+feather.depositSegment(380, 280, 380.6, 280, 760, 560, .9, 1, .3, .4, 0); // one dab, not a drag: a swept stroke piles up and hides the profile
+let firstMarked = -1, lastMarked = -1;
+for (let x = 0; x < 190; x++) if (feather.deposited[70 * 190 + x] > 1e-6) { if (firstMarked < 0) firstMarked = x; lastMarked = x; }
+const middleCell = Math.round((firstMarked + lastMarked) / 2);
+const middle = feather.deposited[70 * 190 + middleCell];
+const rim = Math.max(feather.deposited[70 * 190 + firstMarked], feather.deposited[70 * 190 + lastMarked]);
+assert(middle > rim * 4, 'the footprint must feather towards its edge, not cut off square (middle ' + middle.toFixed(3) + ' vs rim ' + rim.toFixed(3) + ')');
+
+// Whatever the shape, the ledger still balances.
+for (const brush of ['filbert', 'flat']) {
+  const solver = new SharedSolver(190, 140, PROFILES.oil, SUBSTRATES.coldPress);
+  solver.setBrush(brush);
+  solver.clear(0);
+  solver.depositSegment(120, 200, 620, 340, 760, 560, .8, 1, .3, .9, .4);
+  for (let f = 0; f < 20; f++) solver.step(1 / 60);
+  assert(solver.metrics().pigment_conservation_error < 1, brush + ' must conserve pigment like any other contact');
+}
+
+// Same shape, same commands, same result.
+const repeat = () => {
+  const solver = new SharedSolver(120, 90, PROFILES.oil, SUBSTRATES.coldPress);
+  solver.setBrush('filbert'); solver.clear(0);
+  solver.depositSegment(60, 150, 420, 210, 480, 360, .75, 1, .3, .9, .3);
+  return solver.metrics().deposited_pigment;
+};
+assert(Math.abs(repeat() - repeat()) < 1e-9, 'a drawn brush must be as repeatable as a disc');
+
+// And a drawn brush must not decide anything from the material's name.
+assert(!/watercolor|charcoal|oil(?![A-Za-z])/i.test(
+  SharedSolver.prototype.setBrush.toString() + SharedSolver.prototype.getBrush.toString()
+), 'the tool must not branch on a named medium');
 
 console.log('shared solver checks passed');

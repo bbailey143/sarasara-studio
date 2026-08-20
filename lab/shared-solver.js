@@ -41,6 +41,118 @@
     pastelCream:{id:'substrate.paper.pastel-light-cream.reference-derived.experimental.v0.2',name:'Pastel Paper — Light Cream',version:'0.2.0',state:{'TRAN-002':.014,'SUBI-001':.18,'SUBI-003':.28},texture:{pattern:'fibrous',tooth:.18,absorbency:.18,sizing:.82,capacity:.28,dryBrushBreakup:.32,seed:811,noiseScale:.2,paperColor:'#eeebdf',visualFiberContrast:6.2},provenance:[{status:'reference-derived',note:'Sample-guided from the artist-supplied 5100 px Pastel Light Cream image: sampled mean RGB 238.1/235.0/223.0 and luminance spread 10.30. Color and visible fiber scale are evidence; physical height remains an artist-tested stand-in.'}]}
   };
 
+
+  /* ---------------------------------------------------------------------
+     BRUSHES — the tool, as a first-class participant beside the substrate
+     and the material.
+
+     'disc' is the plain round footprint every material was reviewed with
+     before drawn brushes existed. It is the default and it is deliberately
+     untouched, so earlier reviews stay reproducible.
+
+     A drawn brush carries geometry only: a closed outline of what meets the
+     paper, and a belly curve saying how much of that outline is in contact at
+     a given pressure. No pigment, no paper grain, no baked mark - the same
+     rule the brush specification has always carried.
+
+     What is NOT here yet, on purpose: stiffness, spring, damping, cohesion,
+     roughness, absorbency, side-drag, and the reservoir. Those are what the
+     hair is made of, not what shape it is cut to, and they belong to a later
+     pass. This pass answers one question only: can a drawn shape become a
+     brush the engine can paint with?
+     --------------------------------------------------------------------- */
+  /** How much of a real sheet the simulation grid spans. A drawn brush is sized
+      in millimetres like a real brush, so its mark keeps its true size when the
+      grid gets finer. The disc keeps its old cell-based radius, untouched. */
+  const SHEET_WIDTH_MM=120;
+
+  const BRUSHES={
+    disc:{
+      id:'brush.disc.reference.v1',name:'Disc',version:'1.0.0',kind:'disc',
+      provenance:[{status:'reference',note:'The footprint used for every material review up to 2026-08-20. Unchanged by design.'}]
+    },
+    filbert:{
+      id:'brush.filbert.drawn.v0.1',name:'Filbert',version:'0.1.0',kind:'shape',
+      outline:[[1,0],[0.9791,0.1258],[0.9168,0.2194],[0.8146,0.2968],[0.6746,0.3584],[0.4987,0.4034],[0.2859,0.4308],[0,0.44],[-0.2859,0.4308],[-0.4987,0.4034],[-0.6746,0.3584],[-0.8146,0.2968],[-0.9168,0.2194],[-0.9791,0.1258],[-1,0],[-0.9791,-0.1258],[-0.9168,-0.2194],[-0.8146,-0.2968],[-0.6746,-0.3584],[-0.4987,-0.4034],[-0.2859,-0.4308],[0,-0.44],[0.2859,-0.4308],[0.4987,-0.4034],[0.6746,-0.3584],[0.8146,-0.2968],[0.9168,-0.2194],[0.9791,-0.1258]],
+      widthMm:12,belly:[{p:0,contact:.30},{p:.35,contact:.58},{p:.7,contact:.86},{p:1,contact:1}],
+      softness:.52,
+      provenance:[{status:'stand-in',note:'Hand-authored outline for the first drawn-brush pass. Shape only; the belly curve and edge softness are unmeasured.'}]
+    },
+    flat:{
+      id:'brush.flat.drawn.v0.1',name:'Flat',version:'0.1.0',kind:'shape',
+      outline:[[1,0],[0.9936,0.116],[0.974,0.1452],[0.9403,0.1644],[0.8909,0.1782],[0.8221,0.1881],[0.726,0.1948],[0.58,0.1987],[0,0.2],[-0.58,0.1987],[-0.726,0.1948],[-0.8221,0.1881],[-0.8909,0.1782],[-0.9403,0.1644],[-0.974,0.1452],[-0.9936,0.116],[-1,0],[-0.9936,-0.116],[-0.974,-0.1452],[-0.9403,-0.1644],[-0.8909,-0.1782],[-0.8221,-0.1881],[-0.726,-0.1948],[-0.58,-0.1987],[0,-0.2],[0.58,-0.1987],[0.726,-0.1948],[0.8221,-0.1881],[0.8909,-0.1782],[0.9403,-0.1644],[0.974,-0.1452],[0.9936,-0.116]],
+      widthMm:12,belly:[{p:0,contact:.34},{p:.4,contact:.66},{p:1,contact:1}],
+      softness:.30,
+      provenance:[{status:'stand-in',note:'Hand-authored outline for the first drawn-brush pass. Deliberately far from round so direction is obvious.'}]
+    }
+  };
+
+  /** Distance from a point to a closed outline; negative inside. */
+  function outlineDistance(pts,px,py){
+    let best=Infinity,inside=false;
+    for(let i=0,j=pts.length-1;i<pts.length;j=i++){
+      const ax=pts[i][0],ay=pts[i][1],bx=pts[j][0],by=pts[j][1];
+      const ex=bx-ax,ey=by-ay,wx=px-ax,wy=py-ay;
+      const t=Math.max(0,Math.min(1,(wx*ex+wy*ey)/Math.max(1e-9,ex*ex+ey*ey)));
+      const cx=wx-ex*t,cy=wy-ey*t;
+      best=Math.min(best,Math.sqrt(cx*cx+cy*cy));
+      if((ay>py)!==(by>py)&&px<(bx-ax)*(py-ay)/(by-ay)+ax)inside=!inside;
+    }
+    return inside?-best:best;
+  }
+
+  /** Bake an outline once into a small signed-distance grid. */
+  function bakeBrush(brush){
+    if(brush.kind!=='shape'||brush._field)return brush;
+    const size=64,span=1.25,field=new Float32Array(size*size);
+    for(let gy=0;gy<size;gy++)for(let gx=0;gx<size;gx++){
+      const px=(gx/(size-1))*2*span-span,py=(gy/(size-1))*2*span-span;
+      field[gy*size+gx]=outlineDistance(brush.outline,px,py);
+    }
+    brush._field={size,span,field};
+    return brush;
+  }
+
+  /** How much of the outline touches at this pressure. */
+  function bellyContact(brush,pressure){
+    const curve=brush.belly;if(!curve||!curve.length)return 1;
+    const p=Math.max(0,Math.min(1,pressure));
+    for(let i=0;i<curve.length-1;i++){
+      const a=curve[i],b=curve[i+1];
+      if(p<=b.p){const span=Math.max(1e-6,b.p-a.p),t=Math.max(0,Math.min(1,(p-a.p)/span));return a.contact+(b.contact-a.contact)*t}
+    }
+    return curve[curve.length-1].contact;
+  }
+
+  /**
+   * A sampler for one contact. `angle` is the brush's own orientation - the
+   * wrist, not the direction of travel. A flat brush dragged sideways must
+   * make a wide mark and the same brush dragged along its face must make a
+   * thin one; that only happens if the tool keeps its own heading.
+   */
+  function brushSampler(brush,pressure,angle){
+    bakeBrush(brush);
+    const {size,span,field}=brush._field;
+    const contact=Math.max(.05,bellyContact(brush,pressure));
+    const softness=Math.max(.02,brush.softness||.4);
+    const cos=Math.cos(-angle),sin=Math.sin(-angle);
+    return{
+      contact,
+      coverage(dx,dy){
+        const rx=(dx*cos-dy*sin)/contact,ry=(dx*sin+dy*cos)/contact;
+        const gx=(rx+span)/(2*span)*(size-1),gy=(ry+span)/(2*span)*(size-1);
+        if(gx<0||gy<0||gx>size-1||gy>size-1)return 0;
+        const x0=Math.floor(gx),y0=Math.floor(gy);
+        const x1=Math.min(size-1,x0+1),y1=Math.min(size-1,y0+1);
+        const fx=gx-x0,fy=gy-y0;
+        const d=field[y0*size+x0]*(1-fx)*(1-fy)+field[y0*size+x1]*fx*(1-fy)
+               +field[y1*size+x0]*(1-fx)*fy+field[y1*size+x1]*fx*fy;
+        if(d>=0)return 0;
+        return Math.max(0,Math.min(1,-d/softness));
+      }
+    };
+  }
+
   const PROFILES={
     watercolor:{
       id:'material.watercolor.diagnostic.v0.6.1',version:'0.6.1',
@@ -70,12 +182,14 @@
   function validateSubstrate(substrate){const missing=SUBSTRATE_REQUIRED.filter(id=>substrate.state[id]===undefined);if(missing.length)throw new Error('Missing substrate properties: '+missing.join(', '));for(const id of SUBSTRATE_REQUIRED){const value=substrate.state[id];if(typeof value!=='number'||!Number.isFinite(value)||value<0)throw new Error('Invalid substrate value for '+id)}return substrate}
 
   class SharedSolver{
-    constructor(width,height,profile,substrate=SUBSTRATES.coldPress){this.w=width;this.h=height;this.n=width*height;this.surface=document.createElement('canvas');this.surface.width=width;this.surface.height=height;this.sctx=this.surface.getContext('2d');this.image=this.sctx.createImageData(width,height);this.calibration=calibrationCopy();this.substrate=validateSubstrate(substrate);this.s=substrate.state;this.buildPaperSurface();this.setProfile(profile)}
+    constructor(width,height,profile,substrate=SUBSTRATES.coldPress){this.w=width;this.h=height;this.n=width*height;this.surface=document.createElement('canvas');this.surface.width=width;this.surface.height=height;this.sctx=this.surface.getContext('2d');this.image=this.sctx.createImageData(width,height);this.calibration=calibrationCopy();this.substrate=validateSubstrate(substrate);this.s=substrate.state;this.brush=BRUSHES.disc;this.buildPaperSurface();this.setProfile(profile)}
     setCalibration(value){this.calibration=validateCalibration(value);return this.getCalibration()}
     getCalibration(){return calibrationCopy(this.calibration)}
     transformPressure(value){return interpolatePressure(this.calibration.curve,value)}
     calibratedSpeed(value){return Math.max(.1,Math.min(2,.1+(Math.max(.1,Math.min(2,Number(value)||.1))-.1)*this.calibration.speed))}
     setProfile(profile){this.profile=validateProfile(profile);this.p=profile.state;this.displayGain=profile.display?.pigment_visibility_gain||1;this.water=new Float32Array(this.n);this.mobile=new Float32Array(this.n);this.deposited=new Float32Array(this.n);this.loose=new Float32Array(this.n);this.looseVx=new Float32Array(this.n);this.looseVy=new Float32Array(this.n);this.nextLoose=new Float32Array(this.n);this.nextLooseMx=new Float32Array(this.n);this.nextLooseMy=new Float32Array(this.n);this.coarse=new Float32Array(this.n);this.coarseVx=new Float32Array(this.n);this.coarseVy=new Float32Array(this.n);this.nextCoarse=new Float32Array(this.n);this.nextCoarseMx=new Float32Array(this.n);this.nextCoarseMy=new Float32Array(this.n);this.fineDust=new Float32Array(this.n);this.fineDustVx=new Float32Array(this.n);this.fineDustVy=new Float32Array(this.n);this.nextFineDust=new Float32Array(this.n);this.nextFineDustMx=new Float32Array(this.n);this.nextFineDustMy=new Float32Array(this.n);this.absorbed=new Float32Array(this.n);this.nextWater=new Float32Array(this.n);this.nextMobile=new Float32Array(this.n);this.nextDeposited=new Float32Array(this.n);this.initialPigment=0;this.lostPigment=0;this.relocatedPigment=0;this.pressureAnchoredPigment=0;this.sourceOfferedPigment=0;this.sourceRemainingPigment=0;this.coarseCreatedPigment=0;this.fineCreatedPigment=0;this.carriedPigment=0;this.dryBoost=1;this.elapsed=0}
+    setBrush(brush){this.brush=brush&&BRUSHES[brush]?BRUSHES[brush]:(brush&&brush.kind?brush:BRUSHES.disc);if(this.brush.kind==='shape')bakeBrush(this.brush);return this.brush}
+    getBrush(){return this.brush||BRUSHES.disc}
     setSubstrate(substrate){this.substrate=validateSubstrate(substrate);this.s=substrate.state;this.buildPaperSurface()}
     setSmoothing(enabled){this.smoothing=enabled!==false}
     setDisplayGain(value){this.displayGain=Math.max(1,Math.min(12,Number(value)||1))}
@@ -131,13 +245,17 @@
     samplePaperSurface(x,y){const a=this.substrate.texture,rough=this.s['SUBI-001'];if(rough<=0)return{height:.5,visual:0};if(a.pattern==='fibrous'){const layer=(angle,along,cross,seed)=>{const c=Math.cos(angle),s=Math.sin(angle),u=x*c+y*s,v=-x*s+y*c,field=this.smoothNoise(u*along,v*cross,seed),ridge=Math.pow(Math.max(0,1-Math.abs(field-.5)*2),7);return ridge};const f1=layer(.18,.055,.72,a.seed+17),f2=layer(1.19,.07,.62,a.seed+71),f3=layer(2.34,.05,.82,a.seed+131),fibers=Math.max(f1,f2*.88,f3*.72),grain=this.smoothNoise(x*.78,y*.78,a.seed+307),natural=.5+(grain-.5)*.18+(fibers-.28)*.16,spread=.22+rough*.58;return{height:Math.max(0,Math.min(1,.5+(natural-.5)*spread*1.45)),visual:fibers-.28}}let total=0,amplitude=.55,norm=0,frequency=Math.max(.025,.11/Math.max(.1,a.noiseScale));for(let octave=0;octave<4;octave++){total+=this.smoothNoise(x*frequency,y*frequency,a.seed+octave*7919)*amplitude;norm+=amplitude;amplitude*=.5;frequency*=2}const natural=total/norm,spread=.28+rough*.72;return{height:Math.max(0,Math.min(1,.5+(natural-.5)*spread*1.65)),visual:0}}
     buildPaperSurface(){this.paperHeight=new Float32Array(this.n);this.paperVisual=new Float32Array(this.n);for(let y=0;y<this.h;y++)for(let x=0;x<this.w;x++){const i=y*this.w+x,sample=this.samplePaperSurface(x,y);this.paperHeight[i]=sample.height;this.paperVisual[i]=sample.visual}}
     tooth(x,y){const ix=Math.max(0,Math.min(this.w-1,Math.round(x))),iy=Math.max(0,Math.min(this.h-1,Math.round(y)));return this.paperHeight[iy*this.w+ix]}
-    addDisk(cx,cy,radius,water,pigment,pressure,speed,brushMoisture,strokeX=0,strokeY=0,sweep=1){
+    addDisk(cx,cy,radius,water,pigment,pressure,speed,brushMoisture,strokeX=0,strokeY=0,sweep=1,shape=null){
       const regime=this.regime(),body=regime==='body',dry=regime==='granular',rough=this.s['SUBI-001'];
       let addedPigment=0;
       const x0=Math.max(0,Math.floor(cx-radius)),x1=Math.min(this.w-1,Math.ceil(cx+radius)),y0=Math.max(0,Math.floor(cy-radius)),y1=Math.min(this.h-1,Math.ceil(cy+radius));
       for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
-        const dx=(x-cx)/radius,dy=(y-cy)/radius,q=dx*dx+dy*dy;if(q>1)continue;
-        const k=(1-q)*this.p['DEPO-001'],i=y*this.w+x;
+        const dx=(x-cx)/radius,dy=(y-cy)/radius;
+        let cover;
+        if(shape){cover=shape.coverage(dx,dy)}
+        else{const q=dx*dx+dy*dy;if(q>1)continue;cover=1-q}
+        if(cover<=0)continue;
+        const k=cover*this.p['DEPO-001'],i=y*this.w+x;
         if(body){
           const relief=this.reliefHeight(i),amount=pigment*k/(1+relief*.55);
           this.deposited[i]+=amount;addedPigment+=amount;
@@ -153,13 +271,15 @@
       }
       this.initialPigment+=addedPigment;
     }
-    depositSegment(ax,ay,bx,by,canvasW,canvasH,pressure,pigmentLoad,brushWater,speed){
+    depositSegment(ax,ay,bx,by,canvasW,canvasH,pressure,pigmentLoad,brushWater,speed,brushAngle=0){
       pressure=this.transformPressure(pressure);
+      const tool=this.getBrush(),shape=tool.kind==='shape'?brushSampler(tool,pressure,brushAngle):null;
+      const cellsPerMm=this.w/SHEET_WIDTH_MM;
       const sx=this.w/canvasW,sy=this.h/canvasH,x0=ax*sx,y0=ay*sy,x1=bx*sx,y1=by*sy,d=Math.hypot(x1-x0,y1-y0),steps=Math.max(1,Math.ceil(d/.65));
-      const carrier=this.p['COMP-001'],pigmentFraction=this.p['COMP-003'],radius=(1.2+pressure*2.6+brushWater*1.8),regime=this.regime(),water=regime==='body'?0:Math.pow(brushWater,1.85)*.36*carrier;
+      const carrier=this.p['COMP-001'],pigmentFraction=this.p['COMP-003'],radius=shape?(tool.widthMm||10)*.5*cellsPerMm:(1.2+pressure*2.6+brushWater*1.8),regime=this.regime(),water=regime==='body'?0:Math.pow(brushWater,1.85)*.36*carrier;
       const availablePigment=regime==='body'?(.03+pressure*.14)*(pigmentFraction||1):carrier>.02?(.05+pressure*.16)*pigmentFraction:(.012+pressure*.04)*(pigmentFraction||1),pigment=availablePigment*pigmentLoad;
       const ux=d>.001?(x1-x0)/d:0,uy=d>.001?(y1-y0)/d:0;const sweep=radius>0?Math.min(1,(d/Math.max(1,steps))/(2*radius)):1;
-      for(let s=0;s<=steps;s++){const t=s/steps;this.addDisk(x0+(x1-x0)*t,y0+(y1-y0)*t,radius,water,pigment,pressure,speed,brushWater,ux,uy,sweep)}
+      for(let s=0;s<=steps;s++){const t=s/steps;this.addDisk(x0+(x1-x0)*t,y0+(y1-y0)*t,radius,water,pigment,pressure,speed,brushWater,ux,uy,sweep,shape)}
     }
     smudgeSegment(ax,ay,bx,by,canvasW,canvasH,pressure,speed){
       pressure=this.transformPressure(pressure);
@@ -243,5 +363,5 @@
     }
   }
 
-  global.SarasaraLab={SharedSolver,PROFILES,SUBSTRATES,DEFAULT_CALIBRATION:calibrationCopy(),validateCalibration,interpolatePressure,validateProfile,validateSubstrate};
+  global.SarasaraLab={SharedSolver,PROFILES,SUBSTRATES,BRUSHES,DEFAULT_CALIBRATION:calibrationCopy(),validateCalibration,interpolatePressure,validateProfile,validateSubstrate};
 })(window);

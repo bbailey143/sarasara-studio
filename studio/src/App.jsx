@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Tab, TabList, TabPanel, Tabs } from 'react-aria-components';
-import { createEngine, listMaterials, listSubstrates } from './engine/index.js';
+import { createEngine, listBrushes, listMaterials, listSubstrates } from './engine/index.js';
 import { BTN, BTN_PRIMARY, Button, Notes, Select, Slider, ToggleRow } from './components/Controls.jsx';
 import { BOARD_ROWS, MARKS, MARK_ORDER, seedBoard } from './data/board.js';
 
@@ -39,6 +39,7 @@ const REGIME_CHIP = {
 
 const materials = listMaterials();
 const substrates = listSubstrates();
+const brushes = listBrushes();
 
 export default function App() {
   const canvasRef = useRef(null);
@@ -49,6 +50,8 @@ export default function App() {
   const [material, setMaterial] = useState('oil');
   const [substrate, setSubstrate] = useState('coldPress');
   const [action, setAction] = useState('draw');
+  const [brush, setBrush] = useState('disc');
+  const [brushAngle, setBrushAngle] = useState(0);
   const [load, setLoad] = useState(0.7);
   const [water, setWater] = useState(0.3);
   const [dampness, setDampness] = useState(0);
@@ -103,6 +106,13 @@ export default function App() {
     setReadout(engine.readout());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [material, ready]);
+
+  useEffect(() => {
+    const engine = engineRef.current;
+    if (!engine || !ready) return;
+    engine.setBrush(brush);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brush, ready]);
 
   useEffect(() => {
     const engine = engineRef.current;
@@ -239,6 +249,7 @@ export default function App() {
       speed: state.speed,
       load,
       water,
+      angle: (brushAngle * Math.PI) / 180,
     });
 
     state.last = point;
@@ -270,6 +281,7 @@ export default function App() {
         key: material,
       },
       substrate: engine.substrateInfo(),
+      brush: { ...engine.brushInfo(), heldAt: brush === 'disc' ? null: `${brushAngle}°` },
       regime: snapshot.regime,
       settings: {
         action,
@@ -324,6 +336,7 @@ export default function App() {
           {regime || '…'}
         </span>
         <span className="truncate font-mono text-[10.5px] text-ink3">{profileId}</span>
+        <span className={`${CHIP} border-rule2 text-ink2`}>{brushes.find((b) => b.id === brush)?.name || brush}</span>
         <div className="flex-1" />
         {!online && (
           <span className={`${CHIP} border-sienna text-sienna`}>offline · not recording</span>
@@ -341,6 +354,18 @@ export default function App() {
             <Select label="Medium" items={materials} value={material} onChange={setMaterial} />
             <Select label="Paper" items={substrates} value={substrate} onChange={setSubstrate} />
             <ToggleRow label="Contact" options={ACTIONS} value={action} onChange={setAction} />
+            <Select label="Brush" items={brushes} value={brush} onChange={setBrush} />
+            {brush !== 'disc' && (
+              <Slider
+                label="How the brush is held"
+                value={brushAngle}
+                onChange={setBrushAngle}
+                min={0}
+                max={180}
+                step={1}
+                format={(v) => `${v.toFixed(0)}°`}
+              />
+            )}
           </div>
         </section>
 
