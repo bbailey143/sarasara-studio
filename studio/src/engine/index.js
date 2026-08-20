@@ -126,6 +126,10 @@ export async function createEngine({ width, height, material, substrate }) {
       solver.setSubstrate(SUBSTRATES[id]);
     },
 
+    /** Take a new sheet off the pad. Sheet 0 is the reference sheet. */
+    newSheet(seed) { return solver.newSheet(seed); },
+    sheetId() { return solver.getSheet(); },
+
     setViewGain(value) { solver.setDisplayGain(value); },
 
     /** Off means one simulation cell per screen block: honest edges, visible pixels. */

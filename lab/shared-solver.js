@@ -190,15 +190,41 @@
   function validateSubstrate(substrate){const missing=SUBSTRATE_REQUIRED.filter(id=>substrate.state[id]===undefined);if(missing.length)throw new Error('Missing substrate properties: '+missing.join(', '));for(const id of SUBSTRATE_REQUIRED){const value=substrate.state[id];if(typeof value!=='number'||!Number.isFinite(value)||value<0)throw new Error('Invalid substrate value for '+id)}return substrate}
 
   class SharedSolver{
-    constructor(width,height,profile,substrate=SUBSTRATES.coldPress){this.w=width;this.h=height;this.n=width*height;this.surface=document.createElement('canvas');this.surface.width=width;this.surface.height=height;this.sctx=this.surface.getContext('2d');this.image=this.sctx.createImageData(width,height);this.calibration=calibrationCopy();this.substrate=validateSubstrate(substrate);this.s=substrate.state;this.brush=BRUSHES.disc;this.buildPaperSurface();this.setProfile(profile)}
+    constructor(width,height,profile,substrate=SUBSTRATES.coldPress){this.w=width;this.h=height;this.n=width*height;this.surface=document.createElement('canvas');this.surface.width=width;this.surface.height=height;this.sctx=this.surface.getContext('2d');this.image=this.sctx.createImageData(width,height);this.calibration=calibrationCopy();this.substrate=validateSubstrate(substrate);this.s=substrate.state;this.brush=BRUSHES.disc;this.sheetSeed=0;this.buildPaperSurface();this.setProfile(profile)}
     setCalibration(value){this.calibration=validateCalibration(value);return this.getCalibration()}
     getCalibration(){return calibrationCopy(this.calibration)}
     transformPressure(value){return interpolatePressure(this.calibration.curve,value)}
     calibratedSpeed(value){return Math.max(.1,Math.min(2,.1+(Math.max(.1,Math.min(2,Number(value)||.1))-.1)*this.calibration.speed))}
     setProfile(profile){this.profile=validateProfile(profile);this.p=profile.state;this.displayGain=profile.display?.pigment_visibility_gain||1;this.water=new Float32Array(this.n);this.mobile=new Float32Array(this.n);this.deposited=new Float32Array(this.n);this.loose=new Float32Array(this.n);this.looseVx=new Float32Array(this.n);this.looseVy=new Float32Array(this.n);this.nextLoose=new Float32Array(this.n);this.nextLooseMx=new Float32Array(this.n);this.nextLooseMy=new Float32Array(this.n);this.coarse=new Float32Array(this.n);this.coarseVx=new Float32Array(this.n);this.coarseVy=new Float32Array(this.n);this.nextCoarse=new Float32Array(this.n);this.nextCoarseMx=new Float32Array(this.n);this.nextCoarseMy=new Float32Array(this.n);this.fineDust=new Float32Array(this.n);this.fineDustVx=new Float32Array(this.n);this.fineDustVy=new Float32Array(this.n);this.nextFineDust=new Float32Array(this.n);this.nextFineDustMx=new Float32Array(this.n);this.nextFineDustMy=new Float32Array(this.n);this.absorbed=new Float32Array(this.n);this.nextWater=new Float32Array(this.n);this.nextMobile=new Float32Array(this.n);this.nextDeposited=new Float32Array(this.n);this.initialPigment=0;this.lostPigment=0;this.relocatedPigment=0;this.pressureAnchoredPigment=0;this.sourceOfferedPigment=0;this.sourceRemainingPigment=0;this.coarseCreatedPigment=0;this.fineCreatedPigment=0;this.carriedPigment=0;this.dryBoost=1;this.elapsed=0}
+    /**
+     * Every sheet off the pad is a little different. Sheet 0 is the reference
+     * sheet - bit-for-bit what this paper has always been - so nothing already
+     * reviewed moves. Any other number is a different sheet of the SAME paper:
+     * the grain falls elsewhere and the weave or tooth shifts by a few percent,
+     * never enough to turn rough into smooth.
+     */
+    newSheet(sheetSeed){
+      this.sheetSeed=Math.max(0,Math.floor(Number(sheetSeed)||0));
+      this.buildPaperSurface();
+      return this.sheetSeed;
+    }
+    /** Bounded wobble for this sheet. Zero variation on the reference sheet. */
+    sheetVariation(){
+      const id=this.sheetSeed||0;
+      if(!id)return{seedOffset:0,scale:1,rough:1,period:1,slub:1};
+      const roll=(salt)=>{const v=Math.sin(id*127.1+salt*311.7)*43758.5453123;return (v-Math.floor(v))*2-1};
+      return{
+        seedOffset:id*7919,
+        scale:1+roll(1)*.08,   /* grain a touch coarser or finer   */
+        rough:1+roll(2)*.05,   /* tooth a touch deeper or shallower */
+        period:1+roll(3)*.04,  /* threads slightly closer or wider  */
+        slub:1+roll(4)*.22     /* this bolt was spun a bit unevenly */
+      };
+    }
     setBrush(brush){this.brush=brush&&BRUSHES[brush]?BRUSHES[brush]:(brush&&brush.kind?brush:BRUSHES.disc);if(this.brush.kind==='shape')bakeBrush(this.brush);return this.brush}
     getBrush(){return this.brush||BRUSHES.disc}
     setSubstrate(substrate){this.substrate=validateSubstrate(substrate);this.s=substrate.state;this.buildPaperSurface()}
+    getSheet(){return this.sheetSeed||0}
     setSmoothing(enabled){this.smoothing=enabled!==false}
     setDisplayGain(value){this.displayGain=Math.max(1,Math.min(12,Number(value)||1))}
     clear(substrateDampness=0){const saturation=this.regime()==='flowing'?Math.max(0,Math.min(1,substrateDampness))*this.s['SUBI-003']:0;this.water.fill(0);this.mobile.fill(0);this.deposited.fill(0);this.loose.fill(0);this.looseVx.fill(0);this.looseVy.fill(0);this.coarse.fill(0);this.coarseVx.fill(0);this.coarseVy.fill(0);this.fineDust.fill(0);this.fineDustVx.fill(0);this.fineDustVy.fill(0);this.absorbed.fill(saturation);this.initialPigment=0;this.lostPigment=0;this.relocatedPigment=0;this.pressureAnchoredPigment=0;this.sourceOfferedPigment=0;this.sourceRemainingPigment=0;this.coarseCreatedPigment=0;this.fineCreatedPigment=0;this.carriedPigment=0;this.dryBoost=1;this.elapsed=0}
@@ -250,13 +276,13 @@
     addParticlePopulation(mass,index,vx,vy,population,vxField,vyField){if(mass<=0)return;const old=population[index],combined=old+mass;vxField[index]=(vxField[index]*old+vx*mass)/combined;vyField[index]=(vyField[index]*old+vy*mass)/combined;population[index]=combined}
     noise(x,y,seed){const v=Math.sin(x*127.1+y*311.7+seed*74.7)*43758.5453123;return v-Math.floor(v)}
     smoothNoise(x,y,seed){const x0=Math.floor(x),y0=Math.floor(y),fx=x-x0,fy=y-y0,u=fx*fx*(3-2*fx),v=fy*fy*(3-2*fy),a=this.noise(x0,y0,seed),b=this.noise(x0+1,y0,seed),c=this.noise(x0,y0+1,seed),d=this.noise(x0+1,y0+1,seed);return(a+(b-a)*u)*(1-v)+(c+(d-c)*u)*v}
-    samplePaperSurface(x,y){const a=this.substrate.texture,rough=this.s['SUBI-001'];if(rough<=0)return{height:.5,visual:0};if(a.pattern==='woven'){
+    samplePaperSurface(x,y){const a=this.substrate.texture,sheet=this.sheetVariation(),rough=this.s['SUBI-001']*sheet.rough;if(rough<=0)return{height:.5,visual:0};if(a.pattern==='woven'){
         /* A warp thread runs the whole width and simply dips under at alternate
            crossings - it never breaks. So over-and-under is a smooth swell along
            each thread, not a hard swap at every square. Slub is thick-and-thin
            patches running ALONG a thread, which is what keeps linen from looking
            like a printed grid. */
-        const period=Math.max(2,a.threadPeriod||6);
+        const period=Math.max(2,(a.threadPeriod||6)*sheet.period);
         const cord=t=>{const f=t-Math.floor(t);return Math.sin(Math.PI*f)};
         const u=x/period,v=y/period;
         /* Plain weave alternates square by square, so the over-under term is a
@@ -268,19 +294,19 @@
            Holding it constant per square is what keeps the threads continuous;
            varying it smoothly turns the cloth into a grid of beads. */
         const overWarp=((Math.floor(u)+Math.floor(v))%2+2)%2===0?1:0;
-        const slub=a.slub||0;
-        const warpThick=1+(this.smoothNoise(Math.floor(u)*2.3,y*.16,a.seed+53)-.5)*1.6*slub;
-        const weftThick=1+(this.smoothNoise(x*.16,Math.floor(v)*2.3,a.seed+91)-.5)*1.6*slub;
+        const slub=Math.max(0,(a.slub||0)*sheet.slub);
+        const warpThick=1+(this.smoothNoise(Math.floor(u)*2.3,y*.16,a.seed+53+sheet.seedOffset)-.5)*1.6*slub;
+        const weftThick=1+(this.smoothNoise(x*.16,Math.floor(v)*2.3,a.seed+91+sheet.seedOffset)-.5)*1.6*slub;
         const warp=cord(u)*Math.max(.2,warpThick)*(.38+.62*overWarp);
         const weft=cord(v)*Math.max(.2,weftThick)*(.38+.62*(1-overWarp));
-        const drift=(this.smoothNoise(x*.07,y*.07,a.seed+311)-.5)*(a.weaveDrift||.12);
+        const drift=(this.smoothNoise(x*.07,y*.07,a.seed+311+sheet.seedOffset)-.5)*(a.weaveDrift||.12);
         /* Centre the cloth on the same neutral height the papers use, so a weave
            and a paper mean the same thing to everything downstream. */
         const natural=Math.max(0,Math.min(1,(warp+weft)*.62-.12+drift));
         const spread=.30+rough*.70;
         return{height:Math.max(0,Math.min(1,.5+(natural-.5)*spread*1.5)),visual:(warp-weft)*.6};
       }
-      if(a.pattern==='fibrous'){const layer=(angle,along,cross,seed)=>{const c=Math.cos(angle),s=Math.sin(angle),u=x*c+y*s,v=-x*s+y*c,field=this.smoothNoise(u*along,v*cross,seed),ridge=Math.pow(Math.max(0,1-Math.abs(field-.5)*2),7);return ridge};const f1=layer(.18,.055,.72,a.seed+17),f2=layer(1.19,.07,.62,a.seed+71),f3=layer(2.34,.05,.82,a.seed+131),fibers=Math.max(f1,f2*.88,f3*.72),grain=this.smoothNoise(x*.78,y*.78,a.seed+307),natural=.5+(grain-.5)*.18+(fibers-.28)*.16,spread=.22+rough*.58;return{height:Math.max(0,Math.min(1,.5+(natural-.5)*spread*1.45)),visual:fibers-.28}}let total=0,amplitude=.55,norm=0,frequency=Math.max(.025,.11/Math.max(.1,a.noiseScale));for(let octave=0;octave<4;octave++){total+=this.smoothNoise(x*frequency,y*frequency,a.seed+octave*7919)*amplitude;norm+=amplitude;amplitude*=.5;frequency*=2}const natural=total/norm,spread=.28+rough*.72;return{height:Math.max(0,Math.min(1,.5+(natural-.5)*spread*1.65)),visual:0}}
+      if(a.pattern==='fibrous'){const layer=(angle,along,cross,seed)=>{const c=Math.cos(angle),s=Math.sin(angle),u=x*c+y*s,v=-x*s+y*c,field=this.smoothNoise(u*along,v*cross,seed),ridge=Math.pow(Math.max(0,1-Math.abs(field-.5)*2),7);return ridge};const f1=layer(.18,.055,.72,a.seed+17+sheet.seedOffset),f2=layer(1.19,.07,.62,a.seed+71+sheet.seedOffset),f3=layer(2.34,.05,.82,a.seed+131+sheet.seedOffset),fibers=Math.max(f1,f2*.88,f3*.72),grain=this.smoothNoise(x*.78,y*.78,a.seed+307+sheet.seedOffset),natural=.5+(grain-.5)*.18+(fibers-.28)*.16,spread=.22+rough*.58;return{height:Math.max(0,Math.min(1,.5+(natural-.5)*spread*1.45)),visual:fibers-.28}}let total=0,amplitude=.55,norm=0,frequency=Math.max(.025,.11/Math.max(.1,a.noiseScale*sheet.scale));for(let octave=0;octave<4;octave++){total+=this.smoothNoise(x*frequency,y*frequency,a.seed+octave*7919+sheet.seedOffset)*amplitude;norm+=amplitude;amplitude*=.5;frequency*=2}const natural=total/norm,spread=.28+rough*.72;return{height:Math.max(0,Math.min(1,.5+(natural-.5)*spread*1.65)),visual:0}}
     buildPaperSurface(){this.paperHeight=new Float32Array(this.n);this.paperVisual=new Float32Array(this.n);for(let y=0;y<this.h;y++)for(let x=0;x<this.w;x++){const i=y*this.w+x,sample=this.samplePaperSurface(x,y);this.paperHeight[i]=sample.height;this.paperVisual[i]=sample.visual}}
     tooth(x,y){const ix=Math.max(0,Math.min(this.w-1,Math.round(x))),iy=Math.max(0,Math.min(this.h-1,Math.round(y)));return this.paperHeight[iy*this.w+ix]}
     addDisk(cx,cy,radius,water,pigment,pressure,speed,brushMoisture,strokeX=0,strokeY=0,sweep=1,shape=null){

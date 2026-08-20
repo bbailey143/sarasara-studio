@@ -52,6 +52,7 @@ export default function App() {
   const [action, setAction] = useState('draw');
   const [brush, setBrush] = useState('disc');
   const [brushAngle, setBrushAngle] = useState(0);
+  const [sheet, setSheet] = useState(0);
   const [load, setLoad] = useState(0.7);
   const [water, setWater] = useState(0.3);
   const [dampness, setDampness] = useState(0);
@@ -118,6 +119,7 @@ export default function App() {
     const engine = engineRef.current;
     if (!engine || !ready) return;
     engine.setSubstrate(substrate);
+    engine.newSheet(sheet);
     engine.clear(dampness);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [substrate, ready]);
@@ -296,7 +298,7 @@ export default function App() {
         name: materials.find((m) => m.id === material)?.name,
         key: material,
       },
-      substrate: engine.substrateInfo(),
+      substrate: { ...engine.substrateInfo(), sheet: engine.sheetId() },
       brush: { ...engine.brushInfo(), heldAt: brush === 'disc' ? null: `${brushAngle}°` },
       regime: snapshot.regime,
       settings: {
@@ -420,8 +422,20 @@ export default function App() {
         <section className={SECTION}>
           <h2 className={HEADING}>Sheet</h2>
           <div className="flex gap-2">
+            <Button
+              className={`${BTN} flex-1`}
+              onPress={() => {
+                const next = Math.floor(Math.random() * 9999) + 1;
+                engineRef.current?.newSheet(next);
+                engineRef.current?.clear(dampness);
+                setSheet(next);
+                setStatus(null);
+              }}
+            >
+              New sheet
+            </Button>
             <Button className={`${BTN} flex-1`} onPress={() => { engineRef.current?.clear(dampness); setStatus(null); }}>
-              Fresh sheet
+              Wipe
             </Button>
             <Button className={`${BTN} flex-1`} onPress={() => engineRef.current?.forceDry()}>
               Force dry
@@ -450,6 +464,7 @@ export default function App() {
             <span className="text-terre">● live</span>
             <span>{SIM.width}×{SIM.height} cells</span>
             <span>{action === 'draw' ? 'drawing material' : 'smudging what is there'}</span>
+            <span>{sheet === 0 ? 'reference sheet' : `sheet #${sheet}`}</span>
           </div>
         </div>
       </div>

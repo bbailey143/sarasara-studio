@@ -608,4 +608,73 @@ for (let f = 0; f < 20; f++) onCloth.step(1 / 60);
 assert(onCloth.metrics().deposited_pigment > 0, 'a drawn brush must lay paint on canvas');
 assert(onCloth.metrics().pigment_conservation_error < 1, 'painting on canvas must conserve pigment');
 
+/* ---- no two sheets are the same sheet ---------------------------------- */
+
+const sheetOf = (substrate, id) => {
+  const solver = new SharedSolver(140, 140, PROFILES.oil, SUBSTRATES[substrate]);
+  solver.newSheet(id);
+  const line = [];
+  for (let x = 0; x < 140; x++) line.push(solver.tooth(x, 70));
+  let peaks = 0, sum = 0;
+  for (let i = 1; i < 139; i++) if (line[i] > line[i - 1] && line[i] >= line[i + 1]) peaks++;
+  for (let i = 0; i < solver.paperHeight.length; i++) sum += solver.paperHeight[i];
+  return { peaks, mean: sum / solver.paperHeight.length, height: solver.paperHeight.slice() };
+};
+
+// Sheet 0 is the reference sheet and must never move - every mark already
+// reviewed was made on it. Comparing the engine against itself cannot prove
+// that, so these are fingerprints taken on 2026-08-20. If one of them shifts,
+// a paper has changed underneath work that was already approved.
+const REFERENCE_SHEETS = { pastelWhite: 8292.6483, coldPress: 8482.1659, roughCanvas: 6627.1049 };
+for (const [paper, expected] of Object.entries(REFERENCE_SHEETS)) {
+  const solver = new SharedSolver(64, 64, PROFILES.oil, SUBSTRATES[paper]);
+  let fingerprint = 0;
+  for (let i = 0; i < solver.paperHeight.length; i++) fingerprint += solver.paperHeight[i] * (1 + (i % 7));
+  assert(Math.abs(fingerprint - expected) < .01,
+    paper + ' reference sheet has changed - approved marks were made on the old one (got ' + fingerprint.toFixed(4) + ', expected ' + expected + ')');
+}
+
+// and asking for sheet 0 explicitly must land on that same reference sheet
+// reviewed was made on it.
+for (const paper of ['coldPress', 'pastelWhite', 'roughCanvas']) {
+  const fresh = new SharedSolver(140, 140, PROFILES.oil, SUBSTRATES[paper]);
+  const asked = sheetOf(paper, 0);
+  for (let i = 0; i < fresh.paperHeight.length; i++)
+    assert(fresh.paperHeight[i] === asked.height[i], paper + ' sheet 0 must be exactly the sheet it has always been');
+}
+
+// A different sheet is genuinely a different sheet.
+for (const paper of ['coldPress', 'roughCanvas', 'linenCanvas']) {
+  const first = sheetOf(paper, 0), second = sheetOf(paper, 17);
+  let differing = 0;
+  for (let i = 0; i < first.height.length; i++) if (first.height[i] !== second.height[i]) differing++;
+  assert(differing > first.height.length * .8, paper + ' must actually change from one sheet to the next');
+}
+
+// But it is still the same paper. Cloth must keep weaving at its own count.
+for (const cloth of ['roughCanvas', 'linenCanvas']) {
+  const counts = [0, 3, 11, 50, 137].map((id) => sheetOf(cloth, id).peaks);
+  const low = Math.min(...counts), high = Math.max(...counts);
+  assert(high - low <= 2, cloth + ' must weave the same count sheet to sheet - a new sheet is not a new cloth (got ' + counts.join(', ') + ')');
+}
+
+// And rough must stay rougher than smooth, whichever sheets you pick.
+for (const id of [1, 9, 64]) {
+  assert(sheetOf('rough', id).peaks > 0 && sheetOf('hotPress', id).peaks > 0, 'every sheet must have a surface');
+  const roughSheet = new SharedSolver(140, 140, PROFILES.charcoal, SUBSTRATES.rough); roughSheet.newSheet(id);
+  const smoothSheet = new SharedSolver(140, 140, PROFILES.charcoal, SUBSTRATES.hotPress); smoothSheet.newSheet(id);
+  let rMin = 1, rMax = 0, sMin = 1, sMax = 0;
+  for (let i = 0; i < roughSheet.paperHeight.length; i++) {
+    const r = roughSheet.paperHeight[i], sm = smoothSheet.paperHeight[i];
+    if (r < rMin) rMin = r; if (r > rMax) rMax = r;
+    if (sm < sMin) sMin = sm; if (sm > sMax) sMax = sm;
+  }
+  assert(rMax - rMin > sMax - sMin, 'rough paper must stay rougher than hot press on sheet ' + id);
+}
+
+// The same sheet number is always the same sheet, or nothing is reproducible.
+const twiceA = sheetOf('linenCanvas', 42), twiceB = sheetOf('linenCanvas', 42);
+for (let i = 0; i < twiceA.height.length; i++)
+  assert(twiceA.height[i] === twiceB.height[i], 'asking for the same sheet twice must give the same sheet');
+
 console.log('shared solver checks passed');
