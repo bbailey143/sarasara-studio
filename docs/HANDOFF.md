@@ -79,7 +79,9 @@ The user should be able to start another AI with one sentence:
 ## Build and repository state
 
 - This foundation has no package install or production build yet. The lab is dependency-free HTML and JavaScript.
-- Verified command: `node lab/shared-solver.test.js`
+- Verified command: `npm install` then `npm run lab` (the studio; serves at `http://localhost:5173` and writes reviews into the repository).
+- Verified command: `npm run build` — clean production build on 2026-08-19.
+- Verified command: `node lab/shared-solver.test.js` (also `npm test`)
 - Verified result on 2026-08-19 after the shared deposited layer and oil v0.1: `shared solver checks passed`, including all earlier relationships plus regime selection by property, yield-gated slumping and holding, yield-gated brush displacement, derived relief height, a body refusing carrier water, zero oil pigment diffusion, oil determinism, conservation, and a bit-for-bit regression proving watercolor and charcoal are untouched by the new pass.
 - The new checks were mutation-tested on 2026-08-19: removing the yield gate, letting a body write carrier water, dropping packing from relief height, breaking slump conservation, and selecting the regime by material name were each deliberately introduced and each was caught by a named assertion.
 - Verified result on 2026-08-19 after the artist pressure-calibration change: `shared solver checks passed`, including all earlier relationships plus default identity, monotonic curve interpolation, fixed endpoints, serializable calibration, directional checks for paper texture, particle breakup, smear, and speed influences, conservation below 1%, and no named-medium calibration branch.
@@ -200,7 +202,7 @@ Still open for watercolor:
 
 ## NEXT ACTION — start here
 
-Draw with **Oil** in `lab/diagnostic-lab.html` and record the first artist review of a third material. Oil v0.1 has code evidence only; nothing about how it looks has been judged.
+Run `npm run lab`, draw with **Oil** in the studio, and record the first artist review of a third material. Saving writes the whole session — settings, measurements, your words, and the mark itself — into `docs/validation/sessions/`, so nothing needs retyping. Oil v0.1 has code evidence only; nothing about how it looks has been judged.
 
 1. Choose **Oil**, any paper, and **Draw material**.
 2. Make one firm stroke. It should leave a raised body with a lit and a shadowed side, not a flat tone.
@@ -222,6 +224,9 @@ Draw with **Oil** in `lab/diagnostic-lab.html` and record the first artist revie
 
 ## Recently completed
 
+- Rebuilt the bench as `studio/`, a three-column React app: controls left, the sheet alone in the middle, measurements and approvals right. The pressure-curve card and its four influence multipliers were removed. `studio/src/engine/index.js` is the seam — the only file that knows how the engine is implemented, with `createEngine()` async and everything else synchronous so a compiled engine can replace the JavaScript solver without any panel changing. The UI asks the engine for its regime and lets that drive what is shown, so the water controls are absent for oil and charcoal rather than present and inert; no panel branches on a material name. `npm run lab` serves an API that writes `docs/validation/sessions/*.json` and `docs/validation/board.json` straight into the repository; with no server the studio still paints but shows "offline · not recording" and writes nothing. Verified: clean production build; columns resolve to 292 / 796 / 352 at 1440×900; an oil stroke through the real pointer handlers deposited 63.73 with relief peak 0.31, zero surface water, zero suspended pigment, and 5.6e-9% conservation error; a save wrote a complete 17 KB session file; a board mark persisted and read back. Test artifacts were deleted and the board reset to seed. `[1 RUN ONLY]`
+- Fixed a regression introduced by that work: adding `"type": "module"` to `package.json` broke `node lab/shared-solver.test.js`. The field was removed and the Vite config renamed to `vite.config.mjs`, so the documented command works unchanged.
+- The board now lives where the looking happens. `docs/validation/board.json` is seeded from the statuses recorded in `docs/validation/`; automated checks reach `checked` and stop, and only the artist sets `approved`.
 - Added the shared deposited layer with derived `DEPO-005` relief height and yield-gated motion, plus oil v0.1 assembled entirely from existing canonical properties. Regime is selected by physical properties (`body` / `granular` / `flowing`), never by material name. In the matched three-recipe scene the same gesture yields deposited 3.043 / suspended 22.003 / water 62.050 for watercolor, 10.486 / 0 / 0 for charcoal, and 42.841 / 0 / 0 for oil, all at 0.000000% conservation error. A mound at or below the yield stress keeps 100% of its peak and moves exactly zero mass; at 8x yield it keeps 31.7%, at 40x it keeps 19.5%. Brush displacement is 0% at pressures 0.20 and 0.34 against a yield stress of 0.34, then 8.8% at 0.50, 38.9% at 0.75, and 60.0% at 1.00. Watercolor and charcoal deposited arrays are bit-for-bit identical across the new pass. `[1 RUN ONLY]`
 - Recorded ADR-0002, the third-material vocabulary test. Twelve of thirteen required oil behaviors resolve to existing canonical properties; no new property family was introduced. The single gap, how tall deposited material stands, is derivable from mass, packing, and particle density and was therefore added as a derived property inside an existing family. The finding that matters is that the new shared layer is what charcoal burnishing (`CH-P-07`) and watercolor finite-thickness glazing were already blocked on.
 - Added `docs/BUILD_MAP.html`, a visual orientation sheet kept current with the build. Only the pin, the board marks, and the next action change at a checkpoint. A board mark turns green only on artist review.
