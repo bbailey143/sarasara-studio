@@ -17,7 +17,8 @@ stand-in. Nothing below is a claim that oil looks like oil.
 | OL-P-04 | It stands up | Relief height rises with deposited mass and follows packing and particle density. | `automated_relationship_verified` — `DEPO-005` equals deposited mass over packing × density to 1e-9, and more mass stands taller. Derived only; never authored in a profile. |
 | OL-P-05 | No carrier wetting | A body never wets or soaks the sheet, even when carrier water is offered. | `automated_relationship_verified` — a 60-frame stroke drawn with brush water 0.6 leaves surface water and absorbed water at exactly 0. Carrier water offered directly at the contact is also refused. |
 | OL-P-06 | Zero pigment diffusion | Oil pigment never enters the suspended state and never spreads on its own. | `automated_relationship_verified` — suspended pigment stays exactly 0 across a full stroke and 30 steps; `TRAN-001` is 0 in the profile. |
-| OL-P-07 | Dirty brush | Painting into a wet layer picks material up onto the tool. | `not_run` — `DEPO-003` is present in the profile but no pickup path consumes it yet. |
+| OL-P-07 | Dirty brush | Painting into a wet layer picks material up onto the tool. | `not_run` — no pickup path exists. `DEPO-003` is now consumed as a retained-film threshold (OL-P-11), which is a different use of the same property. |
+| OL-P-11 | Retained film | The brush thins an existing film but cannot scrape the sheet back to bare substrate. | `automated_relationship_verified` — after artist review OIL-001 identified scraping, a `DEPO-003` retained film was added. A single firm pass leaves 0 bare cells of 95 along its own centre-line; eight hard passes never push a covered cell below the retained thickness; a film already at that thickness does not move under any pressure; displacement is proportional to the share of a footprint crossing travelled; and watercolor and charcoal remain bit-for-bit unaffected. Artist re-review is pending. |
 | OL-P-08 | Cure | The layer sets over days and stops accepting rework. | `not_run` — no cure clock or `EVOL-002` state transition exists. |
 | OL-P-09 | Relief reads as relief | Ridges and brush marks catch light believably. | `artist_review_required` — diagnostic relief shading exists and is code-verified only as a function of the height gradient. Whether it reads as paint is unknown until reviewed. |
 | OL-P-10 | Scrape and wipe | A scraping gesture removes a bounded portion of the layer. | `not_run` — no removal gesture exists. |
@@ -46,6 +47,10 @@ through the same code with only the recipe changed:
 | oil | body | 42.841 | 0.000 | 0.000 | 0.000000% |
 
 Three materially different results, no medium-name branch anywhere in the path.
+
+## Known residual issue
+
+The deposit loop includes both segment endpoints, so the same line drawn as one long segment versus twenty-four short ones deposits  against  — about 20% more paint for the same gesture. This predates the oil work, affects watercolor and charcoal equally, and changing it would move already-approved charcoal results. It needs its own work.
 
 ## Not yet evidence of anything visual
 

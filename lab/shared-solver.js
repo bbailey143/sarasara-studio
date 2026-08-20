@@ -92,11 +92,24 @@
       for(let y=0;y<h;y++)for(let x=0;x<w;x++){const i=y*w+x;if(x<w-1){slump(i,i+1);slump(i+1,i)}if(y<h-1){slump(i,i+w);slump(i+w,i)}}
       DP.set(ND);return moved;
     }
-    pushLayer(index,targetIndex,pressure){
+    /** Mass per cell that adheres to the sheet and cannot be pushed off it.
+        DEPO-003 is a detachment threshold expressed as a retained relief height. */
+    retainedFilmMass(){
+      const threshold=Math.max(0,Number(this.p['DEPO-003'])||0);
+      if(threshold<=0)return 0;
+      const packing=Math.max(.05,Math.min(1,Number(this.p['DEPO-004'])||.05)),density=Math.max(.05,Math.min(1,Number(this.p['PART-002'])||.05));
+      return threshold*packing*density;
+    }
+    /** `sweep` is the share of one footprint crossing this contact represents,
+        so the total displaced over a crossing does not depend on sampling rate. */
+    pushLayer(index,targetIndex,pressure,sweep=1){
       if(!this.hasYieldingBody()||index===targetIndex)return 0;
       const yieldStress=Math.max(0,Number(this.p['RHEO-002'])||0),stress=this.bodyStress(pressure);
       if(stress<=yieldStress)return 0;
-      const share=Math.max(0,Math.min(.6,(stress-yieldStress)/Math.max(.05,1-yieldStress))),amount=this.deposited[index]*share;
+      const mobile=Math.max(0,this.deposited[index]-this.retainedFilmMass());
+      if(mobile<=0)return 0;
+      const share=Math.max(0,Math.min(.6,(stress-yieldStress)/Math.max(.05,1-yieldStress)));
+      const amount=mobile*share*Math.max(0,Math.min(1,sweep));
       if(amount<=0)return 0;
       this.deposited[index]-=amount;this.deposited[targetIndex]+=amount;this.relocatedPigment+=amount;return amount;
     }
@@ -108,7 +121,7 @@
     samplePaperSurface(x,y){const a=this.substrate.texture,rough=this.s['SUBI-001'];if(rough<=0)return{height:.5,visual:0};if(a.pattern==='fibrous'){const layer=(angle,along,cross,seed)=>{const c=Math.cos(angle),s=Math.sin(angle),u=x*c+y*s,v=-x*s+y*c,field=this.smoothNoise(u*along,v*cross,seed),ridge=Math.pow(Math.max(0,1-Math.abs(field-.5)*2),7);return ridge};const f1=layer(.18,.055,.72,a.seed+17),f2=layer(1.19,.07,.62,a.seed+71),f3=layer(2.34,.05,.82,a.seed+131),fibers=Math.max(f1,f2*.88,f3*.72),grain=this.smoothNoise(x*.78,y*.78,a.seed+307),natural=.5+(grain-.5)*.18+(fibers-.28)*.16,spread=.22+rough*.58;return{height:Math.max(0,Math.min(1,.5+(natural-.5)*spread*1.45)),visual:fibers-.28}}let total=0,amplitude=.55,norm=0,frequency=Math.max(.025,.11/Math.max(.1,a.noiseScale));for(let octave=0;octave<4;octave++){total+=this.smoothNoise(x*frequency,y*frequency,a.seed+octave*7919)*amplitude;norm+=amplitude;amplitude*=.5;frequency*=2}const natural=total/norm,spread=.28+rough*.72;return{height:Math.max(0,Math.min(1,.5+(natural-.5)*spread*1.65)),visual:0}}
     buildPaperSurface(){this.paperHeight=new Float32Array(this.n);this.paperVisual=new Float32Array(this.n);for(let y=0;y<this.h;y++)for(let x=0;x<this.w;x++){const i=y*this.w+x,sample=this.samplePaperSurface(x,y);this.paperHeight[i]=sample.height;this.paperVisual[i]=sample.visual}}
     tooth(x,y){const ix=Math.max(0,Math.min(this.w-1,Math.round(x))),iy=Math.max(0,Math.min(this.h-1,Math.round(y)));return this.paperHeight[iy*this.w+ix]}
-    addDisk(cx,cy,radius,water,pigment,pressure,speed,brushMoisture,strokeX=0,strokeY=0){
+    addDisk(cx,cy,radius,water,pigment,pressure,speed,brushMoisture,strokeX=0,strokeY=0,sweep=1){
       const regime=this.regime(),body=regime==='body',dry=regime==='granular',rough=this.s['SUBI-001'];
       let addedPigment=0;
       const x0=Math.max(0,Math.floor(cx-radius)),x1=Math.min(this.w-1,Math.ceil(cx+radius)),y0=Math.max(0,Math.floor(cy-radius)),y1=Math.min(this.h-1,Math.ceil(cy+radius));
@@ -118,7 +131,7 @@
         if(body){
           const relief=this.reliefHeight(i),amount=pigment*k/(1+relief*.55);
           this.deposited[i]+=amount;addedPigment+=amount;
-          if(strokeX||strokeY){const tx=Math.max(0,Math.min(this.w-1,Math.round(x+strokeX))),ty=Math.max(0,Math.min(this.h-1,Math.round(y+strokeY)));this.pushLayer(i,ty*this.w+tx,pressure)}
+          if(strokeX||strokeY){const tx=Math.max(0,Math.min(this.w-1,Math.round(x+strokeX))),ty=Math.max(0,Math.min(this.h-1,Math.round(y+strokeY)));this.pushLayer(i,ty*this.w+tx,pressure,sweep)}
         }
         else if(dry){const tooth=this.tooth(x,y),texturePressure=Math.max(0,Math.min(1,pressure*this.calibration.paperTexture)),gestureSpeed=this.calibratedSpeed(speed),contact=tooth*.72+texturePressure*.48,potential=pigment*k,particleDensity=Math.max(0,Math.min(1,Number(this.p['PART-002'])||0)),shape=Math.max(0,Math.min(1,Number(this.p['PART-003'])||0)),grain=this.noise(x*1.91,y*2.37,this.substrate.texture.seed+1231),coverage=Math.max(.12,Math.min(.92,.02+texturePressure*.34+particleDensity*.18+tooth*.5-shape*.08));this.sourceOfferedPigment+=potential;if(contact<.34||grain>coverage||(gestureSpeed>1.05&&contact<.58&&((x+y)%3===0))){this.sourceRemainingPigment+=potential;continue}const captureVariation=.58+grain*.78,amount=Math.min(potential,potential*(.16+tooth*.32+particleDensity*.14)*captureVariation),split=this.fractureSplit(pressure,speed,tooth),coarseMass=amount*split.coarse,fineMass=amount*split.fine,settledMass=Math.max(0,amount-coarseMass-fineMass),side=this.noise(x,y,this.substrate.texture.seed+997)*2-1,normalX=-strokeY,normalY=strokeX,coarseSpeed=.7+pressure*.85+gestureSpeed*.45,fineSpeed=2+pressure*1.3+gestureSpeed*2.1;this.sourceRemainingPigment+=potential-amount;this.deposited[i]+=settledMass;this.addParticlePopulation(coarseMass,i,strokeX*coarseSpeed+normalX*side*.35,strokeY*coarseSpeed+normalY*side*.35,this.coarse,this.coarseVx,this.coarseVy);this.addParticlePopulation(fineMass,i,strokeX*fineSpeed+normalX*side,strokeY*fineSpeed+normalY*side,this.fineDust,this.fineDustVx,this.fineDustVy);this.coarseCreatedPigment+=coarseMass;this.fineCreatedPigment+=fineMass;addedPigment+=amount}
         else{
@@ -135,7 +148,8 @@
       const sx=this.w/canvasW,sy=this.h/canvasH,x0=ax*sx,y0=ay*sy,x1=bx*sx,y1=by*sy,d=Math.hypot(x1-x0,y1-y0),steps=Math.max(1,Math.ceil(d/.65));
       const carrier=this.p['COMP-001'],pigmentFraction=this.p['COMP-003'],radius=(1.2+pressure*2.6+brushWater*1.8),regime=this.regime(),water=regime==='body'?0:Math.pow(brushWater,1.85)*.36*carrier;
       const availablePigment=regime==='body'?(.03+pressure*.14)*(pigmentFraction||1):carrier>.02?(.05+pressure*.16)*pigmentFraction:(.012+pressure*.04)*(pigmentFraction||1),pigment=availablePigment*pigmentLoad;
-      const ux=d>.001?(x1-x0)/d:0,uy=d>.001?(y1-y0)/d:0;for(let s=0;s<=steps;s++){const t=s/steps;this.addDisk(x0+(x1-x0)*t,y0+(y1-y0)*t,radius,water,pigment,pressure,speed,brushWater,ux,uy)}
+      const ux=d>.001?(x1-x0)/d:0,uy=d>.001?(y1-y0)/d:0;const sweep=radius>0?Math.min(1,(d/Math.max(1,steps))/(2*radius)):1;
+      for(let s=0;s<=steps;s++){const t=s/steps;this.addDisk(x0+(x1-x0)*t,y0+(y1-y0)*t,radius,water,pigment,pressure,speed,brushWater,ux,uy,sweep)}
     }
     smudgeSegment(ax,ay,bx,by,canvasW,canvasH,pressure,speed){
       pressure=this.transformPressure(pressure);

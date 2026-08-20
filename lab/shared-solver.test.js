@@ -339,4 +339,63 @@ assert(pushTest.pushLayer(465, 466, PROFILES.oil.state['RHEO-002'] * .5) === 0, 
 const runOil = () => { const s = new SharedSolver(30, 30, PROFILES.oil, SUBSTRATES.coldPress); s.clear(0); s.depositSegment(5, 15, 25, 15, 30, 30, .7, 1, 0, .9); for (let f = 0; f < 10; f++) s.step(1 / 60); return s.metrics().deposited_pigment };
 assert(Math.abs(runOil() - runOil()) < 1e-9, 'identical oil commands must produce identical results');
 
+/* ---- the brush must not scrape the sheet clean (artist review 2026-08-20) ---- */
+
+// A retained film comes from DEPO-003, a property oil already declared and
+// nothing consumed. Below that thickness the material adheres to the sheet.
+const oilFloor = PROFILES.oil.state['DEPO-003'] * PROFILES.oil.state['DEPO-004'] * PROFILES.oil.state['PART-002'];
+const floorSolver = new SharedSolver(190, 140, PROFILES.oil, SUBSTRATES.coldPress);
+assert(Math.abs(floorSolver.retainedFilmMass() - oilFloor) < 1e-9, 'the retained film must come from DEPO-003, packing and particle density');
+
+// one firm pass must leave a continuous film, not bare paper
+floorSolver.clear(0);
+floorSolver.depositSegment(0.2 * 760, 0.5 * 560, 0.8 * 760, 0.5 * 560, 760, 560, .55, 1, .3, .8);
+let bareOnLine = 0;
+for (let x = 48; x < 143; x++) if (floorSolver.deposited[70 * 190 + x] <= 1e-6) bareOnLine++;
+assert(bareOnLine === 0, 'a single pass must not leave bare paper along the centre of its own stroke');
+
+// no cell anywhere may be pushed below the retained film
+const scrape = new SharedSolver(190, 140, PROFILES.oil, SUBSTRATES.coldPress);
+scrape.clear(0);
+for (let pass = 0; pass < 8; pass++) scrape.depositSegment(0.2 * 760, 0.5 * 560, 0.8 * 760, 0.5 * 560, 760, 560, .9, 1, .3, 1.4);
+let scrapedThrough = 0;
+for (let x = 60; x < 130; x++) { const v = scrape.deposited[70 * 190 + x]; if (v > 0 && v < oilFloor * 0.98) scrapedThrough++; }
+assert(scrapedThrough === 0, 'repeated hard passes must never push a covered cell below the retained film');
+
+// pushing a lone mound still works, and still stops below the yield stress
+const mound = new SharedSolver(20, 20, PROFILES.oil, SUBSTRATES.coldPress);
+mound.clear(0);
+mound.deposited[210] = 1;
+const moundBefore = mound.deposited.reduce((a, b) => a + b, 0);
+assert(mound.pushLayer(210, 211, .9) > 0, 'pressure above the yield stress must still displace a thick body');
+assert(Math.abs(mound.deposited.reduce((a, b) => a + b, 0) - moundBefore) < 1e-9, 'displacement must still conserve mass');
+assert(mound.deposited[210] >= mound.retainedFilmMass() - 1e-9, 'displacement must leave the retained film behind');
+
+// a film already at the floor cannot be pushed at all
+const thin = new SharedSolver(20, 20, PROFILES.oil, SUBSTRATES.coldPress);
+thin.clear(0);
+thin.deposited[210] = thin.retainedFilmMass();
+assert(thin.pushLayer(210, 211, 1) === 0, 'a film at the retained thickness must not move under any pressure');
+
+// sweep scales displacement: half a crossing displaces less than a whole one
+const sweepA = new SharedSolver(20, 20, PROFILES.oil, SUBSTRATES.coldPress);
+sweepA.clear(0); sweepA.deposited[210] = 1;
+const sweepB = new SharedSolver(20, 20, PROFILES.oil, SUBSTRATES.coldPress);
+sweepB.clear(0); sweepB.deposited[210] = 1;
+const wholeCrossing = sweepA.pushLayer(210, 211, .9, 1);
+const halfCrossing = sweepB.pushLayer(210, 211, .9, .5);
+assert(halfCrossing > 0 && halfCrossing < wholeCrossing, 'a partial crossing must displace less than a whole one');
+assert(Math.abs(halfCrossing * 2 - wholeCrossing) < 1e-9, 'displacement must be proportional to the crossing travelled');
+
+// the media without a yield stress are untouched by any of this
+for (const [name, profile, paper] of [['watercolor', PROFILES.watercolor, SUBSTRATES.coldPress], ['charcoal', PROFILES.charcoal, SUBSTRATES.pastelWhite]]) {
+  const solver = new SharedSolver(60, 60, profile, paper);
+  solver.clear(0);
+  solver.depositSegment(10, 30, 50, 30, 60, 60, .6, 1, name === 'watercolor' ? .4 : 0, .8);
+  const snapshot = solver.deposited.slice();
+  assert(solver.pushLayer(100, 101, 1, 1) === 0, name + ' must never displace a body');
+  assert(solver.retainedFilmMass() === 0, name + ' declares no detachment threshold and must retain no film');
+  for (let i = 0; i < snapshot.length; i++) assert(snapshot[i] === solver.deposited[i], name + ' must be bit-for-bit unchanged by body displacement');
+}
+
 console.log('shared solver checks passed');
