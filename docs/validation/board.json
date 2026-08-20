@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-20T03:09:09.699Z",
+  "updatedAt": "2026-08-20T03:27:23.171Z",
   "rows": {
     "watercolor": {
       "WC-01": {
@@ -122,9 +122,9 @@
         "decidedAt": null
       },
       "OL-07": {
-        "mark": "none",
+        "mark": "partial",
         "note": "",
-        "decidedAt": null
+        "decidedAt": "2026-08-20T03:27:23.171Z"
       }
     }
   }

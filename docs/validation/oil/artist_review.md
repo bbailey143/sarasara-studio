@@ -123,6 +123,56 @@ Measured after the fix, same gesture:
   readout shows the amount so it is never a mystery.
 - There is still no rinse, so the brush never empties on purpose.
 
+## OIL-003 — first verdict on the drag, then withdrawn by the artist
+
+- **Recorded:** 2026-08-20, `docs/validation/sessions/2026-08-20t03-24-55-oil.json`
+- **Settings:** Draw, load `0.03`, pressure `0.55` (slider), speed `0.80`, Cold Press
+- **Rating as saved:** Recognizable / Recalibrate
+
+**Artist’s words as saved:**
+
+> That pickup and drag is still really bad.
+
+**Artist’s correction, same sitting:**
+
+> I’m going back on what I said. I don’t think I properly tested the pressure.
+
+> It looks really good, actually.
+
+The saved verdict stands in the history because it was genuinely given; the
+correction stands beside it because the test behind the first verdict was
+incomplete. The drag was reviewed at pressure `0.55`, which is only a little
+above the paint’s stiffness, so very little was ever going to come away with
+the brush. Retested with real pressure, the artist accepted it.
+
+**What the measurements say about pressure**, dragging an almost-empty brush
+out of thick paint:
+
+| Pressure | Film pulled out just past the edge |
+| --- | --- |
+| 0.35 | 0.018 |
+| 0.55 | 0.035 |
+| 0.75 | 0.101 |
+| 0.85 | **0.139** |
+| 1.00 | 0.079 |
+
+How far the colour reaches barely changes; how *much* comes with the brush
+changes about eightfold. That is the intended shape of the relationship — paint
+that sits still until you lean on it.
+
+**One thing to watch:** pressing absolutely as hard as possible drags out *less*
+than pressing firmly (0.079 against 0.139 at 0.85). That reversal is not
+obviously right and nobody has looked at it deliberately. It is recorded here
+rather than fixed, since the artist has not complained of it.
+
+### A note on how this review was reached
+
+A hypothesis was tested and rejected during this sitting: that the brush was
+putting paint down in the same instant it lifted it, so nothing truly
+travelled. Reordering the two made almost no difference (0.220 against 0.230),
+so the idea was dropped rather than shipped. No code changed as a result of
+OIL-003.
+
 ## Known stand-ins to stay sceptical of
 
 - Yield stress `0.34`, viscosity `0.82`, packing `0.78`, particle density
