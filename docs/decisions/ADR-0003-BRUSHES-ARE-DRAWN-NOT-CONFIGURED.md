@@ -1,6 +1,6 @@
 # ADR-0003: Brushes are drawn, not configured
 
-**Status:** Direction set by the artist, 2026-08-20. Not yet designed or built.
+**Status:** Direction set by the artist, 2026-08-20. **First pass built and passed the same day** — see [the brush review](../validation/brush/artist_review.md). No editor exists yet.
 **Follows:** [ADR-0002](ADR-0002-OIL-VOCABULARY-TEST.md)
 
 ## The artist's words
@@ -76,3 +76,33 @@ A brush is **drawn**, the way a brush maker shapes one:
   between sessions, not because a decision has been made about how to build it.
 - When it lands, every existing green mark should be re-examined, since all of
   them were made with a disc.
+
+
+## Outcome of the first pass — 2026-08-20
+
+The question this pass existed to answer was narrow: *can a drawn shape become
+a brush the engine paints with?* It can.
+
+A 12 mm filbert and a 12 mm flat were hand-authored as closed outlines with a
+belly curve, baked into distance fields, and painted with. Measured at pressure
+0.7, the flat marks 9.5 mm dragged across its face and 1.9 mm dragged along it —
+a five-fold difference from shape alone. Held at 45° it marks 5.7 mm. The disc
+marks identically in every direction. The filbert opens from 4.4 mm on its tip
+to 12.0 mm with the belly down, which is exactly its own width.
+
+Two decisions were taken here rather than deferred, and both should stand:
+
+1. **Brushes are sized in millimetres**, against a sheet width in millimetres.
+   A 12 mm brush marks 12 mm and will keep marking 12 mm if the grid changes.
+   This is the physical-size calibration the legacy roadmap left unfinished.
+2. **Orientation is the wrist, not the direction of travel.** A brush keeps its
+   own heading. Without this an edge stroke and a broad stroke cannot differ,
+   and the whole idea collapses.
+
+The disc was left untouched and remains the default, verified bit-for-bit
+against the previous engine. Nothing already approved has moved.
+
+Still unanswered from the list above: how tufts are generated and nudged, what
+survives of the legacy bristle engine, where a brush studio lives, and how a
+tool gets reviewed when the board only knows how to score materials. The last
+of those is now urgent — there is a passed brush with nowhere to record it.
