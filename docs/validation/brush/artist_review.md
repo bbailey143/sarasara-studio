@@ -52,7 +52,7 @@ broad sweep that opens and closes. None of that was possible with a disc.
 ## BRUSH-002 — hair that bends
 
 - **Recorded:** 2026-08-20, in conversation
-- **Behaviour:**  bends and lags — the head trails the hand and rounds
+- **Behaviour:** `BR-06` bends and lags — the head trails the hand and rounds
   a corner off
 
 **Artist’s words:**
@@ -60,7 +60,7 @@ broad sweep that opens and closes. None of that was possible with a disc.
 > Okay - it works! […] Green light though for this stage.
 
 **No board mark was set.** The artist said this while also reporting the board
-itself was a mess to use, which is the likeliest reason.  stands at
+itself was a mess to use, which is the likeliest reason. `BR-06` stands at
 machine-checked until he sets it himself; nobody else may.
 
 ### What was measured
@@ -90,7 +90,7 @@ so the same gesture drags the same way however finely the pen reports.
 
 ### Still absent, deliberately
 
-Only  drives this.  and  are named in the brush
+Only `stiffness` drives this. `spring` and `damping` are named in the brush
 specification and would govern how a head recovers after lifting, which is not
 simulated — so they are absent rather than sitting in the profile as
 decoration. Runs out of paint, splays and splits, and springs back remain
