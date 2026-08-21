@@ -3,6 +3,7 @@ import { Tab, TabList, TabPanel, Tabs } from 'react-aria-components';
 import { createEngine, listBrushes, listMaterials, listSubstrates } from './engine/index.js';
 import { BTN, BTN_PRIMARY, Button, Notes, Select, Slider, ToggleRow } from './components/Controls.jsx';
 import { BOARD_ROWS, BRUSH_ROWS, MARKS, MARK_ORDER, seedBoard } from './data/board.js';
+import { BellyEditor, FootprintEditor } from './components/BrushShape.jsx';
 
 // Everything physical - brush size, thread spacing - is now stated in
 // millimetres, so a finer grid shows more of the same world rather than
@@ -136,6 +137,8 @@ export default function App() {
   const [sheet, setSheet] = useState(0);
   const [detail, setDetail] = useState('standard');
   const [openGroups, setOpenGroups] = useState({ paint: true, tool: true, surface: false });
+  const [drawn, setDrawn] = useState(null);
+  const [drawnName, setDrawnName] = useState('My filbert');
   const [load, setLoad] = useState(0.7);
   const [water, setWater] = useState(0.3);
   const [dampness, setDampness] = useState(0);
@@ -176,7 +179,8 @@ export default function App() {
       if (import.meta.env.DEV) window.__studio = { engine, readout: () => engine.readout() };
       engine.setViewGain(viewGain);
       engine.setSmoothing(false);
-      engine.setBrush(brush);
+      if (drawn) engine.setBrushDefinition({ ...drawn, name: drawnName });
+      else engine.setBrush(brush);
       engine.newSheet(sheet);
       engine.clear(dampness);
       setRegime(engine.regime());
@@ -202,9 +206,10 @@ export default function App() {
   useEffect(() => {
     const engine = engineRef.current;
     if (!engine || !ready) return;
-    engine.setBrush(brush);
+    if (drawn) engine.setBrushDefinition({ ...drawn, name: drawnName });
+    else engine.setBrush(brush);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [brush, ready]);
+  }, [brush, drawn, drawnName, ready]);
 
   useEffect(() => {
     const engine = engineRef.current;
@@ -391,7 +396,11 @@ export default function App() {
       },
       substrate: { ...engine.substrateInfo(), sheet: engine.sheetId() },
       grid: { width: grid.width, height: grid.height, sheetWidthMm: 80 },
-      brush: { ...engine.brushInfo(), heldAt: brush === 'disc' ? null: `${brushAngle}°` },
+      brush: {
+        ...engine.brushInfo(),
+        heldAt: brush === 'disc' && !drawn ? null : `${brushAngle}°`,
+        drawn: drawn ? { name: drawnName, outline: drawn.outline, belly: drawn.belly, softness: drawn.softness, widthMm: drawn.widthMm } : null,
+      },
       regime: snapshot.regime,
       settings: {
         action,
@@ -448,7 +457,9 @@ export default function App() {
           {regime || '…'}
         </span>
         <span className="truncate font-mono text-[10.5px] text-ink3">{profileId}</span>
-        <span className={`${CHIP} border-rule2 text-ink2`}>{brushes.find((b) => b.id === brush)?.name || brush}</span>
+        <span className={`${CHIP} ${drawn ? 'border-sienna text-sienna' : 'border-rule2 text-ink2'}`}>
+          {drawn ? `${drawnName} · drawing` : brushes.find((b) => b.id === brush)?.name || brush}
+        </span>
         <div className="flex-1" />
         {!online && (
           <span className={`${CHIP} border-sienna text-sienna`}>offline · not recording</span>
@@ -609,7 +620,7 @@ export default function App() {
             className="sticky top-0 z-10 flex gap-0.5 border-b border-rule bg-panel px-2.5"
             aria-label="Recording and approvals"
           >
-            {[['record', 'Record'], ['board', 'Board'], ['history', 'Sessions']].map(([id, label]) => (
+            {[['record', 'Record'], ['board', 'Board'], ['shape', 'Brush'], ['history', 'Sessions']].map(([id, label]) => (
               <Tab
                 key={id}
                 id={id}
@@ -708,6 +719,95 @@ export default function App() {
             <p className={`${HINT} mt-3`}>
               Green is a claim about what you have seen. Nothing a test does can set it.
             </p>
+          </TabPanel>
+
+          <TabPanel className="px-4 py-3.5 outline-none" id="shape">
+            {!drawn ? (
+              <div className="flex flex-col gap-3">
+                <p className={HINT}>
+                  Pick up a drawn brush and start shaping it. The outline is what meets the
+                  paper; the curve below says how much of it comes down as you press.
+                </p>
+                <Button
+                  className={BTN}
+                  onPress={() => {
+                    const base = engineRef.current?.brushDefinition(brush === 'disc' ? 'filbert' : brush);
+                    if (base) { setDrawn(base); setDrawnName(`My ${base.name.toLowerCase()}`); }
+                  }}
+                >
+                  Start from {brush === 'disc' ? 'a filbert' : brushes.find((b) => b.id === brush)?.name}
+                </Button>
+                <p className={HINT}>
+                  The disc has no shape to edit — it is the frozen reference footprint.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="text-[12px] font-semibold">{drawnName}</span>
+                  <span className="font-mono text-[9.5px] text-ink3">{drawn.widthMm} mm · drawing</span>
+                </div>
+
+                <FootprintEditor
+                  outline={drawn.outline}
+                  onChange={(outline) => setDrawn((d) => ({ ...d, outline }))}
+                />
+                <p className={HINT}>Drag a hair. Its twin on the other side follows, so the head stays true.</p>
+
+                <BellyEditor
+                  belly={drawn.belly}
+                  onChange={(belly) => setDrawn((d) => ({ ...d, belly }))}
+                />
+                <p className={HINT}>Left is the lightest touch, right is the whole head down.</p>
+
+                <Slider
+                  label="Head width"
+                  value={drawn.widthMm}
+                  onChange={(widthMm) => setDrawn((d) => ({ ...d, widthMm }))}
+                  min={2}
+                  max={40}
+                  step={.5}
+                  format={(v) => `${v.toFixed(1)} mm`}
+                />
+                <Slider
+                  label="Softness of the edge"
+                  value={drawn.softness}
+                  onChange={(softness) => setDrawn((d) => ({ ...d, softness }))}
+                  min={.05}
+                  max={1}
+                  step={.01}
+                />
+
+                <Notes id="brushname" rows={1} label="Name" value={drawnName} onChange={setDrawnName} />
+
+                <div className="flex gap-2">
+                  <Button
+                    className={`${BTN_PRIMARY} flex-1`}
+                    onPress={async () => {
+                      try {
+                        const response = await fetch('/api/brushes', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ ...drawn, name: drawnName, savedAt: new Date().toISOString() }),
+                        });
+                        const body = await response.json();
+                        if (!response.ok) throw new Error(body.error || 'save failed');
+                        setStatus({ tone: 'ok', text: `Brush saved to ${body.file}` });
+                      } catch (error) {
+                        setStatus({ tone: 'bad', text: `Could not save the brush: ${error.message}` });
+                      }
+                    }}
+                  >
+                    Save brush
+                  </Button>
+                  <Button className={BTN} onPress={() => setDrawn(null)}>Put it down</Button>
+                </div>
+
+                <p className={HINT}>
+                  Every change is in your hand straight away — draw on the sheet and see it.
+                </p>
+              </div>
+            )}
           </TabPanel>
 
           <TabPanel className="px-4 py-3.5 outline-none" id="history">

@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const SESSIONS = path.join(ROOT, 'docs', 'validation', 'sessions');
 const BOARD = path.join(ROOT, 'docs', 'validation', 'board.json');
+const BRUSHES = path.join(ROOT, 'docs', 'brushes');
 
 const readBody = (req) =>
   new Promise((resolve, reject) => {
@@ -56,6 +57,30 @@ function studioBridge() {
             const board = JSON.parse(await readBody(req));
             fs.writeFileSync(BOARD, JSON.stringify(board, null, 2) + '\n');
             return send(res, 200, { ok: true });
+          }
+          return next();
+        } catch (error) {
+          return send(res, 500, { error: error.message });
+        }
+      });
+
+      server.middlewares.use('/api/brushes', async (req, res, next) => {
+        try {
+          if (req.method === 'GET') {
+            const files = fs.existsSync(BRUSHES) ? fs.readdirSync(BRUSHES).filter((f) => f.endsWith('.json')) : [];
+            return send(res, 200, files.map((file) => ({
+              file,
+              ...JSON.parse(fs.readFileSync(path.join(BRUSHES, file), 'utf8')),
+            })));
+          }
+          if (req.method === 'POST') {
+            fs.mkdirSync(BRUSHES, { recursive: true });
+            const brush = JSON.parse(await readBody(req));
+            const name = `${safeSlug(brush.name, 'brush')}.json`;
+            const file = path.join(BRUSHES, name);
+            if (path.dirname(file) !== BRUSHES) return send(res, 400, { error: 'bad path' });
+            fs.writeFileSync(file, JSON.stringify(brush, null, 2) + '\n');
+            return send(res, 200, { ok: true, file: `docs/brushes/${name}` });
           }
           return next();
         } catch (error) {

@@ -120,6 +120,35 @@ export async function createEngine({ width, height, material, substrate }) {
       return { id: b.id, key: brushId, name: b.name, version: b.version, kind: b.kind, widthMm: b.widthMm || null };
     },
 
+    /** A brush being edited. Handed in whole each time so the engine rebakes. */
+    setBrushDefinition(definition) {
+      brushId = 'custom';
+      solver.setBrush({
+        id: 'brush.custom.drawn.v0',
+        name: definition.name || 'Custom',
+        version: '0',
+        kind: 'shape',
+        outline: definition.outline,
+        belly: definition.belly,
+        softness: definition.softness,
+        widthMm: definition.widthMm,
+        provenance: [{ status: 'stand-in', note: 'Drawn by the artist in the brush editor. Geometry only.' }],
+      });
+    },
+
+    /** The definition behind a registry brush, so the editor can start from it. */
+    brushDefinition(id) {
+      const b = BRUSHES[id] || BRUSHES.filbert;
+      if (b.kind !== 'shape') return null;
+      return {
+        name: b.name,
+        outline: b.outline.map((p) => [p[0], p[1]]),
+        belly: b.belly.map((s) => ({ ...s })),
+        softness: b.softness,
+        widthMm: b.widthMm,
+      };
+    },
+
     setSubstrate(id) {
       if (!SUBSTRATES[id]) throw new Error('Unknown substrate: ' + id);
       substrateId = id;

@@ -683,4 +683,63 @@ const twiceA = sheetOf('linenCanvas', 42), twiceB = sheetOf('linenCanvas', 42);
 for (let i = 0; i < twiceA.height.length; i++)
   assert(twiceA.height[i] === twiceB.height[i], 'asking for the same sheet twice must give the same sheet');
 
+/* ---- a brush being drawn is a brush ------------------------------------ */
+
+// The editor hands the engine a whole definition on every edit. If that does
+// not change the mark, nothing about drawing a brush is real.
+const EDIT_GRID = 380, EDIT_H = 280, EDIT_CPM = EDIT_GRID / 80;
+const markOfDefinition = (definition, alongFace) => {
+  const solver = new SharedSolver(EDIT_GRID, EDIT_H, PROFILES.oil, SUBSTRATES.coldPress);
+  solver.setBrush(definition);
+  solver.clear(0);
+  const cx = EDIT_GRID * 2, cy = EDIT_H * 2, reach = EDIT_GRID;
+  if (alongFace) solver.depositSegment(cx - reach, cy, cx + reach, cy, EDIT_GRID * 4, EDIT_H * 4, .9, 1, .3, .8, 0);
+  else solver.depositSegment(cx, cy - reach, cx, cy + reach, EDIT_GRID * 4, EDIT_H * 4, .9, 1, .3, .8, 0);
+  let cells = 0;
+  if (alongFace) { for (let y = 0; y < EDIT_H; y++) if (solver.deposited[y * EDIT_GRID + Math.round(EDIT_GRID / 2)] > 1e-6) cells++; }
+  else { for (let x = 0; x < EDIT_GRID; x++) if (solver.deposited[Math.round(EDIT_H / 2) * EDIT_GRID + x] > 1e-6) cells++; }
+  return { mm: cells / EDIT_CPM, error: solver.metrics().pigment_conservation_error };
+};
+
+const asDrawn = (changes) => {
+  const base = JSON.parse(JSON.stringify(BRUSHES.filbert));
+  delete base._field;
+  return { ...base, kind: 'shape', ...changes };
+};
+
+const stock = markOfDefinition(asDrawn({}), false);
+const stockAlong = markOfDefinition(asDrawn({}), true);
+
+// pinch the hairs toward the spine: the face narrows, the other way does not
+const pinched = asDrawn({ outline: BRUSHES.filbert.outline.map((p) => [p[0] * .45, p[1]]) });
+assert(markOfDefinition(pinched, false).mm < stock.mm * .6,
+  'pulling the hairs inward must narrow the face of the mark');
+assert(Math.abs(markOfDefinition(pinched, true).mm - stockAlong.mm) < .5,
+  'narrowing the face must not change the mark along the face');
+
+// pull it long and thin and the two axes swap over
+const rigger = asDrawn({ outline: BRUSHES.filbert.outline.map((p) => [p[0] * .3, p[1] * 2.1]) });
+const riggerAcross = markOfDefinition(rigger, false).mm, riggerAlong = markOfDefinition(rigger, true).mm;
+assert(riggerAlong > riggerAcross * 2,
+  'a long thin head must mark broadly along its length and thinly across it');
+
+// the belly alone decides how pressure opens the head
+const lateBelly = asDrawn({ belly: [{ p: 0, contact: .12 }, { p: .6, contact: .2 }, { p: .85, contact: .6 }, { p: 1, contact: 1 }] });
+const lateSolver = (pressure) => {
+  const solver = new SharedSolver(EDIT_GRID, EDIT_H, PROFILES.oil, SUBSTRATES.coldPress);
+  solver.setBrush(lateBelly);
+  solver.clear(0);
+  solver.depositSegment(EDIT_GRID * 1.2, EDIT_H * 2, EDIT_GRID * 2.8, EDIT_H * 2, EDIT_GRID * 4, EDIT_H * 4, pressure, 1, .3, .8, 0);
+  let cells = 0;
+  for (let y = 0; y < EDIT_H; y++) if (solver.deposited[y * EDIT_GRID + Math.round(EDIT_GRID / 2)] > 1e-6) cells++;
+  return cells / EDIT_CPM;
+};
+assert(lateSolver(.9) > lateSolver(.3) * 2.5,
+  'a belly that opens late must stay thin under light pressure and open under heavy');
+
+// whatever is drawn, the ledger still balances and no look is baked in
+assert(stock.error < 1, 'a drawn brush must conserve pigment like any other');
+assert(!/color|colour|pigment|grain|texture|image/i.test(JSON.stringify(asDrawn({}).outline)),
+  'a drawn brush must carry geometry only');
+
 console.log('shared solver checks passed');
