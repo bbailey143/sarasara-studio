@@ -150,6 +150,12 @@ export default function App() {
   const [fallbackSpeed, setFallbackSpeed] = useState(0.8);
   const [viewGain, setViewGain] = useState(2.6);
 
+  // Going back to the palette without saying so. The engine ships with this
+  // off, because a measurement of running out has to be allowed to run out;
+  // the studio turns it on because painting with it off is tedious.
+  const [autoReload, setAutoReload] = useState(true);
+  const [reloadFill, setReloadFill] = useState(1);
+
   const [regime, setRegime] = useState('');
   const [profileId, setProfileId] = useState('');
   const [readout, setReadout] = useState([]);
@@ -162,7 +168,6 @@ export default function App() {
 
   const [rating, setRating] = useState('recognizable');
   const [decision, setDecision] = useState('recalibrate');
-  const [behavior, setBehavior] = useState('');
   const [notes, setNotes] = useState('');
 
   /* ---------------------------------------------------------- engine */
@@ -227,6 +232,10 @@ export default function App() {
   useEffect(() => {
     if (engineRef.current && ready) engineRef.current.setViewGain(viewGain);
   }, [viewGain, ready]);
+
+  useEffect(() => {
+    if (engineRef.current && ready) engineRef.current.setAutoReload(autoReload, reloadFill);
+  }, [autoReload, reloadFill, brush, drawn, ready]);
 
   /* ------------------------------------------------------- frame loop */
 
@@ -419,7 +428,18 @@ export default function App() {
       brush: {
         ...engine.brushInfo(),
         heldAt: brush === 'disc' && !drawn ? null : `${brushAngle}°`,
-        drawn: drawn ? { name: drawnName, outline: drawn.outline, belly: drawn.belly, softness: drawn.softness, widthMm: drawn.widthMm } : null,
+        drawn: drawn
+          ? {
+            name: drawnName,
+            outline: drawn.outline,
+            belly: drawn.belly,
+            softness: drawn.softness,
+            stiffness: drawn.stiffness,
+            widthMm: drawn.widthMm,
+            capacity: drawn.capacity,
+            release: drawn.release,
+          }
+          : null,
       },
       regime: snapshot.regime,
       settings: {
@@ -433,7 +453,7 @@ export default function App() {
         note: 'viewGain is a display control only; it does not change physical state.',
       },
       measurements: snapshot.measurements,
-      review: { rating, decision, behavior: behavior.trim(), notes: notes.trim() },
+      review: { rating, decision, notes: notes.trim() },
       board: {
         paint: board?.rows?.[material] || null,
         engine: board?.engine || null,
@@ -581,9 +601,29 @@ export default function App() {
               Dip the brush
             </Button>
           </div>
+          <div className="mt-3">
+            <ToggleRow
+              label="Reload when you lift"
+              options={[{ id: 'on', name: 'On' }, { id: 'off', name: 'Off' }]}
+              value={autoReload ? 'on' : 'off'}
+              onChange={(value) => setAutoReload(value === 'on')}
+            />
+          </div>
+          {autoReload && (
+            <div className="mt-2">
+              <Slider
+                label="How much it picks up"
+                value={reloadFill}
+                onChange={setReloadFill}
+                min={0.1}
+                format={(v) => Math.round(v * 100) + '%'}
+              />
+            </div>
+          )}
           <p className={HINT + ' mt-2'}>
-            A drawn brush holds a finite amount and runs dry. Pigment load is how
-            much it picks up when you dip. The disc is bottomless, as it always was.
+            A drawn brush holds a finite amount and runs dry. With reloading on it
+            goes back to the palette every time you lift; turn it off to feel a
+            brush run out. The disc is bottomless, as it always was.
           </p>
         </section>
       </div>
@@ -776,14 +816,6 @@ export default function App() {
               )}
               <Select label="Rating" items={RATINGS} value={rating} onChange={setRating} />
               <Select label="Decision" items={DECISIONS} value={decision} onChange={setDecision} />
-              <Notes
-                id="behavior"
-                rows={2}
-                label="Which behaviour is this about?"
-                value={behavior}
-                onChange={setBehavior}
-                placeholder="e.g. OL-01 holds its shape"
-              />
               <Notes
                 id="notes"
                 rows={4}

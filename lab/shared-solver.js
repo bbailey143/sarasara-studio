@@ -72,6 +72,10 @@
   /** How much of a real sheet the simulation grid spans. A drawn brush is sized
       in millimetres like a real brush, so its mark keeps its true size when the
       grid gets finer. The disc keeps its old cell-based radius, untouched. */
+  /** The trace of paint that never leaves the hair, as a share of capacity. */
+  const DRY_RESIDUE=.012;
+  /** The faintest a fading brush marks before it gives up entirely. */
+  const DRY_FADE_FLOOR=.12;
   const SHEET_WIDTH_MM=80;
 
   /** Cells per millimetre for a given grid width. Everything physical - brush
@@ -88,14 +92,14 @@
       id:'brush.filbert.drawn.v0.1',name:'Filbert',version:'0.1.0',kind:'shape',
       outline:[[1,0],[0.9791,0.1258],[0.9168,0.2194],[0.8146,0.2968],[0.6746,0.3584],[0.4987,0.4034],[0.2859,0.4308],[0,0.44],[-0.2859,0.4308],[-0.4987,0.4034],[-0.6746,0.3584],[-0.8146,0.2968],[-0.9168,0.2194],[-0.9791,0.1258],[-1,0],[-0.9791,-0.1258],[-0.9168,-0.2194],[-0.8146,-0.2968],[-0.6746,-0.3584],[-0.4987,-0.4034],[-0.2859,-0.4308],[0,-0.44],[0.2859,-0.4308],[0.4987,-0.4034],[0.6746,-0.3584],[0.8146,-0.2968],[0.9168,-0.2194],[0.9791,-0.1258]],
       widthMm:12,belly:[{p:0,contact:.30},{p:.35,contact:.58},{p:.7,contact:.86},{p:1,contact:1}],
-      softness:.52,stiffness:.55,capacity:1150,
+      softness:.52,stiffness:.55,capacity:2400,release:.65,reloadFill:1,
       provenance:[{status:'stand-in',note:'Hand-authored outline for the first drawn-brush pass. Shape only; the belly curve and edge softness are unmeasured.'}]
     },
     flat:{
       id:'brush.flat.drawn.v0.1',name:'Flat',version:'0.1.0',kind:'shape',
       outline:[[1,0],[0.9936,0.116],[0.974,0.1452],[0.9403,0.1644],[0.8909,0.1782],[0.8221,0.1881],[0.726,0.1948],[0.58,0.1987],[0,0.2],[-0.58,0.1987],[-0.726,0.1948],[-0.8221,0.1881],[-0.8909,0.1782],[-0.9403,0.1644],[-0.974,0.1452],[-0.9936,0.116],[-1,0],[-0.9936,-0.116],[-0.974,-0.1452],[-0.9403,-0.1644],[-0.8909,-0.1782],[-0.8221,-0.1881],[-0.726,-0.1948],[-0.58,-0.1987],[0,-0.2],[0.58,-0.1987],[0.726,-0.1948],[0.8221,-0.1881],[0.8909,-0.1782],[0.9403,-0.1644],[0.974,-0.1452],[0.9936,-0.116]],
       widthMm:12,belly:[{p:0,contact:.34},{p:.4,contact:.66},{p:1,contact:1}],
-      softness:.30,stiffness:.78,capacity:520,
+      softness:.30,stiffness:.78,capacity:1100,release:.48,reloadFill:1,
       provenance:[{status:'stand-in',note:'Hand-authored outline for the first drawn-brush pass. Deliberately far from round so direction is obvious.'}]
     }
   };
@@ -233,6 +237,19 @@
      * the wrong door. Merging them properly means reworking how a body lays paint,
      * and that is its own piece of work. Recorded as a simplification, not a fact.
      *
+     * A head has two numbers, not one, because holding and giving up are
+     * different things. `capacity` is how much paint the hair holds.
+     * `release` is how freely it lets go on each contact: a soft hair dumps its
+     * load, a stiff coarse one meters it out and drags the same load much
+     * further. Reach per dip is capacity divided by release, so the two can be
+     * tuned against each other.
+     *
+     * Both are stand-ins. The artist's stated target is that hair type and
+     * medium should decide them together - a sable holds far more water than a
+     * hog bristle, while a hog bristle holds and spreads far more oil. That
+     * coupling is not modelled yet; these are per-brush numbers meant to be
+     * edited in the brush studio.
+     *
      * A brush that declares no capacity is bottomless - which is what the disc
      * has always been, and what every material review before now was painted
      * with. Dipping brings paint into the world; painting moves it from the hair
@@ -248,9 +265,36 @@
       this.initialPigment+=taken;
       return taken;
     }
-    /** 0..1, for a readout and for fading a stroke as the hair empties. */
-    brushCharge(){return this.hasReservoir()?Math.max(0,Math.min(1,this.charge/this.brushCapacity())):1}
-    liftBrush(){this.headX=null;this.headY=null}
+    /**
+     * 0..1, for a readout and for fading a stroke as the hair empties.
+     *
+     * Zero means dry, not literally empty: DRY_RESIDUE of the capacity stays
+     * clinging to the hair and will not transfer, the way a spent brush is
+     * still stained. Without it the deposit is a fraction of what is left, so
+     * the charge halves and halves and the brush never actually runs out.
+     * The residue stays on the books - it is still paint, it is just stuck.
+     */
+    brushCharge(){
+      if(!this.hasReservoir())return 1;
+      const full=this.charge/this.brushCapacity();
+      return Math.max(0,Math.min(1,(full-DRY_RESIDUE)/(1-DRY_RESIDUE)));
+    }
+    /** What is left that can still be painted with. */
+    usableCharge(){return this.hasReservoir()?Math.max(0,this.charge-this.brushCapacity()*DRY_RESIDUE):Infinity}
+    /** How freely the hair gives paint up per contact. Lower lays thinner and reaches further. */
+    brushRelease(){const r=Number(this.getBrush().release);return Number.isFinite(r)&&r>0?Math.min(1,r):1}
+    /** How full this head's own reload puts it back to. */
+    brushReloadFill(){const f=Number(this.getBrush().reloadFill);return Number.isFinite(f)?Math.max(0,Math.min(1,f)):1}
+    /**
+     * Auto-reload: going back to the palette without having to say so.
+     *
+     * It is a convenience, not physics, so the engine ships with it off and the
+     * studio turns it on. A test that measures running out must leave it off or
+     * it is measuring nothing.
+     */
+    setAutoReload(enabled,fill){this.autoReload=!!enabled;this.reloadFill=fill===undefined||fill===null?undefined:Math.max(0,Math.min(1,Number(fill)))}
+    reloadFillValue(){return this.reloadFill===undefined?this.brushReloadFill():this.reloadFill}
+    liftBrush(){this.headX=null;this.headY=null;if(this.autoReload&&this.hasReservoir())this.dipBrush(this.reloadFillValue())}
     headFollow(targetX,targetY,stepCells,speed){
       const tool=this.getBrush(),stiffness=Number(tool.stiffness);
       if(!Number.isFinite(stiffness)||stiffness>=1||this.headX===null||this.headX===undefined){
@@ -380,7 +424,7 @@
       const regime=this.regime(),body=regime==='body',dry=regime==='granular',rough=this.s['SUBI-001'];
       let addedPigment=0;
       /* Infinity for a bottomless tool, so its path is exactly as it always was. */
-      let budget=this.hasReservoir()?Math.max(0,this.charge):Infinity;
+      let budget=this.usableCharge();
       if(budget<=0)return;
       const x0=Math.max(0,Math.floor(cx-radius)),x1=Math.min(this.w-1,Math.ceil(cx+radius)),y0=Math.max(0,Math.floor(cy-radius)),y1=Math.min(this.h-1,Math.ceil(cy+radius));
       for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
@@ -420,7 +464,12 @@
          before drawn brushes existed used it at 190 cells, and giving it millimetres
          now would move those results. Drawn brushes carry a real size instead. */
       radius=shape?(tool.widthMm||10)*.5*perMm:(1.2+pressure*2.6+brushWater*1.8),regime=this.regime(),water=regime==='body'?0:Math.pow(brushWater,1.85)*.36*carrier;
-      const charge=this.hasReservoir()?Math.min(1,this.brushCharge()/.3):1;
+      /* A brush low on paint fades, but not forever. If what it lays is always a
+         fraction of what is left then the two halve together and it approaches dry
+         without ever arriving. Below the fade point it keeps making the same faint
+         scratchy mark until the usable charge is spent, and then it stops - which
+         is what a brush actually does. */
+      const charge=this.hasReservoir()?(this.brushCharge()>0?Math.max(DRY_FADE_FLOOR,Math.min(1,this.brushCharge()/.3)):0)*this.brushRelease():1;
       const availablePigment=regime==='body'?(.03+pressure*.14)*(pigmentFraction||1):carrier>.02?(.05+pressure*.16)*pigmentFraction:(.012+pressure*.04)*(pigmentFraction||1),pigment=availablePigment*pigmentLoad*charge;
       const ux=d>.001?(x1-x0)/d:0,uy=d>.001?(y1-y0)/d:0;const sweep=radius>0?Math.min(1,(d/Math.max(1,steps))/(2*radius)):1;
       const stepCells=d/Math.max(1,steps);

@@ -194,3 +194,97 @@ Every approved behaviour on the board — five on oil, five on charcoal — was
 painted with the disc. The artist has already accepted that a real brush puts
 all ten back in question. That reckoning has not happened yet; it is deferred by
 agreement, not resolved.
+
+## BRUSH-004 — the engine judged with a real brush
+
+Session `2026-08-21t20-37-24-watercolor`. Filbert, 12 mm, on hot press at
+Finest. Rated *recognizable*, decision *recalibrate*.
+
+This is the re-test the previous entry was waiting for. Judged with a drawn
+brush instead of the disc, the engine picked up its first two approvals:
+
+| Row | Verdict with the filbert |
+| --- | --- |
+| `BR-01` holds its true size | **approved** |
+| `BR-02` knows how it is held | **approved** |
+| `BR-05` runs out of paint | partial |
+| `BR-06` bends and lags | partial |
+| `BR-09` lays paint by distance | partial |
+
+And the brush itself: *reads as a filbert* and *its belly feels right* both
+approved; *its hair feels right* and *worth keeping* left at partial. Shape and
+belly pass. Hair and reservoir do not.
+
+### What the artist said
+
+> Paint runs out very quickly - too quickly, actually. The reservoir needs to
+> release slower by default. I think that will need to be changeable behavior
+> as Sables hold way more water than Hog Bristle, but hog bristle would hold
+> and spread much more oil than a sable. I think I’m saying the reservoir
+> exists, but it needs to be customizable and refinable, but default brushes
+> need to spread further - running out fluid/paint more slowly. Also, let’s
+> have a default setting of auto reload which can be turned on and off with a
+> switch. And, we might as well add an extra setting to that auto-reload for
+> the user to select how much paint is put on the brush from auto-load. I think
+> that could be a per-brush setting in the brush-building studio.
+
+And on the review form’s first question:
+
+> Get rid of this question. I don’t think it’s really needed anymore...
+
+### He was right, and it was measurable
+
+One 8 cm stroke, oil, filbert, at working pressure:
+
+| | before | after |
+| --- | --- | --- |
+| cost of one 8 cm stroke | 42% of a full dip | 13% |
+| oil, filbert | 23 cm per dip | 85 cm |
+| oil, flat | 23 cm | 116 cm |
+| watercolour, filbert | 70 cm | 224 cm |
+| watercolour, flat | 77 cm | 355 cm |
+
+Two and a half strokes and the brush was dead. That is not a brush.
+
+### What was done about it
+
+**A head now has two numbers, not one.** `capacity` is how much paint the hair
+holds; `release` is how freely it lets go on each contact. Reach per dip is one
+divided by the other, so a soft head that dumps its load and a stiff one that
+meters the same load out much further are both expressible. Both are per-brush
+and both are meant to be edited in the brush studio.
+
+The artist’s stated target — that hair type and medium should decide these
+together, a sable holding far more water while a hog bristle holds and spreads
+far more oil — is **not** modelled. These are two editable numbers, not that
+coupling. Recorded as the next step, not as done.
+
+**Auto-reload**, on by default in the studio, with an adjustable amount. It is
+a convenience rather than physics, so the engine ships with it off: a test that
+measures a brush running out has to be allowed to run out.
+
+**The behaviour question is gone** from the review form.
+
+### A second defect, found on the way
+
+A brush low on paint laid a fraction of what was left, so the two halved
+together and it approached dry without ever arriving — a filbert was still
+making marks after 4,547 cm and 400 strokes. *Runs out of paint* was not true
+in the literal sense.
+
+Now a fading brush keeps making the same faint scratchy mark until the usable
+charge is spent and then stops, and a trace stays clinging to the hair that
+never transfers, the way a spent brush is still stained. The gauge reads what
+is left to paint with, so it reaches a true zero exactly when the brush stops
+marking. The residue stays on the books; it is still paint, it is just stuck.
+
+### Evidence
+
+Reach is now pinned in centimetres of stroke rather than in units of pigment,
+because capacity and release are both meant to move and the reach they produce
+is the thing that must not drift. Six deliberate breakages were tried against
+the new tests — the old stingy capacity, the metering removed, the endless
+fade, no residue, no reload on lift, reload ignoring its amount — and all six
+were caught.
+
+Status: `automated_relationship_verified`. The artist has not re-tested it yet.

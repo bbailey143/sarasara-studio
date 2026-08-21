@@ -32,7 +32,7 @@ const MATERIAL_LABELS = { watercolor: 'Watercolor', charcoal: 'Charcoal', oil: '
 const REGIME_READOUTS = {
   flowing: [
     'pigment_area_fraction', 'wet_area_fraction', 'water', 'absorbed_water',
-    'mobile_pigment', 'deposited_pigment', 'relocated_pigment', 'pigment_conservation_error',
+    'mobile_pigment', 'deposited_pigment', 'brush_charge', 'relocated_pigment', 'pigment_conservation_error',
   ],
   granular: [
     'pigment_area_fraction', 'deposited_pigment', 'loose_pigment', 'coarse_fragment_pigment',
@@ -59,7 +59,7 @@ export const READOUT_LABELS = {
   source_remaining_pigment: ['Left on the tool', ''],
   pressure_anchored_pigment: ['Pressed into paper', ''],
   lost_off_canvas_pigment: ['Left the page', ''],
-  brush_charge: ['Paint left on the brush', ''],
+  brush_charge: ['Paint left on the brush', '%'],
   carried_pigment: ['Scraped up off the sheet', ''],
   relocated_pigment: ['Pushed by contact (running total)', ''],
   relief_peak: ['Tallest point', ''],
@@ -67,7 +67,7 @@ export const READOUT_LABELS = {
   pigment_conservation_error: ['Ledger error', '%'],
 };
 
-const PERCENT_KEYS = new Set(['pigment_area_fraction', 'wet_area_fraction', 'relief_area_fraction']);
+const PERCENT_KEYS = new Set(['pigment_area_fraction', 'wet_area_fraction', 'relief_area_fraction', 'brush_charge']);
 
 export async function createEngine({ width, height, material, substrate }) {
   let solver = new SharedSolver(width, height, PROFILES[material], SUBSTRATES[substrate]);
@@ -144,6 +144,11 @@ export async function createEngine({ width, height, material, substrate }) {
     brushCharge() { return solver.brushCharge(); },
     hasReservoir() { return solver.hasReservoir(); },
 
+    /** Going back to the palette without saying so. Off in the engine, on in the studio. */
+    setAutoReload(enabled, fill) { solver.setAutoReload(enabled, fill); },
+    /** What this head reloads to when nothing overrides it. */
+    brushReloadFill() { return solver.brushReloadFill(); },
+
     setBrushDefinition(definition) {
       brushId = 'custom';
       solver.setBrush({
@@ -156,6 +161,9 @@ export async function createEngine({ width, height, material, substrate }) {
         softness: definition.softness,
         stiffness: definition.stiffness,
         widthMm: definition.widthMm,
+        capacity: definition.capacity,
+        release: definition.release,
+        reloadFill: definition.reloadFill,
         provenance: [{ status: 'stand-in', note: 'Drawn by the artist in the brush editor. Geometry only.' }],
       });
     },
@@ -171,6 +179,11 @@ export async function createEngine({ width, height, material, substrate }) {
         softness: b.softness,
         stiffness: b.stiffness ?? .6,
         widthMm: b.widthMm,
+        // Carried through so that picking a brush up to reshape it does not
+        // silently turn it bottomless. There is no editor for these yet.
+        capacity: b.capacity,
+        release: b.release,
+        reloadFill: b.reloadFill,
       };
     },
 
@@ -210,6 +223,8 @@ export async function createEngine({ width, height, material, substrate }) {
     /** Named numbers, already filtered to what this regime can meaningfully report. */
     readout() {
       const raw = { ...solver.metrics(), ...reliefStats() };
+      if (solver.hasReservoir()) raw.brush_charge = solver.brushCharge();
+      else delete raw.brush_charge;
       const keys = REGIME_READOUTS[solver.regime()] || Object.keys(raw);
       return keys
         .filter((key) => raw[key] !== undefined)

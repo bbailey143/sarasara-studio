@@ -824,21 +824,27 @@ assert(restart.x === 50 && restart.y === 200, 'lifting the brush must let the ne
 
 const strokeOn = (solver, row) => {
   const before = solver.metrics().deposited_pigment;
-  solver.depositSegment(380 * 4 * .15, 280 * 4 * row, 380 * 4 * .85, 280 * 4 * row, 380 * 4, 280 * 4, .75, 1, .3, .8, 0);
+  solver.liftBrush();
+  solver.depositSegment(solver.w * .12, solver.h * row, solver.w * .88, solver.h * row, solver.w, solver.h, .75, 1, .3, .8, 0);
   return solver.metrics().deposited_pigment - before;
 };
 
-const loaded = new SharedSolver(380, 280, PROFILES.oil, SUBSTRATES.coldPress);
-loaded.setBrush('filbert');
+// A deliberately small head, so running dry is five strokes rather than thirty.
+// What is under test here is the mechanism; the capacities the brushes actually
+// ship with are pinned separately, by reach, below.
+const smallHead = { ...BRUSHES.filbert, id: 'brush.test.small-head.v0', name: 'Small head', capacity: 900 };
+const loaded = new SharedSolver(380, 420, PROFILES.oil, SUBSTRATES.coldPress);
+loaded.setBrush(smallHead);
 loaded.clear(0);
 assert(loaded.hasReservoir(), 'a drawn brush must hold a finite amount of paint');
 assert(loaded.brushCharge() === 1, 'a brush must come to the sheet loaded, not dry');
 
-const laid = [.25, .36, .47, .58].map((row) => strokeOn(loaded, row));
-assert(laid[0] > 400, 'the first stroke must lay a full load of paint');
-assert(laid[2] < laid[0] * .5, 'a brush running low must lay less (' + laid.map((v) => v.toFixed(0)).join(', ') + ')');
-assert(laid[3] === 0, 'an empty brush must lay nothing at all');
-assert(loaded.brushCharge() === 0, 'an empty brush must read empty');
+const laid = [.15, .3, .45, .6, .75].map((row) => strokeOn(loaded, row));
+const laidAt = laid.map((v) => v.toFixed(0)).join(', ');
+assert(laid[0] > 300, 'the first stroke must lay a full load of paint (' + laidAt + ')');
+assert(laid[2] < laid[0] * .5, 'a brush running low must lay less (' + laidAt + ')');
+assert(laid[4] === 0, 'an empty brush must lay nothing at all (' + laidAt + ')');
+assert(loaded.brushCharge() === 0, 'an empty brush must read empty, not merely faint');
 assert(loaded.metrics().pigment_conservation_error < 1, 'running a brush dry must still conserve pigment');
 
 // dipping brings it back, and brings paint into the world rather than conjuring it
@@ -846,8 +852,74 @@ const beforeDip = loaded.metrics().deposited_pigment + loaded.charge;
 const taken = loaded.dipBrush(1);
 assert(taken > 0 && loaded.brushCharge() === 1, 'dipping must refill the brush');
 assert(Math.abs(loaded.metrics().pigment_conservation_error) < 1, 'dipping must keep the ledger honest');
-assert(strokeOn(loaded, .69) > 400, 'a freshly dipped brush must paint at full strength again');
+assert(strokeOn(loaded, .9) > 300, 'a freshly dipped brush must paint at full strength again');
 assert(beforeDip < loaded.metrics().deposited_pigment + loaded.charge, 'dipping must add paint, not move it');
+
+/* ---- how far one dip goes -------------------------------------------------
+
+   The artist's finding on 2026-08-21, painting oil with the filbert: "Paint runs
+   out very quickly - too quickly, actually." It was true and it was measurable -
+   a single 8 cm stroke spent 42% of a full load, so two and a half strokes and
+   the brush was dead.
+
+   Reach is capacity divided by release. Both are per-brush numbers meant to be
+   edited, so the thing worth holding still is the reach they produce, stated in
+   millimetres of stroke rather than in units of pigment. */
+
+const reachMm = (material, substrate, brush) => {
+  const t = new SharedSolver(380, 280, PROFILES[material], SUBSTRATES[substrate]);
+  t.setBrush(brush);
+  t.clear(0);
+  let cells = 0;
+  // 380 cells across a sheet 80 mm wide.
+  for (let i = 0; i < 600 && t.brushCharge() > 0; i++) {
+    t.liftBrush();
+    t.depositSegment(10, 20 + (i * 13) % 240, 370, 20 + (i * 13) % 240, 380, 280, .6, 1, .3, .8, 0);
+    cells += 360;
+  }
+  return cells / (380 / 80);
+};
+
+const oilReach = reachMm('oil', 'roughCanvas', 'filbert');
+assert(oilReach > 500 && oilReach < 2000,
+  'a dipped filbert must draw between 50 and 200 cm of oil before it runs dry (' + (oilReach / 10).toFixed(0) + ' cm)');
+const washReach = reachMm('watercolor', 'hotPress', 'filbert');
+assert(washReach > oilReach * 1.5,
+  'a thin wash must go much further on one dip than stiff paint (' + (washReach / 10).toFixed(0) + ' vs ' + (oilReach / 10).toFixed(0) + ' cm)');
+
+// A stiffer, coarser head meters its paint out and drags the same load further.
+assert(reachMm('oil', 'roughCanvas', 'flat') > oilReach,
+  'the stiffer flat must reach further on one dip than the softer filbert');
+
+/* ---- auto-reload ----------------------------------------------------------
+
+   Going back to the palette without having to say so. It is a convenience and
+   not physics, so the engine ships with it off - otherwise every measurement of
+   running out silently measures nothing. */
+
+const reload = new SharedSolver(380, 280, PROFILES.oil, SUBSTRATES.coldPress);
+reload.setBrush('filbert');
+reload.clear(0);
+reload.depositSegment(40, 60, 340, 60, 380, 280, .75, 1, .3, .8, 0);
+const spentCharge = reload.brushCharge();
+assert(spentCharge > 0 && spentCharge < 1, 'a stroke must spend paint without emptying the brush (' + spentCharge.toFixed(3) + ')');
+reload.liftBrush();
+assert(reload.brushCharge() === spentCharge, 'lifting must not refill the brush while auto-reload is off');
+reload.setAutoReload(true);
+reload.liftBrush();
+assert(reload.brushCharge() === 1, 'auto-reload must fill the brush when the hand lifts');
+
+reload.setAutoReload(false);
+for (let i = 0; i < 20 && reload.brushCharge() > .3; i++) {
+  reload.liftBrush();
+  reload.depositSegment(40, 140, 340, 140, 380, 280, .75, 1, .3, .8, 0);
+}
+assert(reload.brushCharge() <= .3, 'the brush must actually run low when auto-reload is off');
+reload.setAutoReload(true, .4);
+reload.liftBrush();
+assert(Math.abs(reload.charge / reload.brushCapacity() - .4) < 1e-6,
+  'auto-reload must honour how much paint it puts on (' + (reload.charge / reload.brushCapacity()).toFixed(4) + ')');
+assert(reload.metrics().pigment_conservation_error < 1, 'auto-reload must not conjure paint');
 
 // Dipping brings paint into the world from the palette, so the ledger has to
 // grow by exactly what was taken up. The conservation error alone cannot catch
@@ -869,7 +941,13 @@ half.setBrush('filbert');
 half.clear(0);
 half.charge = 0;
 half.dipBrush(.5);
-assert(Math.abs(half.brushCharge() - .5) < 1e-9, 'a half dip must leave the brush half full');
+assert(Math.abs(half.charge / half.brushCapacity() - .5) < 1e-9, 'a half dip must put exactly half a load on the hair');
+// The gauge reads paint the brush can still use, not raw fill. A trace stays
+// stuck in the hair and never transfers, so half a load reads a shade under
+// half - and, far more usefully, a spent brush reads a true zero.
+assert(Math.abs(half.brushCharge() - .5) < .02, 'a half dip must read about half full (' + half.brushCharge().toFixed(4) + ')');
+half.charge = half.brushCapacity() * .004;
+assert(half.brushCharge() === 0, 'a brush down to the trace in its hair must read empty');
 
 // the disc is bottomless, exactly as every earlier review found it
 const bottomless = new SharedSolver(380, 280, PROFILES.oil, SUBSTRATES.coldPress);

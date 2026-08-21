@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-21T06:30:00.000Z",
+  "updatedAt": "2026-08-21T20:32:03.491Z",
   "rows": {
     "watercolor": {
       "WC-01": {
@@ -153,24 +153,24 @@
     },
     "filbert": {
       "BX-01": {
-        "mark": "none",
+        "mark": "approved",
         "note": "",
-        "decidedAt": null
+        "decidedAt": "2026-08-21T20:31:52.601Z"
       },
       "BX-02": {
-        "mark": "none",
+        "mark": "approved",
         "note": "",
-        "decidedAt": null
+        "decidedAt": "2026-08-21T20:31:56.550Z"
       },
       "BX-03": {
-        "mark": "none",
+        "mark": "partial",
         "note": "",
-        "decidedAt": null
+        "decidedAt": "2026-08-21T20:31:57.656Z"
       },
       "BX-04": {
-        "mark": "none",
+        "mark": "partial",
         "note": "",
-        "decidedAt": null
+        "decidedAt": "2026-08-21T20:32:03.491Z"
       }
     },
     "flat": {
@@ -220,14 +220,14 @@
   },
   "engine": {
     "BR-01": {
-      "mark": "checked",
-      "note": "Marked down 2026-08-21 while testing with the disc, which cannot demonstrate this. The artist disowned the test; restored to machine-checked, awaiting a judgement made with a drawn brush.",
-      "decidedAt": null
+      "mark": "approved",
+      "note": "Re-judged with the filbert on 2026-08-21 and approved. The earlier mark-down was made with the disc, which is sized in cells and cannot hold a true millimetre size.",
+      "decidedAt": "2026-08-21T20:26:03.717Z"
     },
     "BR-02": {
-      "mark": "checked",
-      "note": "Marked down 2026-08-21 while testing with the disc, which cannot demonstrate this. The artist disowned the test; restored to machine-checked, awaiting a judgement made with a drawn brush.",
-      "decidedAt": null
+      "mark": "approved",
+      "note": "Re-judged with the filbert on 2026-08-21 and approved. The earlier mark-down was made with the disc, which is round and marks the same in every direction.",
+      "decidedAt": "2026-08-21T20:26:08.998Z"
     },
     "BR-03": {
       "mark": "checked",
@@ -240,14 +240,14 @@
       "decidedAt": "2026-08-21T05:39:12.026Z"
     },
     "BR-05": {
-      "mark": "checked",
-      "note": "Marked down 2026-08-21 while testing with the disc, which cannot demonstrate this. The artist disowned the test; restored to machine-checked, awaiting a judgement made with a drawn brush.",
-      "decidedAt": null
+      "mark": "partial",
+      "note": "Judged with the filbert on 2026-08-21 and left at partial: \"Paint runs out very quickly - too quickly, actually.\" Measured at 42% of a full dip for one 8 cm oil stroke. Reworked the same day - capacity and release are now separate per-brush numbers, reach is roughly 3.7x further, and auto-reload is on by default with an adjustable amount. Awaiting a re-test.",
+      "decidedAt": "2026-08-21T20:31:30.715Z"
     },
     "BR-06": {
-      "mark": "checked",
-      "note": "Marked down 2026-08-21 while testing with the disc, which cannot demonstrate this. The artist disowned the test; restored to machine-checked, awaiting a judgement made with a drawn brush.",
-      "decidedAt": null
+      "mark": "partial",
+      "note": "Re-judged with the filbert on 2026-08-21 and left at partial. Supersedes the earlier disc mark-down; BX-03 \"its hair feels right\" is partial for the same reason.",
+      "decidedAt": "2026-08-21T20:31:35.577Z"
     },
     "BR-07": {
       "mark": "none",
@@ -260,9 +260,9 @@
       "decidedAt": null
     },
     "BR-09": {
-      "mark": "checked",
+      "mark": "partial",
       "note": "",
-      "decidedAt": "2026-08-21T05:43:00.186Z"
+      "decidedAt": "2026-08-21T20:31:46.533Z"
     }
   }
 }
