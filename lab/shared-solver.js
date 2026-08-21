@@ -302,8 +302,18 @@
         return{x:targetX,y:targetY};
       }
       const perMm=cellsPerMm(this.w);
-      /* a limp head trails further, and trails further still when hurried */
-      const trailMm=(1-Math.max(0,Math.min(.98,stiffness)))*3.2*(.6+Math.max(.1,Math.min(2,speed))*.7);
+      /* A limp head trails further, trails further still when hurried, and - the
+         part that was missing - trails further the bigger it is. A brush bends
+         because its hair is a cantilever, and a wider head carries longer hair,
+         so lag scales with the width rather than being one flat number for a
+         12 mm filbert and a 40 mm mop alike.
+
+         The artist's finding on 2026-08-21: "The bending and lagging is very
+         understated which is why I haven't green marked it." It was: a filbert
+         sat 1.5 mm behind the hand on an 80 mm sheet, and the gap between the
+         softest and stiffest head rounding a corner was 0.4 mm. Only the 12 mm
+         case has been looked at; the width scaling is reasoning, not evidence. */
+      const trailMm=(1-Math.max(0,Math.min(.98,stiffness)))*(Math.max(1,Number(tool.widthMm)||12)/12)*7.5*(.6+Math.max(.1,Math.min(2,speed))*.7);
       const trail=Math.max(.001,trailMm*perMm);
       const follow=1-Math.exp(-Math.max(0,stepCells)/trail);
       this.headX+=(targetX-this.headX)*follow;

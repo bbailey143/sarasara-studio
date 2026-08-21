@@ -288,3 +288,82 @@ fade, no residue, no reload on lift, reload ignoring its amount — and all six
 were caught.
 
 Status: `automated_relationship_verified`. The artist has not re-tested it yet.
+
+## BRUSH-005 — the bend was too small to see
+
+Session `2026-08-21t21-33-39-watercolor`. A brush drawn in the studio from the
+filbert and saved as *My filbert*, 12 mm, on rough watercolour paper at Finest.
+Rated *recognizable*, decision *recalibrate*.
+
+First: the reservoir landed.
+
+> The reservoir issue feels better. So does the amount of time the brush takes
+> to run out.
+
+And the session file confirms the drawn brush carried `capacity` 2400 and
+`release` 0.65 through the editor, so reshaping a brush no longer empties it.
+
+### The finding
+
+> The bending and lagging is very understated which is why I haven’t green
+> marked it.
+
+Measured, on an 80 mm sheet:
+
+| | before | after |
+| --- | --- | --- |
+| filbert, distance behind the hand | 1.53 mm | **3.78 mm** |
+| soft vs stiff head rounding a corner | 0.42 mm apart | **1.26 mm apart** |
+| filbert, slow gesture vs fast | 1.03 → 2.34 mm | 2.60 → 5.67 mm |
+
+Under two per cent of the sheet, and four tenths of a millimetre between the
+softest working head and the stiffest. He was reading it correctly.
+
+### And a second thing underneath it
+
+Lag did not depend on the size of the brush at all. A 40 mm head trailed the
+same 2.46 mm as a 12 mm one. A brush bends because its hair is a cantilever, so
+a wider head carries longer hair and has to lag more; that is now how it works.
+
+Only the 12 mm case has been looked at. **The width scaling is reasoning, not
+evidence** — a 40 mm soft head now trails 20 mm, which nobody has judged.
+
+### Why the tests did not catch it
+
+Every assertion about bending compared one brush against another: softer cuts
+the corner more than stiffer, quicker bends further than slower, and the ladder
+runs the right way. All of them passed at a size nobody could see. **Ordering
+was tested and magnitude was not.** The new checks state the distances in
+millimetres. Four deliberate breakages were tried against them and all four were
+caught.
+
+This is the second time the artist’s eye has found something the suite was
+structurally incapable of noticing. It is worth saying plainly: a relationship
+test proves a thing responds, never that it responds enough to matter.
+
+### The rest of the session
+
+Three requests about the instrument rather than the paint, all built:
+
+**A red mark.** *"The board needs a red mark, which means I’ve checked it and
+it needs recalibration."* Choosing it opens a box for the reason. The reason
+waits — *"I don’t want to separately submit that, either"* — and goes up with
+the next **Save this mark**, onto the row itself and into the session file.
+
+**A clean form and a modal.** Saving now says so in a dialog and empties the
+form behind it. Saving a brush had been writing to a status line that no longer
+existed, so it had been silent; it uses the same dialog now.
+
+**The reservoir in the Brush Studio.** *"These settings as well, reservoir,
+belly size, etc. need to land in the Brush Studio. I don’t want to lose site of
+that goal as well."* How much it holds and how freely it gives it up are both
+dials there now. A thirsty, tight-releasing head spends 3% of a dip on a stroke
+that costs the stock filbert 19%.
+
+### One bug found while testing this
+
+A brush drawn in the studio was reading its board row from whichever registry
+head it had been started from, so *My filbert* inherited the stock filbert’s
+note and date. Each brush keeps its own row now.
+
+Status: `automated_relationship_verified`. The artist has not re-tested the bend.

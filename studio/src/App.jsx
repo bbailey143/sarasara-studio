@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Tab, TabList, TabPanel, Tabs } from 'react-aria-components';
+import {
+  Dialog, DialogTrigger, Heading, Modal, ModalOverlay,
+  Popover, Tab, TabList, TabPanel, Tabs, TextArea,
+} from 'react-aria-components';
 import { createEngine, listBrushes, listMaterials, listSubstrates } from './engine/index.js';
 import { BTN, BTN_PRIMARY, Button, Notes, Select, Slider, ToggleRow } from './components/Controls.jsx';
 import { BOARD_ROWS, BRUSH_ROWS, CANNOT_SHOW, ENGINE_ROWS, MARKS, MARK_ORDER, seedBoard } from './data/board.js';
@@ -48,7 +51,15 @@ const brushes = listBrushes();
  * turned three columns into ninety-odd words of chrome and buried the thing
  * that matters, which is the colour of the dot on the left.
  */
-function BoardRow({ row, current, onMark, blocked }) {
+function BoardRow({ row, current, onMark, blocked, reason, onReason }) {
+  const dot = (key) => (
+    <span className="mk !h-2.5 !w-2.5" data-mark={key} />
+  );
+  const buttonClass = (key) =>
+    `grid h-[18px] w-[18px] cursor-pointer place-items-center rounded-sm border ${
+      current === key ? 'border-ink2 bg-panel2' : 'border-transparent hover:border-rule2'
+    }`;
+
   return (
     <div
       className={`grid grid-cols-[13px_1fr_auto] items-center gap-2.5 border-b border-rule/60 py-1.5 last:border-b-0 ${
@@ -60,24 +71,63 @@ function BoardRow({ row, current, onMark, blocked }) {
       <span className="min-w-0 text-[12px] leading-tight">
         <span className="font-medium">{row.name}</span>
         <span className="ml-1.5 text-[11px] text-ink3">{blocked || row.hint}</span>
+        {reason ? (
+          <span className="ml-1.5 font-mono text-[10px] text-danger">· reason waiting to be saved</span>
+        ) : null}
       </span>
       <span className="flex items-center gap-1">
-        {MARK_ORDER.map((key) => (
-          <button
-            type="button"
-            key={key}
-            disabled={!!blocked}
-            onClick={() => !blocked && onMark(row.id, key)}
-            title={blocked || MARKS[key].label}
-            aria-label={`${row.name}: ${MARKS[key].label}`}
-            aria-pressed={current === key}
-            className={`grid h-[18px] w-[18px] cursor-pointer place-items-center rounded-sm border ${
-              current === key ? 'border-ink2 bg-panel2' : 'border-transparent hover:border-rule2'
-            }`}
-          >
-            <span className="mk !h-2.5 !w-2.5" data-mark={key} />
-          </button>
-        ))}
+        {MARK_ORDER.map((key) =>
+          // The one mark that asks a question back. Setting it opens the box for
+          // why; the answer rides along with the next saved session. A blocked
+          // row gets the plain dot instead - there is nothing to explain about a
+          // judgement the tool in hand cannot support, and a disabled button
+          // never registers with the popover that would wrap it.
+          key === 'recalibrate' && !blocked ? (
+            <DialogTrigger key={key}>
+              <Button
+                isDisabled={!!blocked}
+                title={blocked || MARKS[key].label}
+                aria-label={`${row.name}: ${MARKS[key].label}`}
+                aria-pressed={current === key}
+                onPress={() => !blocked && onMark(row.id, key)}
+                className={buttonClass(key)}
+              >
+                {dot(key)}
+              </Button>
+              <Popover placement="bottom end" className="z-50 w-72 rounded border border-rule2 bg-panel p-3 shadow-xl">
+                <Dialog className="flex flex-col gap-2 outline-none">
+                  <p className="text-[12px] font-medium">{row.name}</p>
+                  <p className="text-[11px] leading-snug text-ink3">
+                    What needs recalibrating? This is saved with your next mark, not separately.
+                  </p>
+                  <TextArea
+                    rows={4}
+                    autoFocus
+                    aria-label={`Why ${row.name} needs recalibrating`}
+                    value={reason || ''}
+                    onChange={(event) => onReason(row.id, event.target.value)}
+                    placeholder="e.g. the lag is there but far too subtle to see"
+                    className="w-full resize-y rounded border border-rule2 bg-panel2 px-2.5 py-1.5
+                               text-[12.5px] leading-relaxed text-ink hover:border-ink3 focus:outline-none"
+                  />
+                </Dialog>
+              </Popover>
+            </DialogTrigger>
+          ) : (
+            <button
+              type="button"
+              key={key}
+              disabled={!!blocked}
+              onClick={() => !blocked && onMark(row.id, key)}
+              title={blocked || MARKS[key].label}
+              aria-label={`${row.name}: ${MARKS[key].label}`}
+              aria-pressed={current === key}
+              className={buttonClass(key)}
+            >
+              {dot(key)}
+            </button>
+          ),
+        )}
         <span className="ml-1 w-9 shrink-0 text-right font-mono text-[9px] text-ink3">{row.id}</span>
       </span>
     </div>
@@ -85,7 +135,7 @@ function BoardRow({ row, current, onMark, blocked }) {
 }
 
 /** A column of the board. Side by side in the drawer, so no collapsing here. */
-function BoardGroup({ title, subject, rows, marks, onMark, empty, blockedFor }) {
+function BoardGroup({ title, subject, rows, marks, onMark, empty, blockedFor, reasons, onReason }) {
   const tally = rows.reduce((count, row) => {
     const mark = marks[row.id]?.mark || row.seed;
     count[mark] = (count[mark] || 0) + 1;
@@ -118,6 +168,8 @@ function BoardGroup({ title, subject, rows, marks, onMark, empty, blockedFor }) 
               current={marks[row.id]?.mark || row.seed}
               onMark={onMark}
               blocked={blockedFor ? blockedFor(row) : null}
+              reason={reasons?.[row.id]}
+              onReason={onReason}
             />
           ))}
         </div>
@@ -164,7 +216,12 @@ export default function App() {
   const [board, setBoard] = useState(null);
   const [sessions, setSessions] = useState([]);
   const [online, setOnline] = useState(true);
-  const [status, setStatus] = useState(null);
+
+  // Reasons typed against a red mark, keyed by scope and row. They wait here
+  // until the next save rather than going up on their own, so a judgement and
+  // the reasoning behind it land in the record together.
+  const [reasons, setReasons] = useState({});
+  const [saved, setSaved] = useState(null);
 
   const [rating, setRating] = useState('recognizable');
   const [decision, setDecision] = useState('recalibrate');
@@ -308,6 +365,15 @@ export default function App() {
     }
   }, []);
 
+  const noteReason = (scope) => (rowId, text) =>
+    setReasons((current) => {
+      const next = { ...current, [scope]: { ...(current[scope] || {}), [rowId]: text } };
+      if (!text) delete next[scope][rowId];
+      return next;
+    });
+
+  const reasonCount = Object.values(reasons).reduce((n, group) => n + Object.keys(group).length, 0);
+
   /** The engine's own rows: one shared set, not per brush. */
   const setEngineMark = (rowId, mark) => {
     if (!board) return;
@@ -329,7 +395,9 @@ export default function App() {
         ...(board.brushes || {}),
         [brushKey]: {
           ...((board.brushes || {})[brushKey] || {}),
-          [rowId]: { ...(((board.brushes || {})[brush] || {})[rowId] || {}), mark, decidedAt: now },
+          // brushKey, not brush: a drawn brush keeps its own row rather than
+          // inheriting the note and date of whichever registry head it started from.
+          [rowId]: { ...(((board.brushes || {})[brushKey] || {})[rowId] || {}), mark, decidedAt: now },
         },
       },
     });
@@ -459,6 +527,7 @@ export default function App() {
         engine: board?.engine || null,
         tool: board?.brushes?.[brushKey] || null,
       },
+      recalibrate: reasonCount ? reasons : null,
       provenance: engine.profile().provenance,
       image: canvas.toDataURL('image/png'),
     };
@@ -471,12 +540,35 @@ export default function App() {
       });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || 'save failed');
-      setStatus({ tone: 'ok', text: `Saved to ${body.file}` });
+
+      // The reasons written against red marks belong on the rows themselves,
+      // not only inside the session file, so the board carries its own why.
+      if (reasonCount && board) {
+        const stamp = (group, existing) =>
+          Object.entries(group || {}).reduce((rows, [rowId, why]) => {
+            rows[rowId] = { ...(existing?.[rowId] || {}), note: why, decidedAt: session.recordedAt };
+            return rows;
+          }, { ...(existing || {}) });
+        persistBoard({
+          ...board,
+          updatedAt: session.recordedAt,
+          rows: { ...board.rows, [material]: stamp(reasons.paint, board.rows?.[material]) },
+          engine: stamp(reasons.engine, board.engine),
+          brushes: { ...(board.brushes || {}), [brushKey]: stamp(reasons.tool, board.brushes?.[brushKey]) },
+        });
+      }
+
       setOnline(true);
       loadSessions();
+      setSaved({ ok: true, file: body.file, reasons: reasonCount });
+      // A clean form for the next mark, as asked.
+      setReasons({});
+      setNotes('');
+      setRating('recognizable');
+      setDecision('recalibrate');
     } catch (error) {
-      setStatus({ tone: 'bad', text: `Could not save: ${error.message}. Is "npm run lab" running?` });
       setOnline(false);
+      setSaved({ ok: false, message: error.message });
     }
   };
 
@@ -580,12 +672,11 @@ export default function App() {
                 engineRef.current?.newSheet(next);
                 engineRef.current?.clear(dampness);
                 setSheet(next);
-                setStatus(null);
               }}
             >
               New sheet
             </Button>
-            <Button className={`${BTN} flex-1`} onPress={() => { engineRef.current?.clear(dampness); setStatus(null); }}>
+            <Button className={`${BTN} flex-1`} onPress={() => engineRef.current?.clear(dampness)}>
               Wipe
             </Button>
             <Button className={`${BTN} flex-1`} onPress={() => engineRef.current?.forceDry()}>
@@ -596,7 +687,7 @@ export default function App() {
             <Button
               className={BTN + ' flex-1'}
               isDisabled={!ready}
-              onPress={() => { engineRef.current?.dipBrush(load); setStatus(null); }}
+              onPress={() => engineRef.current?.dipBrush(load)}
             >
               Dip the brush
             </Button>
@@ -627,6 +718,36 @@ export default function App() {
           </p>
         </section>
       </div>
+
+      <ModalOverlay
+        isOpen={!!saved}
+        onOpenChange={(open) => !open && setSaved(null)}
+        isDismissable
+        className="fixed inset-0 z-50 grid place-items-center bg-black/35 p-6 backdrop-blur-[1px]"
+      >
+        <Modal className="w-full max-w-sm rounded border border-rule2 bg-panel p-5 shadow-2xl">
+          <Dialog className="flex flex-col gap-3 outline-none">
+            {({ close }) => (
+              <>
+                <Heading
+                  slot="title"
+                  className={`text-[15px] font-semibold ${saved?.ok ? 'text-ink' : 'text-danger'}`}
+                >
+                  {saved?.ok ? `${saved.what || 'Mark'} saved` : 'Could not save'}
+                </Heading>
+                <p className="text-[12.5px] leading-relaxed text-ink2">
+                  {saved?.ok
+                    ? `Written to ${saved.file}.${saved.reasons ? ` ${saved.reasons} recalibration ${saved.reasons === 1 ? 'reason is' : 'reasons are'} on the board.` : ''}`
+                    : `${saved?.message}. Is "npm run lab" still running?`}
+                </p>
+                <Button className={`${BTN_PRIMARY} self-end`} onPress={close} autoFocus>
+                  Right
+                </Button>
+              </>
+            )}
+          </Dialog>
+        </Modal>
+      </ModalOverlay>
 
       {/* -------------------------------------------------- centre: canvas */}
       <div className="[grid-area:center] flex min-h-0 min-w-0 items-center justify-center bg-ground p-5">
@@ -706,6 +827,8 @@ export default function App() {
                 rows={rows}
                 marks={marks}
                 onMark={setMark}
+                reasons={reasons.paint}
+                onReason={noteReason('paint')}
               />
 
               <BoardGroup
@@ -714,6 +837,8 @@ export default function App() {
                 rows={ENGINE_ROWS}
                 marks={engineMarks}
                 onMark={setEngineMark}
+                reasons={reasons.engine}
+                onReason={noteReason('engine')}
                 blockedFor={(row) =>
                   row.needs && brushCan && !brushCan[row.needs]
                     ? `this brush is ${CANNOT_SHOW[row.needs]} — pick a drawn brush`
@@ -727,6 +852,8 @@ export default function App() {
                 rows={brushRows}
                 marks={brushMarks}
                 onMark={setBrushMark}
+                reasons={reasons.tool}
+                onReason={noteReason('tool')}
               />
 
               <BoardGroup
@@ -827,16 +954,11 @@ export default function App() {
               <Button className={BTN_PRIMARY} onPress={saveSession} isDisabled={!ready}>
                 Save this mark
               </Button>
-              {status && (
-                <div
-                  className={`rounded border px-2.5 py-2 text-[12px] ${
-                    status.tone === 'ok'
-                      ? 'border-terre bg-terresoft text-ink'
-                      : 'border-danger text-danger'
-                  }`}
-                >
-                  {status.text}
-                </div>
+              {reasonCount > 0 && (
+                <p className="text-[11.5px] text-danger">
+                  {reasonCount === 1 ? '1 recalibration reason' : `${reasonCount} recalibration reasons`} will be
+                  saved with this mark.
+                </p>
               )}
             </div>
           </TabPanel>
@@ -910,6 +1032,31 @@ export default function App() {
                   step={.01}
                 />
 
+                {/* The reservoir, where the artist asked for it to live. */}
+                <Slider
+                  label="How much paint it holds"
+                  value={drawn.capacity ?? 2400}
+                  onChange={(capacity) => setDrawn((d) => ({ ...d, capacity }))}
+                  min={300}
+                  max={7000}
+                  step={50}
+                  format={(v) => `${(v / 2400).toFixed(2)}×`}
+                />
+                <Slider
+                  label="How freely it gives it up"
+                  value={drawn.release ?? .65}
+                  onChange={(release) => setDrawn((d) => ({ ...d, release }))}
+                  min={.15}
+                  max={1}
+                  step={.01}
+                  format={(v) => `${Math.round(v * 100)}%`}
+                />
+                <p className={HINT}>
+                  Holding more and giving it up more slowly both make a dip last longer.
+                  A soft head dumps its load; a stiff coarse one meters it out and drags
+                  the same load much further. 1× is the stock 12 mm filbert.
+                </p>
+
                 <Notes id="brushname" rows={1} label="Name" value={drawnName} onChange={setDrawnName} />
 
                 <div className="flex gap-2">
@@ -924,9 +1071,9 @@ export default function App() {
                         });
                         const body = await response.json();
                         if (!response.ok) throw new Error(body.error || 'save failed');
-                        setStatus({ tone: 'ok', text: `Brush saved to ${body.file}` });
+                        setSaved({ ok: true, file: body.file, what: 'Brush' });
                       } catch (error) {
-                        setStatus({ tone: 'bad', text: `Could not save the brush: ${error.message}` });
+                        setSaved({ ok: false, message: error.message });
                       }
                     }}
                   >

@@ -780,6 +780,44 @@ const ladder = [.95, .78, .55, .30].map((st) => cornerReach(st, 1.4));
 for (let i = 1; i < ladder.length; i++)
   assert(ladder[i] <= ladder[i - 1] + .01, 'softer hair must never cut the corner less than stiffer hair');
 
+/* ---- and the bend has to be big enough to see ---------------------------
+
+   Every assertion above compares one brush against another. All of them passed
+   while the effect was far too small to notice - a filbert sat 1.5 mm behind
+   the hand on an 80 mm sheet, and the whole spread between the softest and the
+   stiffest head rounding a corner was 0.4 mm. The artist saw that immediately:
+   "The bending and lagging is very understated which is why I haven't green
+   marked it." Ordering was tested; size was not. */
+
+const trailingMm = (stiffness, widthMm, speed) => {
+  const solver = new SharedSolver(570, 420, PROFILES.oil, SUBSTRATES.coldPress);
+  solver.setBrush({ ...BRUSHES.filbert, id: 'brush.test.trail.v0', stiffness, widthMm });
+  solver.clear(0);
+  solver.liftBrush();
+  solver.headFollow(50, 100, 0, speed);
+  for (let i = 0; i < 400; i++) solver.headFollow(50 + (i + 1) * 2, 100, 2, speed);
+  return (850 - solver.headX) / (570 / 80);   // 570 cells across a sheet 80 mm wide
+};
+
+const filbertTrail = trailingMm(.55, 12, .8);
+assert(filbertTrail > 3 && filbertTrail < 6,
+  'a 12 mm filbert must sit 3 to 6 mm behind the hand - far enough to read as hair (' + filbertTrail.toFixed(2) + ' mm)');
+
+// The gap between a soft head and a stiff one has to be visible on the sheet,
+// not merely present in the numbers.
+const cornerSpread = cornerReach(.95, 1.4) - cornerReach(.30, 1.4);
+assert(cornerSpread > 1,
+  'soft and stiff heads must round a corner at least a millimetre apart (' + cornerSpread.toFixed(2) + ' mm)');
+
+// A brush bends because its hair is a cantilever, so a wider head - carrying
+// longer hair - must lag more than a narrow one of the same stiffness.
+assert(trailingMm(.55, 24, .8) > filbertTrail * 1.5,
+  'a wider head must trail further than a narrow one of the same hair');
+
+// and hurrying it must matter by a visible amount, not a rounding error
+assert(trailingMm(.55, 12, 1.6) - trailingMm(.55, 12, .3) > 1.5,
+  'the same head must trail at least 1.5 mm further when hurried');
+
 // the disc has no hair and must not pretend to
 const rigidSolver = new SharedSolver(380, 280, PROFILES.oil, SUBSTRATES.coldPress);
 rigidSolver.clear(0);

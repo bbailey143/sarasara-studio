@@ -117,6 +117,10 @@ body {
   background: radial-gradient(circle at 50% 50%, var(--color-sienna) 0 36%, transparent 37%);
   border-color: var(--color-sienna);
 }
+.mk[data-mark="recalibrate"] {
+  background: linear-gradient(135deg, var(--color-danger) 0 45%, transparent 45% 55%, var(--color-danger) 55% 100%);
+  border-color: var(--color-danger);
+}
 .mk[data-mark="none"] {
   background: transparent;
   border-style: dashed;

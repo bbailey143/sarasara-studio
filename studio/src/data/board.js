@@ -25,10 +25,20 @@ export const MARKS = {
   approved: { label: 'You approved it', short: 'Approved', tone: 'approved' },
   checked: { label: 'Machine says yes — your eye pending', short: 'Machine-checked', tone: 'checked' },
   partial: { label: 'Half there, tangled with other things', short: 'Partial', tone: 'partial' },
+  recalibrate: { label: 'You checked it — it needs recalibrating', short: 'Recalibrate', tone: 'recalibrate' },
   none: { label: 'Not built', short: 'Not built', tone: 'none' },
 };
 
-export const MARK_ORDER = ['none', 'partial', 'checked', 'approved'];
+/*
+ * Worst to best. 'recalibrate' sits above 'not built' because a thing that is
+ * built and wrong is further along than a thing that does not exist, and below
+ * 'partial' because partial is half right rather than actively off.
+ *
+ * It is the only mark that asks a question back: choosing it opens a box for
+ * the reason, which rides along with the next saved session rather than being
+ * submitted separately.
+ */
+export const MARK_ORDER = ['none', 'recalibrate', 'partial', 'checked', 'approved'];
 
 export const BOARD_ROWS = {
   watercolor: [

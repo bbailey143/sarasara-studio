@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-21T20:32:03.491Z",
+  "updatedAt": "2026-08-21T21:45:09.975Z",
   "rows": {
     "watercolor": {
       "WC-01": {
@@ -230,9 +230,9 @@
       "decidedAt": "2026-08-21T20:26:08.998Z"
     },
     "BR-03": {
-      "mark": "checked",
+      "mark": "approved",
       "note": "Marked down 2026-08-21 while testing with the disc, which cannot demonstrate this. The artist disowned the test; restored to machine-checked, awaiting a judgement made with a drawn brush.",
-      "decidedAt": null
+      "decidedAt": "2026-08-21T21:23:28.481Z"
     },
     "BR-04": {
       "mark": "partial",
@@ -240,9 +240,9 @@
       "decidedAt": "2026-08-21T05:39:12.026Z"
     },
     "BR-05": {
-      "mark": "partial",
+      "mark": "approved",
       "note": "Judged with the filbert on 2026-08-21 and left at partial: \"Paint runs out very quickly - too quickly, actually.\" Measured at 42% of a full dip for one 8 cm oil stroke. Reworked the same day - capacity and release are now separate per-brush numbers, reach is roughly 3.7x further, and auto-reload is on by default with an adjustable amount. Awaiting a re-test.",
-      "decidedAt": "2026-08-21T20:31:30.715Z"
+      "decidedAt": "2026-08-21T21:23:36.787Z"
     },
     "BR-06": {
       "mark": "partial",
@@ -260,9 +260,9 @@
       "decidedAt": null
     },
     "BR-09": {
-      "mark": "partial",
+      "mark": "approved",
       "note": "",
-      "decidedAt": "2026-08-21T20:31:46.533Z"
+      "decidedAt": "2026-08-21T21:24:39.396Z"
     }
   }
 }
