@@ -365,6 +365,22 @@ export default function App() {
     }
   }, []);
 
+  /**
+   * Changing medium brings its usual paper and brush with it.
+   *
+   * The pairing lives on the material, not here — the studio asks the engine
+   * what a material is usually found on rather than keeping its own list of
+   * material names. A brush you drew yourself is left alone; picking a medium
+   * should not throw your own work out of your hand.
+   */
+  const pickMaterial = (id) => {
+    setMaterial(id);
+    const usual = engineRef.current?.studioDefaults(id);
+    if (!usual) return;
+    if (usual.substrate) setSubstrate(usual.substrate);
+    if (usual.brush && !drawn) setBrush(usual.brush);
+  };
+
   const noteReason = (scope) => (rowId, text) =>
     setReasons((current) => {
       const next = { ...current, [scope]: { ...(current[scope] || {}), [rowId]: text } };
@@ -433,12 +449,22 @@ export default function App() {
   const onPointerDown = (event) => {
     try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* capture is a nicety, not a requirement */ }
     setUsingStylus(event.pointerType === 'pen');
+    const at = toCanvas(event);
     strokeRef.current = {
       down: true,
-      last: toCanvas(event),
+      last: at,
       lastTime: performance.now(),
       speed: fallbackSpeed,
     };
+    // Putting the brush down is itself a mark. Without this a tap that never
+    // moves went nowhere, because only pointer movement ever reached the engine.
+    engineRef.current?.stroke(action, at, at, viewRef.current, {
+      pressure: event.pointerType === 'pen' && event.pressure > 0 ? event.pressure : fallbackPressure,
+      speed: fallbackSpeed,
+      load,
+      water,
+      angle: (brushAngle * Math.PI) / 180,
+    });
   };
 
   const onPointerMove = (event) => {
@@ -613,7 +639,7 @@ export default function App() {
         <section className={SECTION}>
           <h2 className={HEADING}>Material</h2>
           <div className="flex flex-col gap-3">
-            <Select label="Medium" items={materials} value={material} onChange={setMaterial} />
+            <Select label="Medium" items={materials} value={material} onChange={pickMaterial} />
             <Select label="Paper" items={substrates} value={substrate} onChange={setSubstrate} />
             <Select label="Detail" items={DETAILS} value={detail} onChange={setDetail} />
             <ToggleRow label="Contact" options={ACTIONS} value={action} onChange={setAction} />

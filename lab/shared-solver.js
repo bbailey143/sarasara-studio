@@ -173,17 +173,23 @@
   const PROFILES={
     watercolor:{
       id:'material.watercolor.diagnostic.v0.6.1',version:'0.6.1',
+      /* Where this material is usually found and what usually moves it. A
+         studio convenience, read only by the app when you change medium; the
+         solver never looks at it. */
+      studio:{substrate:'rough',brush:'filbert'},
       state:{'COMP-001':.88,'COMP-003':.12,'STATE-001':'suspension','STATE-003':0,'TRAN-001':.48,'DEPO-001':.74,'DEPO-004':.42,'TRIB-002':.18,'EVOL-001':.0032,'EVOL-003':.016,'REAC-001':.22,'REAC-002':.58,'REAC-003':.18,'REAC-004':.025},
       display:{pigment_visibility_gain:2.6,note:'Diagnostic preview gain only; does not alter physical pigment mass.'},
       models:MODELS,interactions:['IM-009'],provenance:[{status:'stand-in',note:'Artist-calibrated diagnostic values; not measured production constants.'}]
     },
     charcoal:{
       id:'material.charcoal.diagnostic.v0.6',version:'0.6.0',
+      studio:{substrate:'pastelWhite',brush:'filbert'},
       state:{'COMP-001':0,'COMP-003':1,'STATE-001':'powder','STATE-003':0,'TRAN-001':0,'DEPO-001':.68,'DEPO-004':.48,'TRIB-002':.58,'TRIB-003':.34,'TRIB-004':.42,'PART-001':{coarse_fraction:.38,fine_fraction:.62},'PART-002':.72,'PART-003':.46,'EVOL-001':0,'EVOL-003':0,'REAC-001':0,'REAC-002':0,'REAC-003':0,'REAC-004':1},
       models:['MODEL-DEPO-001','MODEL-PART-001','MODEL-TRIB-001'],interactions:['IM-008','IM-009'],provenance:[{status:'stand-in',note:'Artist-recognizable loose, grainy charcoal target. Fracture toughness, abrasion resistance, coarse/fine shares, density, shape, settling, granular capture, optical density, and pressure anchoring are normalized unmeasured stand-ins. v0.6 preserves v0.5.2 high-load anchoring while making dry transfer spatially incomplete and separating the visible density of settled, loose, coarse, and fine populations.'}]
     },
     oil:{
       id:'material.oil.diagnostic.v0.1',version:'0.1.0',
+      studio:{substrate:'linenCanvas',brush:'flat'},
       state:{'COMP-001':.28,'COMP-002':.32,'COMP-003':.4,'COMP-004':0,'STATE-001':'paste','STATE-003':0,'RHEO-001':.82,'RHEO-002':.34,'RHEO-003':.68,'TRAN-001':0,'DEPO-001':.62,'DEPO-003':.28,'DEPO-004':.78,'PART-002':.62,'TRIB-002':.3,'EVOL-001':0,'EVOL-003':0,'REAC-001':0,'REAC-002':0,'REAC-003':0,'REAC-004':1},
       display:{pigment_visibility_gain:1,note:'Diagnostic preview only; relief shading does not alter physical mass.'},
       models:['MODEL-DEPO-001','MODEL-RHEO-003','MODEL-TRIB-001'],interactions:['IM-009'],provenance:[{status:'stand-in',note:'ADR-0002 third-material vocabulary test. Every value is an unmeasured normalized stand-in assembled from existing canonical properties; no new property family was introduced. Yield stress, viscosity, packing, density, and transfer efficiency require artist review before any claim of oil realism.'}]
@@ -370,10 +376,20 @@
     /** How readily the tool takes material off the sheet and gives it back.
         Picking up is gated by yield stress; laying down favours emptier ground,
         which is what lets a loaded brush drag colour out onto bare canvas. */
-    smearBody(index,pressure,sweep=1){
+    /**
+     * Shoving paint that is already there.
+     *
+     * `contact` is how much of this cell the hair actually covers. It matters:
+     * without it the outermost hair, barely grazing the sheet, lifted and laid
+     * paint exactly as hard as the fully loaded belly, which flattens the soft
+     * edge of every mark into a hard one. The artist found it from the other
+     * end - "it's not great at feathering edges... The relationship between the
+     * brush and the paint already on the canvas just doesn't quite jive."
+     */
+    smearBody(index,pressure,sweep=1,contact=1){
       if(!this.hasYieldingBody())return 0;
       const yieldStress=Math.max(0,Number(this.p['RHEO-002'])||0),stress=this.bodyStress(pressure);
-      const floor=this.retainedFilmMass(),reach=Math.max(0,Math.min(1,sweep));
+      const floor=this.retainedFilmMass(),reach=Math.max(0,Math.min(1,sweep))*Math.max(0,Math.min(1,contact));
       let lifted=0;
       if(stress>yieldStress){
         const share=Math.max(0,Math.min(.6,(stress-yieldStress)/Math.max(.05,1-yieldStress)));
@@ -433,9 +449,16 @@
     addDisk(cx,cy,radius,water,pigment,pressure,speed,brushMoisture,strokeX=0,strokeY=0,sweep=1,shape=null){
       const regime=this.regime(),body=regime==='body',dry=regime==='granular',rough=this.s['SUBI-001'];
       let addedPigment=0;
-      /* Infinity for a bottomless tool, so its path is exactly as it always was. */
+      /* Infinity for a bottomless tool, so its path is exactly as it always was.
+
+         Running out of paint stops the brush GIVING paint. It does not stop the
+         brush existing: the hair still meets the sheet, still shoves what is
+         already there and still picks it up. Bailing out here meant an empty
+         brush passed straight through the paint without touching it, which the
+         artist caught on 2026-08-21: "When paint left on brush hits 0 it stops
+         picking up and scraping paint." A budget of zero simply lays nothing -
+         every contact below still happens. */
       let budget=this.usableCharge();
-      if(budget<=0)return;
       const x0=Math.max(0,Math.floor(cx-radius)),x1=Math.min(this.w-1,Math.ceil(cx+radius)),y0=Math.max(0,Math.floor(cy-radius)),y1=Math.min(this.h-1,Math.ceil(cy+radius));
       for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
         const dx=(x-cx)/radius,dy=(y-cy)/radius;
@@ -449,7 +472,7 @@
           const amount=Math.min(budget,pigment*k/(1+relief*.55));
           budget-=amount;
           this.deposited[i]+=amount;addedPigment+=amount;
-          this.smearBody(i,pressure,sweep);
+          this.smearBody(i,pressure,sweep,cover);
         }
         else if(dry){const tooth=this.tooth(x,y),texturePressure=Math.max(0,Math.min(1,pressure*this.calibration.paperTexture)),gestureSpeed=this.calibratedSpeed(speed),contact=tooth*.72+texturePressure*.48,potential=pigment*k,particleDensity=Math.max(0,Math.min(1,Number(this.p['PART-002'])||0)),shape=Math.max(0,Math.min(1,Number(this.p['PART-003'])||0)),grain=this.noise(x*1.91,y*2.37,this.substrate.texture.seed+1231),coverage=Math.max(.12,Math.min(.92,.02+texturePressure*.34+particleDensity*.18+tooth*.5-shape*.08));this.sourceOfferedPigment+=potential;if(contact<.34||grain>coverage||(gestureSpeed>1.05&&contact<.58&&((x+y)%3===0))){this.sourceRemainingPigment+=potential;continue}const captureVariation=.58+grain*.78,amount=Math.min(budget,Math.min(potential,potential*(.16+tooth*.32+particleDensity*.14)*captureVariation)),split=this.fractureSplit(pressure,speed,tooth),coarseMass=amount*split.coarse,fineMass=amount*split.fine,settledMass=Math.max(0,amount-coarseMass-fineMass),side=this.noise(x,y,this.substrate.texture.seed+997)*2-1,normalX=-strokeY,normalY=strokeX,coarseSpeed=.7+pressure*.85+gestureSpeed*.45,fineSpeed=2+pressure*1.3+gestureSpeed*2.1;this.sourceRemainingPigment+=potential-amount;this.deposited[i]+=settledMass;this.addParticlePopulation(coarseMass,i,strokeX*coarseSpeed+normalX*side*.35,strokeY*coarseSpeed+normalY*side*.35,this.coarse,this.coarseVx,this.coarseVy);this.addParticlePopulation(fineMass,i,strokeX*fineSpeed+normalX*side,strokeY*fineSpeed+normalY*side,this.fineDust,this.fineDustVx,this.fineDustVy);this.coarseCreatedPigment+=coarseMass;this.fineCreatedPigment+=fineMass;budget-=amount;addedPigment+=amount}
         else{
@@ -515,11 +538,21 @@
          so it gets no such correction - off its own reference grid it is simply
          undefined, which is what being a frozen reference means. */
       const perArea=shape?Math.pow(REFERENCE_CELLS_PER_MM/perMm,2):1;
-      const laidPigment=pigment*perStep*perArea,laidWater=water*perStep*perArea;
+      /* Putting the head down is a contact, not a distance.
+
+         Paint is otherwise laid per millimetre travelled, which is what keeps a
+         gesture honest however finely the pen reports it - but taken literally
+         it means a brush pressed to the sheet and lifted without moving travels
+         zero millimetres and leaves nothing at all. It does not; it leaves a
+         dab. The landing contact lays one reference step's worth and everything
+         after it goes by distance, and since a stroke only lands once, the
+         gesture stays worth the same however it is sampled. */
+      const landingScale=perArea,dragScale=perStep*perArea;
       for(let s=firstStep;s<=steps;s++){
         const t=s/steps;
         const head=this.headFollow(x0+(x1-x0)*t,y0+(y1-y0)*t,s===0?0:stepCells,speed);
-        this.addDisk(head.x,head.y,radius,laidWater,laidPigment,pressure,speed,brushWater,ux,uy,sweep,shape);
+        const scale=s===0?landingScale:dragScale;
+        this.addDisk(head.x,head.y,radius,water*scale,pigment*scale,pressure,speed,brushWater,ux,uy,sweep,shape);
       }
     }
     smudgeSegment(ax,ay,bx,by,canvasW,canvasH,pressure,speed){

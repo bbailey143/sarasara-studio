@@ -89,7 +89,7 @@ export const ENGINE_ROWS = [
   { id: 'BR-01', name: 'Holds its true size', hint: 'a 12 mm brush marks 12 mm, at any resolution', seed: 'checked', needs: 'size' },
   { id: 'BR-02', name: 'Knows how it is held', hint: 'edge stroke and broad stroke differ', seed: 'checked', needs: 'shape' },
   { id: 'BR-03', name: 'Opens with pressure', hint: 'tip only, then the belly comes down', seed: 'checked', needs: 'belly' },
-  { id: 'BR-04', name: 'Feathers its edge', hint: 'a head of hair, not a cookie cutter', seed: 'checked', needs: null },
+  { id: 'BR-04', name: 'Feathers its edge', hint: 'the mark fades out at the edge instead of stopping dead', seed: 'checked', needs: null },
   { id: 'BR-05', name: 'Runs out of paint', hint: 'a reservoir that empties, and a dip that fills it', seed: 'checked', needs: 'reservoir' },
   { id: 'BR-06', name: 'Bends and lags', hint: 'the head trails the hand and rounds a corner off', seed: 'checked', needs: 'hair' },
   { id: 'BR-09', name: 'Lays paint by distance', hint: 'the same gesture lays the same paint however finely drawn', seed: 'checked', needs: null },

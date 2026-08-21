@@ -367,3 +367,107 @@ head it had been started from, so *My filbert* inherited the stock filbert’s
 note and date. Each brush keeps its own row now.
 
 Status: `automated_relationship_verified`. The artist has not re-tested the bend.
+
+## BRUSH-006 — an empty brush is still a brush
+
+Session `2026-08-21t23-35-51-oil`. Filbert, 12 mm, oil on rough canvas.
+Rated *recognizable*, decision *recalibrate*. The first session to use the red
+mark, and both reasons came through attached to their rows.
+
+The bend landed. `BR-03` opens with pressure and `BR-09` lays paint by distance
+both went to **approved**, and all four filbert rows went green — including
+*its hair feels right*, which had been the one held back.
+
+### `BR-05` — the finding
+
+> When paint left on brush hits 0 it stops picking up and scraping paint.
+
+Exactly right, and the cause was two lines:
+
+```js
+let budget = this.usableCharge();
+if (budget <= 0) return;          // <- the whole contact, abandoned
+```
+
+Running out of paint stopped the brush GIVING paint. It should never have
+stopped the brush existing. Measured on a dry head dragged through wet oil:
+**0.000 units relocated, 0.000 picked up.** The hair passed straight through
+the paint without touching it.
+
+A budget of zero now simply lays nothing, and every contact still happens. The
+same drag moves 6.5 units and the ledger stays exact.
+
+### `BR-04` — the finding
+
+> What the crap does a head of hair, not a cookie cutter mean?
+
+A fair question about a hint that was showing off rather than saying anything.
+It now reads *"the mark fades out at the edge instead of stopping dead"*.
+
+> Anyway, it’s not great at feathering edges. I think it may partially be
+> related to the other item I marked as needing recalibration. The relationship
+> between the brush and the paint already on the canvas just doesn’t quite jive.
+
+He was right that the two are the same problem. Every cell inside the footprint
+was being shoved with the full stroke pressure, so the outermost hair — barely
+grazing the sheet — moved settled paint exactly as hard as the loaded belly.
+That flattens a soft edge into a hard one on every pass over existing paint.
+
+Shoving is now scaled by how much of the cell the hair actually covers. An
+empty head dragged across settled paint, measured by row away from the centre:
+
+| rows from the centre | paint moved, before | after |
+| --- | --- | --- |
+| 0 (the belly) | 0.246 | 0.349 |
+| 4 | — | 0.216 |
+| 8 (the rim) | 0.085 | 0.048 |
+| ratio belly : rim | 2.9× | **7.3×** |
+
+**What is still not built, and is probably what he is seeing.** The edge of a
+mark is a smooth gradient — it falls from 90% to 10% over 1.26 mm on a mark
+whose half-width is about 1.9 mm. That is soft, but it is not *feathered*: real
+feathering is separate hairs leaving separate streaks, and this engine has no
+individual hairs at all. That is `BR-07` splays and splits, which is unbuilt.
+The mark is left red.
+
+### A third defect, found while chasing the second
+
+**A tap left no mark whatsoever.** Paint is laid per millimetre travelled —
+the fix that stopped a gesture getting heavier the faster the pen reported it —
+and taken literally, a brush pressed to the sheet and lifted without moving
+travels zero millimetres and therefore lays nothing. It measured 0.000. The
+studio made it worse by never sending a pointer-down to the engine at all, so
+only movement ever reached the sheet.
+
+Putting the head down is now a contact in its own right, worth one reference
+step, and everything after it still goes by distance. A stroke lands once, so
+the gesture is still worth the same however finely it is sampled. Holding still
+does not pump paint out: eight repeated landings lay less than twice one.
+
+The golden disc mark moved from 128.4241 to 128.4923 — half of one tenth of a
+percent — and was re-baselined with the reason beside it.
+
+### And the thing he asked for
+
+> Could we have a default paper and brush that load with each medium change?
+> So for watercolor-> Rough Watercolor Paper, oil->Linen, charcoal->Pastel White
+
+Built. The pairing lives on the material itself and the studio asks for it,
+rather than the UI keeping its own list of material names — which the seam
+forbids, and rightly. A brush drawn by hand is left alone; picking a medium
+should not take your own work out of your hand.
+
+### Evidence
+
+Four deliberate breakages — the empty brush bailing out again, the landing
+laying nothing, the landing never stopping, and the grazing hair shoving as
+hard as the belly — all four caught.
+
+One of them was caught by the wrong test first. The check written for the
+grazing hair was measuring a zero-length contact, which sweeps nothing, so it
+was quietly measuring deposition instead of shoving and passed under the
+mutation. Rewritten to drag a deliberately empty head across settled paint,
+where nothing is laid and everything that moves was shoved.
+
+Status: `automated_relationship_verified`. `BR-04` and `BR-05` stay red until
+the artist says otherwise.

@@ -98,6 +98,18 @@ export async function createEngine({ width, height, material, substrate }) {
       return { id: p.id, version: p.version, provenance: p.provenance };
     },
 
+    /**
+     * What a material is usually found on and usually moved with.
+     *
+     * The studio asks; it does not decide. That keeps the list of "oil goes on
+     * linen" out of the UI, where a rule against branching on material names
+     * would otherwise make it impossible to say at all.
+     */
+    studioDefaults(id) {
+      const p = PROFILES[id || materialId];
+      return p?.studio ? { ...p.studio } : null;
+    },
+
     substrateInfo() {
       const s = SUBSTRATES[substrateId];
       return { id: s.id, name: s.name, version: s.version, provenance: s.provenance };

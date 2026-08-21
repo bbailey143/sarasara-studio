@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-21T21:45:09.975Z",
+  "updatedAt": "2026-08-21T23:35:51.364Z",
   "rows": {
     "watercolor": {
       "WC-01": {
@@ -163,14 +163,14 @@
         "decidedAt": "2026-08-21T20:31:56.550Z"
       },
       "BX-03": {
-        "mark": "partial",
+        "mark": "approved",
         "note": "",
-        "decidedAt": "2026-08-21T20:31:57.656Z"
+        "decidedAt": "2026-08-21T23:31:11.223Z"
       },
       "BX-04": {
-        "mark": "partial",
+        "mark": "approved",
         "note": "",
-        "decidedAt": "2026-08-21T20:32:03.491Z"
+        "decidedAt": "2026-08-21T23:31:12.195Z"
       }
     },
     "flat": {
@@ -231,22 +231,22 @@
     },
     "BR-03": {
       "mark": "approved",
-      "note": "Marked down 2026-08-21 while testing with the disc, which cannot demonstrate this. The artist disowned the test; restored to machine-checked, awaiting a judgement made with a drawn brush.",
+      "note": "Re-judged with the filbert on 2026-08-21 and approved. The earlier mark-down was made with the disc, which has no belly to open.",
       "decidedAt": "2026-08-21T21:23:28.481Z"
     },
     "BR-04": {
-      "mark": "partial",
-      "note": "Set to partial 2026-08-21. The disc can feather, so this judgement stands on its own feet and is left alone.",
-      "decidedAt": "2026-08-21T05:39:12.026Z"
+      "mark": "recalibrate",
+      "note": "What the crap does a head of hair, not a cookie cutter mean?  Anyway, it's not great at feathering edges.  I think it may partially be related to the other item I marked as needing recalibration.  The relationship between the brush and the paint already on the canvas just doesn't quite jive.",
+      "decidedAt": "2026-08-21T23:35:51.364Z"
     },
     "BR-05": {
-      "mark": "approved",
-      "note": "Judged with the filbert on 2026-08-21 and left at partial: \"Paint runs out very quickly - too quickly, actually.\" Measured at 42% of a full dip for one 8 cm oil stroke. Reworked the same day - capacity and release are now separate per-brush numbers, reach is roughly 3.7x further, and auto-reload is on by default with an adjustable amount. Awaiting a re-test.",
-      "decidedAt": "2026-08-21T21:23:36.787Z"
+      "mark": "recalibrate",
+      "note": "When paint left on brush hits 0 it stops picking up and scraping paint.\n",
+      "decidedAt": "2026-08-21T23:35:51.364Z"
     },
     "BR-06": {
       "mark": "partial",
-      "note": "Re-judged with the filbert on 2026-08-21 and left at partial. Supersedes the earlier disc mark-down; BX-03 \"its hair feels right\" is partial for the same reason.",
+      "note": "Re-judged with the filbert on 2026-08-21 and left at partial. The bend was then strengthened - a 12 mm head now trails 3.8 mm rather than 1.5 mm, and lag scales with the size of the brush - after which the artist approved BX-03 \"its hair feels right\". This row has not been re-judged since.",
       "decidedAt": "2026-08-21T20:31:35.577Z"
     },
     "BR-07": {

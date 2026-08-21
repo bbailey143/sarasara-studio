@@ -421,6 +421,73 @@ assert(drag.metrics().pigment_conservation_error < 1, 'dragging colour out must 
 
 const CELLS_PER_MM = 190 / 80; // the sheet is 80 mm across
 
+// Putting the brush down leaves a mark, even if the hand never moves.
+const tapOnly = new SharedSolver(380, 280, PROFILES.oil, SUBSTRATES.coldPress);
+tapOnly.setBrush('filbert');
+tapOnly.clear(0);
+tapOnly.liftBrush();
+tapOnly.depositSegment(190, 140, 190, 140, 380, 280, .6, 1, .3, .8, 0);
+const tapped = tapOnly.metrics().deposited_pigment;
+assert(tapped > 0, 'a brush pressed to the sheet and lifted must leave a mark (' + tapped.toFixed(3) + ')');
+
+// but a landing is one dab, not a licence to lay paint forever in one place
+const heldDown = new SharedSolver(380, 280, PROFILES.oil, SUBSTRATES.coldPress);
+heldDown.setBrush('filbert');
+heldDown.clear(0);
+heldDown.liftBrush();
+for (let i = 0; i < 8; i++) heldDown.depositSegment(190, 140, 190, 140, 380, 280, .6, 1, .3, .8, 0);
+assert(heldDown.metrics().deposited_pigment < tapped * 2,
+  'holding still must not keep pumping paint out of the brush (' + heldDown.metrics().deposited_pigment.toFixed(3) + ' from ' + tapped.toFixed(3) + ')');
+
+// An empty brush stops giving paint. It does not stop being a brush: it still
+// shoves what is already on the sheet and picks some of it up.
+const spent = new SharedSolver(380, 280, PROFILES.oil, SUBSTRATES.coldPress);
+spent.setBrush('filbert');
+spent.clear(0);
+spent.setAutoReload(false);
+for (let y = 100; y < 180; y += 6) { spent.liftBrush(); spent.depositSegment(60, y, 320, y, 380, 280, .7, 1, .3, .8, 0); }
+let guard = 0;
+while (spent.brushCharge() > 0 && guard++ < 400) { spent.liftBrush(); spent.depositSegment(60, 240, 320, 240, 380, 280, .7, 1, .3, .8, 0); }
+assert(spent.brushCharge() === 0, 'the brush must actually run dry for this check to mean anything');
+const movedBefore = spent.relocatedPigment;
+spent.liftBrush();
+spent.depositSegment(60, 140, 320, 140, 380, 280, .8, 1, .3, .8, 0);
+assert(spent.relocatedPigment > movedBefore,
+  'an empty brush must still push the paint that is already on the sheet');
+assert(spent.metrics().pigment_conservation_error < 1, 'pushing paint with an empty brush must conserve it');
+
+// A hair that barely touches must shove proportionally less than the belly.
+//
+// Without this the outermost hair moved paint exactly as hard as the middle of
+// the head, which turns the soft edge of a mark into a hard one. The artist
+// found it from the far end: "it's not great at feathering edges... The
+// relationship between the brush and the paint already on the canvas just
+// doesn't quite jive."
+//
+// The brush is run empty first, so nothing is laid and everything that moves
+// moved because the hair shoved it.
+const dryHead = { ...BRUSHES.filbert, id: 'brush.test.dry-head.v0', capacity: 1 };
+const onWetPaint = new SharedSolver(380, 280, PROFILES.oil, SUBSTRATES.coldPress);
+onWetPaint.setBrush(dryHead);
+onWetPaint.clear(0);
+onWetPaint.setAutoReload(false);
+onWetPaint.charge = 0;
+for (let y = 100; y < 190; y++) for (let x = 100; x < 300; x++) onWetPaint.deposited[y * 380 + x] = 2;
+const beforeContact = new Float32Array(onWetPaint.deposited);
+onWetPaint.liftBrush();
+onWetPaint.depositSegment(130, 145, 270, 145, 380, 280, .7, 1, .3, .8, 0);
+const shovedAt = (dy) => {
+  let total = 0;
+  for (let x = 150; x < 250; x++) total += Math.abs(onWetPaint.deposited[(145 + dy) * 380 + x] - beforeContact[(145 + dy) * 380 + x]);
+  return total;
+};
+assert(shovedAt(0) > 0, 'an empty head dragged over settled paint must move some of it');
+assert(shovedAt(0) > shovedAt(8) * 3,
+  'the belly must shove settled paint far harder than the rim of the same head (' +
+  shovedAt(0).toFixed(4) + ' down the middle, ' + shovedAt(8).toFixed(4) + ' near the edge)');
+assert(shovedAt(0) > shovedAt(4) && shovedAt(4) > shovedAt(8),
+  'the falloff from belly to rim must be gradual rather than a step');
+
 // The disc is the default and stays the default. Every material review so far
 // was made with it, and none of them may move because drawn brushes now exist.
 const defaultTool = new SharedSolver(60, 60, PROFILES.oil, SUBSTRATES.coldPress);
@@ -430,10 +497,14 @@ assert(defaultTool.getBrush().kind === 'disc', 'a solver must reach for the disc
 // Re-baselined 2026-08-21 by a tenth of a percent when contact spacing moved
 // from nominal to actual. That change stopped a stroke getting heavier the
 // faster the pen reported it, which was worth more than an exact reference.
+// Re-baselined again the same day, by half of one tenth of a percent, when
+// putting the brush down became a mark in its own right. Paint is laid by
+// distance travelled, and taken literally that left a brush pressed to the
+// sheet and lifted without moving with nothing to show for it.
 const goldenDisc = new SharedSolver(190, 140, PROFILES.oil, SUBSTRATES.coldPress); // the disc's own reference grid
 goldenDisc.clear(0);
 goldenDisc.depositSegment(114, 280, 646, 252, 760, 560, .68, 1, .42, .9);
-assert(Math.abs(goldenDisc.metrics().deposited_pigment - 128.4241) < .01,
+assert(Math.abs(goldenDisc.metrics().deposited_pigment - 128.4923) < .01,
   'the disc footprint must keep laying the paint it lays (got ' + goldenDisc.metrics().deposited_pigment.toFixed(4) + ')');
 
 // Geometry only. A brush may never carry a look.
