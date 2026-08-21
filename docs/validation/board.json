@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-21T05:43:00.186Z",
+  "updatedAt": "2026-08-21T06:30:00.000Z",
   "rows": {
     "watercolor": {
       "WC-01": {
@@ -220,34 +220,34 @@
   },
   "engine": {
     "BR-01": {
-      "mark": "partial",
-      "note": "",
-      "decidedAt": "2026-08-21T05:38:16.580Z"
+      "mark": "checked",
+      "note": "Marked down 2026-08-21 while testing with the disc, which cannot demonstrate this. The artist disowned the test; restored to machine-checked, awaiting a judgement made with a drawn brush.",
+      "decidedAt": null
     },
     "BR-02": {
-      "mark": "partial",
-      "note": "",
-      "decidedAt": "2026-08-21T05:38:34.590Z"
+      "mark": "checked",
+      "note": "Marked down 2026-08-21 while testing with the disc, which cannot demonstrate this. The artist disowned the test; restored to machine-checked, awaiting a judgement made with a drawn brush.",
+      "decidedAt": null
     },
     "BR-03": {
-      "mark": "partial",
-      "note": "",
-      "decidedAt": "2026-08-21T05:38:41.272Z"
+      "mark": "checked",
+      "note": "Marked down 2026-08-21 while testing with the disc, which cannot demonstrate this. The artist disowned the test; restored to machine-checked, awaiting a judgement made with a drawn brush.",
+      "decidedAt": null
     },
     "BR-04": {
       "mark": "partial",
-      "note": "",
+      "note": "Set to partial 2026-08-21. The disc can feather, so this judgement stands on its own feet and is left alone.",
       "decidedAt": "2026-08-21T05:39:12.026Z"
     },
     "BR-05": {
-      "mark": "none",
-      "note": "",
-      "decidedAt": "2026-08-21T05:41:21.482Z"
+      "mark": "checked",
+      "note": "Marked down 2026-08-21 while testing with the disc, which cannot demonstrate this. The artist disowned the test; restored to machine-checked, awaiting a judgement made with a drawn brush.",
+      "decidedAt": null
     },
     "BR-06": {
-      "mark": "partial",
-      "note": "",
-      "decidedAt": "2026-08-21T05:41:48.483Z"
+      "mark": "checked",
+      "note": "Marked down 2026-08-21 while testing with the disc, which cannot demonstrate this. The artist disowned the test; restored to machine-checked, awaiting a judgement made with a drawn brush.",
+      "decidedAt": null
     },
     "BR-07": {
       "mark": "none",

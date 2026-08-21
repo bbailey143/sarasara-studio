@@ -66,18 +66,35 @@ export const BOARD_ROWS = {
   ],
 };
 
-/** The brush machinery. One set, shared by every brush that uses it. */
+/**
+ * The brush machinery. One set, shared by every brush that uses it.
+ *
+ * `needs` names what a tool must have before a row can be judged at all. The
+ * disc has almost none of it — it is sized in cells, it is round, it has no
+ * belly, no hair and no reservoir — which is exactly what makes it the frozen
+ * reference. Judging the engine through the disc marks down the engine for the
+ * disc's deliberate emptiness, and that happened on 2026-08-21.
+ */
 export const ENGINE_ROWS = [
-  { id: 'BR-01', name: 'Holds its true size', hint: 'a 12 mm brush marks 12 mm, at any resolution', seed: 'checked' },
-  { id: 'BR-02', name: 'Knows how it is held', hint: 'edge stroke and broad stroke differ', seed: 'checked' },
-  { id: 'BR-03', name: 'Opens with pressure', hint: 'tip only, then the belly comes down', seed: 'checked' },
-  { id: 'BR-04', name: 'Feathers its edge', hint: 'a head of hair, not a cookie cutter', seed: 'checked' },
-  { id: 'BR-05', name: 'Runs out of paint', hint: 'a reservoir that empties, and a dip that fills it', seed: 'checked' },
-  { id: 'BR-06', name: 'Bends and lags', hint: 'the head trails the hand and rounds a corner off', seed: 'checked' },
-  { id: 'BR-09', name: 'Lays paint by distance', hint: 'the same gesture lays the same paint however finely drawn', seed: 'checked' },
-  { id: 'BR-07', name: 'Splays and splits', hint: 'press hard and the hairs separate', seed: 'none' },
-  { id: 'BR-08', name: 'Springs back', hint: 'lift off and it recovers its shape', seed: 'none' },
+  { id: 'BR-01', name: 'Holds its true size', hint: 'a 12 mm brush marks 12 mm, at any resolution', seed: 'checked', needs: 'size' },
+  { id: 'BR-02', name: 'Knows how it is held', hint: 'edge stroke and broad stroke differ', seed: 'checked', needs: 'shape' },
+  { id: 'BR-03', name: 'Opens with pressure', hint: 'tip only, then the belly comes down', seed: 'checked', needs: 'belly' },
+  { id: 'BR-04', name: 'Feathers its edge', hint: 'a head of hair, not a cookie cutter', seed: 'checked', needs: null },
+  { id: 'BR-05', name: 'Runs out of paint', hint: 'a reservoir that empties, and a dip that fills it', seed: 'checked', needs: 'reservoir' },
+  { id: 'BR-06', name: 'Bends and lags', hint: 'the head trails the hand and rounds a corner off', seed: 'checked', needs: 'hair' },
+  { id: 'BR-09', name: 'Lays paint by distance', hint: 'the same gesture lays the same paint however finely drawn', seed: 'checked', needs: null },
+  { id: 'BR-07', name: 'Splays and splits', hint: 'press hard and the hairs separate', seed: 'none', needs: 'hair' },
+  { id: 'BR-08', name: 'Springs back', hint: 'lift off and it recovers its shape', seed: 'none', needs: 'hair' },
 ];
+
+/** What the tool in your hand can actually show. */
+export const CANNOT_SHOW = {
+  size: 'sized in cells, not millimetres',
+  shape: 'round — it marks the same in every direction',
+  belly: 'no belly to open',
+  reservoir: 'bottomless by design',
+  hair: 'no hair to bend',
+};
 
 /** Whether one particular head is any good. Per brush. */
 export const BRUSH_ROWS = {

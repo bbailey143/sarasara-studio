@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Tab, TabList, TabPanel, Tabs } from 'react-aria-components';
 import { createEngine, listBrushes, listMaterials, listSubstrates } from './engine/index.js';
 import { BTN, BTN_PRIMARY, Button, Notes, Select, Slider, ToggleRow } from './components/Controls.jsx';
-import { BOARD_ROWS, BRUSH_ROWS, ENGINE_ROWS, MARKS, MARK_ORDER, seedBoard } from './data/board.js';
+import { BOARD_ROWS, BRUSH_ROWS, CANNOT_SHOW, ENGINE_ROWS, MARKS, MARK_ORDER, seedBoard } from './data/board.js';
 import { BellyEditor, FootprintEditor } from './components/BrushShape.jsx';
 
 // Everything physical - brush size, thread spacing - is now stated in
@@ -48,21 +48,27 @@ const brushes = listBrushes();
  * turned three columns into ninety-odd words of chrome and buried the thing
  * that matters, which is the colour of the dot on the left.
  */
-function BoardRow({ row, current, onMark }) {
+function BoardRow({ row, current, onMark, blocked }) {
   return (
-    <div className="grid grid-cols-[13px_1fr_auto] items-center gap-2.5 border-b border-rule/60 py-1.5 last:border-b-0">
+    <div
+      className={`grid grid-cols-[13px_1fr_auto] items-center gap-2.5 border-b border-rule/60 py-1.5 last:border-b-0 ${
+        blocked ? 'opacity-45' : ''
+      }`}
+      title={blocked || undefined}
+    >
       <span className="mk" data-mark={current} />
       <span className="min-w-0 text-[12px] leading-tight">
         <span className="font-medium">{row.name}</span>
-        <span className="ml-1.5 text-[11px] text-ink3">{row.hint}</span>
+        <span className="ml-1.5 text-[11px] text-ink3">{blocked || row.hint}</span>
       </span>
       <span className="flex items-center gap-1">
         {MARK_ORDER.map((key) => (
           <button
             type="button"
             key={key}
-            onClick={() => onMark(row.id, key)}
-            title={MARKS[key].label}
+            disabled={!!blocked}
+            onClick={() => !blocked && onMark(row.id, key)}
+            title={blocked || MARKS[key].label}
             aria-label={`${row.name}: ${MARKS[key].label}`}
             aria-pressed={current === key}
             className={`grid h-[18px] w-[18px] cursor-pointer place-items-center rounded-sm border ${
@@ -79,7 +85,7 @@ function BoardRow({ row, current, onMark }) {
 }
 
 /** A column of the board. Side by side in the drawer, so no collapsing here. */
-function BoardGroup({ title, subject, rows, marks, onMark, empty }) {
+function BoardGroup({ title, subject, rows, marks, onMark, empty, blockedFor }) {
   const tally = rows.reduce((count, row) => {
     const mark = marks[row.id]?.mark || row.seed;
     count[mark] = (count[mark] || 0) + 1;
@@ -106,7 +112,13 @@ function BoardGroup({ title, subject, rows, marks, onMark, empty }) {
       ) : (
         <div className="flex flex-col">
           {rows.map((row) => (
-            <BoardRow key={row.id} row={row} current={marks[row.id]?.mark || row.seed} onMark={onMark} />
+            <BoardRow
+              key={row.id}
+              row={row}
+              current={marks[row.id]?.mark || row.seed}
+              onMark={onMark}
+              blocked={blockedFor ? blockedFor(row) : null}
+            />
           ))}
         </div>
       )}
@@ -454,6 +466,7 @@ export default function App() {
   const brushRows = BRUSH_ROWS[brushKey] || [];
   const brushMarks = board?.brushes?.[brushKey] || {};
   const engineMarks = board?.engine || {};
+  const brushCan = ready ? engineRef.current?.brushCan() : null;
 
   return (
     <div
@@ -657,10 +670,15 @@ export default function App() {
 
               <BoardGroup
                 title="The brush engine"
-                subject="shared by every brush"
+                subject={`judged with ${drawn ? drawnName : brushes.find((b) => b.id === brush)?.name}`}
                 rows={ENGINE_ROWS}
                 marks={engineMarks}
                 onMark={setEngineMark}
+                blockedFor={(row) =>
+                  row.needs && brushCan && !brushCan[row.needs]
+                    ? `this brush is ${CANNOT_SHOW[row.needs]} — pick a drawn brush`
+                    : null
+                }
               />
 
               <BoardGroup

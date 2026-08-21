@@ -117,8 +117,21 @@ export async function createEngine({ width, height, material, substrate }) {
     },
 
     brushInfo() {
-      const b = BRUSHES[brushId];
+      const b = BRUSHES[brushId] || solver.getBrush();
       return { id: b.id, key: brushId, name: b.name, version: b.version, kind: b.kind, widthMm: b.widthMm || null };
+    },
+
+    /** What the tool in hand is physically able to demonstrate. */
+    brushCan() {
+      const b = solver.getBrush();
+      const shape = b.kind === 'shape';
+      return {
+        size: shape && b.widthMm > 0,
+        shape,
+        belly: shape && Array.isArray(b.belly) && b.belly.length > 1,
+        reservoir: Number(b.capacity) > 0,
+        hair: Number.isFinite(Number(b.stiffness)) && Number(b.stiffness) < 1,
+      };
     },
 
     /** A brush being edited. Handed in whole each time so the engine rebakes. */

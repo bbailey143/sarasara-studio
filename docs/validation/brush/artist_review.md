@@ -145,10 +145,48 @@ thousand pointer moves.
 This cost about a tenth of a percent against the old disc reference, which was
 re-baselined. Bit-exactness lost, rate-independence gained.
 
-**Whether this was what the artist saw is unknown.** It is one real defect in
-the path between his hand and the measurements, and it plausibly touches size,
-feathering and the reservoir alike. It is not a claim to have explained the
-marks, and the other rows remain unexplained until he says what he saw.
+**It was not what the artist saw.** He was testing with the disc:
+
+> I was testing with the disc, that’s my bad.
+
+### Why every one of those marks was right, for the disc
+
+The disc is sized in cells rather than millimetres, it is round so it marks the
+same in every direction, it has no belly, no hair and no reservoir. Those
+absences are what make it the frozen reference. Judged through it, the engine
+genuinely fails five of its own rows:
+
+| Row | Through the disc |
+| --- | --- |
+| `BR-01` holds its true size | it does not — it is sized in cells |
+| `BR-02` knows how it is held | it cannot — it is round |
+| `BR-03` opens with pressure | no belly to open |
+| `BR-05` runs out of paint | bottomless by design |
+| `BR-06` bends and lags | no hair to bend |
+
+This is a fault in the board, not in the testing. It offered a verdict it could
+not support and gave no sign that the tool in hand could not show any of it.
+
+### What was done about it
+
+Each engine row now names what a tool must have before it can be judged. When
+the brush in hand lacks it the row greys out, says why — *"this brush is
+bottomless by design — pick a drawn brush"* — and refuses the click.
+
+The five rows above were restored to machine-checked, each carrying a note
+saying it was marked down through the disc and awaits a judgement made with a
+drawn brush. The marks are preserved in this record rather than erased.
+
+**`BR-04` feathers its edge was left at partial.** The disc has a soft-edged
+footprint and can demonstrate feathering perfectly well, so that judgement
+stands on its own feet and is nobody else’s to undo.
+
+### The defect above still counts
+
+The double-stamped joins were real and are fixed regardless. They were found by
+going looking for a cause, and the cause turned out to be something else — but
+a gesture that laid twice the paint depending on how fast the pen reported it
+was a genuine breach of the brush specification, and it is now closed.
 
 ### The consequence nobody should forget
 
