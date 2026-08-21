@@ -742,4 +742,79 @@ assert(stock.error < 1, 'a drawn brush must conserve pigment like any other');
 assert(!/color|colour|pigment|grain|texture|image/i.test(JSON.stringify(asDrawn({}).outline)),
   'a drawn brush must carry geometry only');
 
+/* ---- hair bends: the head trails the hand ------------------------------ */
+
+// A lagging head does not run PAST a corner - it never gets there. The hand
+// turns first and the head cuts across, which is why a soft brush rounds a
+// sharp corner off and a stiff one takes it crisply.
+const cornerReach = (stiffness, speed) => {
+  const definition = { ...JSON.parse(JSON.stringify(BRUSHES.filbert)), kind: 'shape', stiffness };
+  delete definition._field;
+  const solver = new SharedSolver(380, 280, PROFILES.oil, SUBSTRATES.coldPress);
+  solver.setBrush(definition);
+  solver.clear(0);
+  solver.liftBrush();
+  const V = 4;
+  solver.depositSegment(380 * V * .25, 280 * V * .35, 380 * V * .62, 280 * V * .35, 380 * V, 280 * V, .8, 1, .3, speed, 0);
+  solver.depositSegment(380 * V * .62, 280 * V * .35, 380 * V * .62, 280 * V * .8, 380 * V, 280 * V, .8, 1, .3, speed, 0);
+  const cornerX = Math.round(380 * .62), cornerY = Math.round(280 * .35);
+  let reach = 0;
+  for (let x = cornerX; x < 380; x++) if (solver.deposited[cornerY * 380 + x] > 1e-6) reach = x - cornerX;
+  return reach / (380 / 80);
+};
+
+const stiffCorner = cornerReach(.95, 1.4);
+const softCorner = cornerReach(.30, 1.4);
+assert(softCorner < stiffCorner * .8,
+  'a soft head must cut the corner, reaching less far than a stiff one (soft ' + softCorner.toFixed(2) + ' mm, stiff ' + stiffCorner.toFixed(2) + ' mm)');
+
+// hurrying bends the head further
+assert(cornerReach(.30, 1.4) < cornerReach(.30, .4),
+  'the same soft head must bend further when the gesture is quicker');
+
+// and it is a steady relationship, not a switch
+const ladder = [.95, .78, .55, .30].map((st) => cornerReach(st, 1.4));
+for (let i = 1; i < ladder.length; i++)
+  assert(ladder[i] <= ladder[i - 1] + .01, 'softer hair must never cut the corner less than stiffer hair');
+
+// the disc has no hair and must not pretend to
+const rigidSolver = new SharedSolver(380, 280, PROFILES.oil, SUBSTRATES.coldPress);
+rigidSolver.clear(0);
+rigidSolver.liftBrush();
+assert(rigidSolver.getBrush().stiffness === undefined, 'the disc must declare no stiffness rather than a fake one');
+const before = rigidSolver.headFollow(100, 100, 0, 1);
+const after = rigidSolver.headFollow(180, 100, 40, 1);
+assert(after.x === 180 && after.y === 100 && before.x === 100,
+  'a tool with no stiffness must sit exactly where the hand puts it');
+
+// The bend must follow the DISTANCE the hand travelled, not the number of
+// times the stroke happened to be sampled. Chasing a fixed point in one long
+// step and in ten short ones has to land the head in the same place, or the
+// same gesture drags differently depending on how fast the pen reports.
+const chase=(steps,total)=>{
+  const solver=new SharedSolver(380,280,PROFILES.oil,SUBSTRATES.coldPress);
+  solver.setBrush('filbert');
+  solver.clear(0);
+  solver.liftBrush();
+  solver.headFollow(0,0,0,1);
+  for(let i=0;i<steps;i++) solver.headFollow(total,0,total/steps,1);
+  return solver.headX;
+};
+// eight cells is about one trailing length, so the head is still catching up
+// there; over a long straight it would arrive fully, which is the point.
+const oneLongStep=chase(1,8), manyShortSteps=chase(24,8);
+assert(Math.abs(oneLongStep-manyShortSteps)<.5,
+  'the bend must depend on how far the hand moved, not how finely it was sampled ('+oneLongStep.toFixed(2)+' against '+manyShortSteps.toFixed(2)+')');
+assert(oneLongStep<8*.85,'the head must genuinely trail behind the point it is chasing (reached '+oneLongStep.toFixed(2)+' of 8)');
+
+// lifting clears the head, so the next stroke starts where you put it
+const afterLift = new SharedSolver(380, 280, PROFILES.oil, SUBSTRATES.coldPress);
+afterLift.setBrush('filbert');
+afterLift.clear(0);
+afterLift.headFollow(10, 10, 0, 1);
+afterLift.headFollow(300, 10, 200, 1);
+afterLift.liftBrush();
+const restart = afterLift.headFollow(50, 200, 0, 1);
+assert(restart.x === 50 && restart.y === 200, 'lifting the brush must let the next stroke start where it is put');
+
 console.log('shared solver checks passed');

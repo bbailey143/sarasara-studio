@@ -88,14 +88,14 @@
       id:'brush.filbert.drawn.v0.1',name:'Filbert',version:'0.1.0',kind:'shape',
       outline:[[1,0],[0.9791,0.1258],[0.9168,0.2194],[0.8146,0.2968],[0.6746,0.3584],[0.4987,0.4034],[0.2859,0.4308],[0,0.44],[-0.2859,0.4308],[-0.4987,0.4034],[-0.6746,0.3584],[-0.8146,0.2968],[-0.9168,0.2194],[-0.9791,0.1258],[-1,0],[-0.9791,-0.1258],[-0.9168,-0.2194],[-0.8146,-0.2968],[-0.6746,-0.3584],[-0.4987,-0.4034],[-0.2859,-0.4308],[0,-0.44],[0.2859,-0.4308],[0.4987,-0.4034],[0.6746,-0.3584],[0.8146,-0.2968],[0.9168,-0.2194],[0.9791,-0.1258]],
       widthMm:12,belly:[{p:0,contact:.30},{p:.35,contact:.58},{p:.7,contact:.86},{p:1,contact:1}],
-      softness:.52,
+      softness:.52,stiffness:.55,
       provenance:[{status:'stand-in',note:'Hand-authored outline for the first drawn-brush pass. Shape only; the belly curve and edge softness are unmeasured.'}]
     },
     flat:{
       id:'brush.flat.drawn.v0.1',name:'Flat',version:'0.1.0',kind:'shape',
       outline:[[1,0],[0.9936,0.116],[0.974,0.1452],[0.9403,0.1644],[0.8909,0.1782],[0.8221,0.1881],[0.726,0.1948],[0.58,0.1987],[0,0.2],[-0.58,0.1987],[-0.726,0.1948],[-0.8221,0.1881],[-0.8909,0.1782],[-0.9403,0.1644],[-0.974,0.1452],[-0.9936,0.116],[-1,0],[-0.9936,-0.116],[-0.974,-0.1452],[-0.9403,-0.1644],[-0.8909,-0.1782],[-0.8221,-0.1881],[-0.726,-0.1948],[-0.58,-0.1987],[0,-0.2],[0.58,-0.1987],[0.726,-0.1948],[0.8221,-0.1881],[0.8909,-0.1782],[0.9403,-0.1644],[0.974,-0.1452],[0.9936,-0.116]],
       widthMm:12,belly:[{p:0,contact:.34},{p:.4,contact:.66},{p:1,contact:1}],
-      softness:.30,
+      softness:.30,stiffness:.78,
       provenance:[{status:'stand-in',note:'Hand-authored outline for the first drawn-brush pass. Deliberately far from round so direction is obvious.'}]
     }
   };
@@ -195,7 +195,7 @@
   function validateSubstrate(substrate){const missing=SUBSTRATE_REQUIRED.filter(id=>substrate.state[id]===undefined);if(missing.length)throw new Error('Missing substrate properties: '+missing.join(', '));for(const id of SUBSTRATE_REQUIRED){const value=substrate.state[id];if(typeof value!=='number'||!Number.isFinite(value)||value<0)throw new Error('Invalid substrate value for '+id)}return substrate}
 
   class SharedSolver{
-    constructor(width,height,profile,substrate=SUBSTRATES.coldPress){this.w=width;this.h=height;this.n=width*height;this.surface=document.createElement('canvas');this.surface.width=width;this.surface.height=height;this.sctx=this.surface.getContext('2d');this.image=this.sctx.createImageData(width,height);this.calibration=calibrationCopy();this.substrate=validateSubstrate(substrate);this.s=substrate.state;this.brush=BRUSHES.disc;this.sheetSeed=0;this.buildPaperSurface();this.setProfile(profile)}
+    constructor(width,height,profile,substrate=SUBSTRATES.coldPress){this.w=width;this.h=height;this.n=width*height;this.surface=document.createElement('canvas');this.surface.width=width;this.surface.height=height;this.sctx=this.surface.getContext('2d');this.image=this.sctx.createImageData(width,height);this.calibration=calibrationCopy();this.substrate=validateSubstrate(substrate);this.s=substrate.state;this.brush=BRUSHES.disc;this.sheetSeed=0;this.headX=null;this.headY=null;this.buildPaperSurface();this.setProfile(profile)}
     setCalibration(value){this.calibration=validateCalibration(value);return this.getCalibration()}
     getCalibration(){return calibrationCopy(this.calibration)}
     transformPressure(value){return interpolatePressure(this.calibration.curve,value)}
@@ -208,6 +208,35 @@
      * the grain falls elsewhere and the weave or tooth shifts by a few percent,
      * never enough to turn rough into smooth.
      */
+    /**
+     * Where the head actually is, as opposed to where the hand is.
+     *
+     * Hair bends. Move the handle and the head follows a moment later, then
+     * catches up on a straight. The trailing distance is measured in
+     * millimetres of travel, not in frames, so the same gesture drags the same
+     * way however finely it was sampled.
+     *
+     * Only 'stiffness' drives this. Spring and damping are named in the brush
+     * specification and would govern how a head recovers after you lift, which
+     * is not simulated - so they are deliberately absent rather than present
+     * and inert.
+     */
+    liftBrush(){this.headX=null;this.headY=null}
+    headFollow(targetX,targetY,stepCells,speed){
+      const tool=this.getBrush(),stiffness=Number(tool.stiffness);
+      if(!Number.isFinite(stiffness)||stiffness>=1||this.headX===null||this.headX===undefined){
+        this.headX=targetX;this.headY=targetY;
+        return{x:targetX,y:targetY};
+      }
+      const perMm=cellsPerMm(this.w);
+      /* a limp head trails further, and trails further still when hurried */
+      const trailMm=(1-Math.max(0,Math.min(.98,stiffness)))*3.2*(.6+Math.max(.1,Math.min(2,speed))*.7);
+      const trail=Math.max(.001,trailMm*perMm);
+      const follow=1-Math.exp(-Math.max(0,stepCells)/trail);
+      this.headX+=(targetX-this.headX)*follow;
+      this.headY+=(targetY-this.headY)*follow;
+      return{x:this.headX,y:this.headY};
+    }
     newSheet(sheetSeed){
       this.sheetSeed=Math.max(0,Math.floor(Number(sheetSeed)||0));
       this.buildPaperSurface();
@@ -357,7 +386,12 @@
       radius=shape?(tool.widthMm||10)*.5*perMm:(1.2+pressure*2.6+brushWater*1.8),regime=this.regime(),water=regime==='body'?0:Math.pow(brushWater,1.85)*.36*carrier;
       const availablePigment=regime==='body'?(.03+pressure*.14)*(pigmentFraction||1):carrier>.02?(.05+pressure*.16)*pigmentFraction:(.012+pressure*.04)*(pigmentFraction||1),pigment=availablePigment*pigmentLoad;
       const ux=d>.001?(x1-x0)/d:0,uy=d>.001?(y1-y0)/d:0;const sweep=radius>0?Math.min(1,(d/Math.max(1,steps))/(2*radius)):1;
-      for(let s=0;s<=steps;s++){const t=s/steps;this.addDisk(x0+(x1-x0)*t,y0+(y1-y0)*t,radius,water,pigment,pressure,speed,brushWater,ux,uy,sweep,shape)}
+      const stepCells=d/Math.max(1,steps);
+      for(let s=0;s<=steps;s++){
+        const t=s/steps;
+        const head=this.headFollow(x0+(x1-x0)*t,y0+(y1-y0)*t,s===0?0:stepCells,speed);
+        this.addDisk(head.x,head.y,radius,water,pigment,pressure,speed,brushWater,ux,uy,sweep,shape);
+      }
     }
     smudgeSegment(ax,ay,bx,by,canvasW,canvasH,pressure,speed){
       pressure=this.transformPressure(pressure);

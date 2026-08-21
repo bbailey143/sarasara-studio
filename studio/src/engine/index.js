@@ -121,6 +121,9 @@ export async function createEngine({ width, height, material, substrate }) {
     },
 
     /** A brush being edited. Handed in whole each time so the engine rebakes. */
+    /** Lift the brush off the sheet, so the next stroke starts where it is put. */
+    liftBrush() { solver.liftBrush(); },
+
     setBrushDefinition(definition) {
       brushId = 'custom';
       solver.setBrush({
@@ -131,6 +134,7 @@ export async function createEngine({ width, height, material, substrate }) {
         outline: definition.outline,
         belly: definition.belly,
         softness: definition.softness,
+        stiffness: definition.stiffness,
         widthMm: definition.widthMm,
         provenance: [{ status: 'stand-in', note: 'Drawn by the artist in the brush editor. Geometry only.' }],
       });
@@ -145,6 +149,7 @@ export async function createEngine({ width, height, material, substrate }) {
         outline: b.outline.map((p) => [p[0], p[1]]),
         belly: b.belly.map((s) => ({ ...s })),
         softness: b.softness,
+        stiffness: b.stiffness ?? .6,
         widthMm: b.widthMm,
       };
     },

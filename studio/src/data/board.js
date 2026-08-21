@@ -73,7 +73,7 @@ export const BRUSH_ROWS = {
     { id: 'BR-03', name: 'Opens with pressure', hint: 'tip only, then the belly comes down', seed: 'checked' },
     { id: 'BR-04', name: 'Feathers its edge', hint: 'a head of hair, not a cookie cutter', seed: 'checked' },
     { id: 'BR-05', name: 'Runs out of paint', hint: 'a reservoir that empties as you work', seed: 'none' },
-    { id: 'BR-06', name: 'Bends and lags', hint: 'the head trails the hand and catches up', seed: 'none' },
+    { id: 'BR-06', name: 'Bends and lags', hint: 'the head trails the hand and rounds a corner off', seed: 'checked' },
     { id: 'BR-07', name: 'Splays and splits', hint: 'press hard and the hairs separate', seed: 'none' },
     { id: 'BR-08', name: 'Springs back', hint: 'lift off and it recovers its shape', seed: 'none' },
   ],

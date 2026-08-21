@@ -137,6 +137,7 @@ export default function App() {
   const [sheet, setSheet] = useState(0);
   const [detail, setDetail] = useState('standard');
   const [openGroups, setOpenGroups] = useState({ paint: true, tool: true, surface: false });
+  const [boardOpen, setBoardOpen] = useState(false);
   const [drawn, setDrawn] = useState(null);
   const [drawnName, setDrawnName] = useState('My filbert');
   const [load, setLoad] = useState(0.7);
@@ -377,6 +378,7 @@ export default function App() {
       }
     } catch { /* nothing to release */ }
     strokeRef.current.down = false;
+    engineRef.current?.liftBrush();
   };
 
   /* ----------------------------------------------------------- record */
@@ -444,10 +446,10 @@ export default function App() {
   return (
     <div
       className="grid h-full max-lg:h-auto max-lg:min-h-full
-                 grid-cols-[292px_minmax(0,1fr)_352px] grid-rows-[46px_minmax(0,1fr)]
-                 [grid-template-areas:'bar_bar_bar''left_center_right']
-                 max-lg:grid-cols-1 max-lg:grid-rows-[46px_auto_auto_auto]
-                 max-lg:[grid-template-areas:'bar''center''left''right']"
+                 grid-cols-[292px_minmax(0,1fr)_352px] grid-rows-[46px_minmax(0,1fr)_auto]
+                 [grid-template-areas:'bar_bar_bar''left_center_right''board_board_board']
+                 max-lg:grid-cols-1 max-lg:grid-rows-[46px_auto_auto_auto_auto]
+                 max-lg:[grid-template-areas:'bar''center''left''right''board']"
     >
       <header className="[grid-area:bar] flex items-center gap-4 border-b border-rule bg-panel px-4">
         <h1 className="m-0 whitespace-nowrap text-[13px] font-semibold tracking-wide">
@@ -573,6 +575,95 @@ export default function App() {
         </div>
       </div>
 
+      {/* ------------------------------------------------------ the board */}
+      <section className="[grid-area:board] border-t border-rule bg-panel">
+        <button
+          type="button"
+          onClick={() => setBoardOpen((open) => !open)}
+          aria-expanded={boardOpen}
+          className="flex w-full cursor-pointer items-center gap-3 px-4 py-2 text-left"
+        >
+          <span className="font-mono text-[9px] text-ink3">{boardOpen ? '▾' : '▴'}</span>
+          <span className="font-mono text-[9px] uppercase tracking-[0.13em] text-ink3">The board</span>
+          <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            {[
+              ['paint', materials.find((m) => m.id === material)?.name, rows, marks],
+              ['tool', drawn ? drawnName : brushes.find((b) => b.id === brush)?.name, brushRows, brushMarks],
+            ].map(([key, subject, groupRows, groupMarks]) => {
+              const tally = groupRows.reduce((count, row) => {
+                const mark = groupMarks[row.id]?.mark || row.seed;
+                count[mark] = (count[mark] || 0) + 1;
+                return count;
+              }, {});
+              return (
+                <span key={key} className="flex items-center gap-1.5 text-[11.5px] text-ink2">
+                  <span className="truncate font-semibold">{subject}</span>
+                  {MARK_ORDER.slice().reverse().map((mk) =>
+                    tally[mk] ? (
+                      <span key={mk} className="flex items-center gap-1 font-mono text-[10px] text-ink3">
+                        <span className="mk !h-2.5 !w-2.5" data-mark={mk} />
+                        {tally[mk]}
+                      </span>
+                    ) : null,
+                  )}
+                </span>
+              );
+            })}
+          </span>
+          <span className="ml-auto font-mono text-[9.5px] text-ink3">
+            {boardOpen ? 'hide' : 'show'}
+          </span>
+        </button>
+
+        {boardOpen && (
+          <div className="max-h-[42vh] overflow-y-auto border-t border-rule px-4 pb-4 pt-2">
+            <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1.5">
+              {MARK_ORDER.slice().reverse().map((key) => (
+                <span key={key} className="inline-flex items-center gap-1.5 text-[11.5px] text-ink2">
+                  <span className="mk" data-mark={key} /> {MARKS[key].short}
+                </span>
+              ))}
+            </div>
+            <div className="grid gap-x-8 gap-y-0 lg:grid-cols-3">
+              <BoardGroup
+                title="The paint"
+                subject={materials.find((m) => m.id === material)?.name}
+                rows={rows}
+                marks={marks}
+                onMark={setMark}
+                open={openGroups.paint}
+                onToggle={() => setOpenGroups((g) => ({ ...g, paint: !g.paint }))}
+              />
+
+              <BoardGroup
+                title="The tool"
+                subject={brushes.find((b) => b.id === brush)?.name}
+                rows={brushRows}
+                marks={brushMarks}
+                onMark={setBrushMark}
+                open={openGroups.tool}
+                onToggle={() => setOpenGroups((g) => ({ ...g, tool: !g.tool }))}
+              />
+
+              <BoardGroup
+                title="The surface"
+                subject={substrates.find((p) => p.id === substrate)?.name}
+                rows={[]}
+                marks={{}}
+                onMark={() => {}}
+                open={openGroups.surface}
+                onToggle={() => setOpenGroups((g) => ({ ...g, surface: !g.surface }))}
+                empty="No rows yet. Paper and canvas have never been scored on their own — they have only ever been judged through whatever was painted on them."
+              />
+
+            </div>
+            <p className={`${HINT} mt-3`}>
+              Green is a claim about what you have seen. Nothing a test does can set it.
+            </p>
+          </div>
+        )}
+      </section>
+
       {/* ------------------------------------------------- right: numbers */}
       <div className="[grid-area:right] min-h-0 overflow-y-auto border-l border-rule bg-panel max-lg:overflow-visible max-lg:border-l-0 max-lg:border-t">
         <section className={SECTION}>
@@ -620,7 +711,7 @@ export default function App() {
             className="sticky top-0 z-10 flex gap-0.5 border-b border-rule bg-panel px-2.5"
             aria-label="Recording and approvals"
           >
-            {[['record', 'Record'], ['board', 'Board'], ['shape', 'Brush'], ['history', 'Sessions']].map(([id, label]) => (
+            {[['record', 'Record'], ['shape', 'Brush'], ['history', 'Sessions']].map(([id, label]) => (
               <Tab
                 key={id}
                 id={id}
@@ -676,51 +767,6 @@ export default function App() {
             </div>
           </TabPanel>
 
-          <TabPanel className="px-4 py-3.5 outline-none" id="board">
-            <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1.5">
-              {MARK_ORDER.slice().reverse().map((key) => (
-                <span key={key} className="inline-flex items-center gap-1.5 text-[11.5px] text-ink2">
-                  <span className="mk" data-mark={key} /> {MARKS[key].short}
-                </span>
-              ))}
-            </div>
-
-            <BoardGroup
-              title="The paint"
-              subject={materials.find((m) => m.id === material)?.name}
-              rows={rows}
-              marks={marks}
-              onMark={setMark}
-              open={openGroups.paint}
-              onToggle={() => setOpenGroups((g) => ({ ...g, paint: !g.paint }))}
-            />
-
-            <BoardGroup
-              title="The tool"
-              subject={brushes.find((b) => b.id === brush)?.name}
-              rows={brushRows}
-              marks={brushMarks}
-              onMark={setBrushMark}
-              open={openGroups.tool}
-              onToggle={() => setOpenGroups((g) => ({ ...g, tool: !g.tool }))}
-            />
-
-            <BoardGroup
-              title="The surface"
-              subject={substrates.find((p) => p.id === substrate)?.name}
-              rows={[]}
-              marks={{}}
-              onMark={() => {}}
-              open={openGroups.surface}
-              onToggle={() => setOpenGroups((g) => ({ ...g, surface: !g.surface }))}
-              empty="No rows yet. Paper and canvas have never been scored on their own — they have only ever been judged through whatever was painted on them."
-            />
-
-            <p className={`${HINT} mt-3`}>
-              Green is a claim about what you have seen. Nothing a test does can set it.
-            </p>
-          </TabPanel>
-
           <TabPanel className="px-4 py-3.5 outline-none" id="shape">
             {!drawn ? (
               <div className="flex flex-col gap-3">
@@ -769,6 +815,18 @@ export default function App() {
                   step={.5}
                   format={(v) => `${v.toFixed(1)} mm`}
                 />
+                <Slider
+                  label="Stiffness of the hair"
+                  value={drawn.stiffness}
+                  onChange={(stiffness) => setDrawn((d) => ({ ...d, stiffness }))}
+                  min={.05}
+                  max={.98}
+                  step={.01}
+                />
+                <p className={HINT}>
+                  Soft hair trails behind your hand and rounds a corner off. Stiff hair
+                  goes where you put it.
+                </p>
                 <Slider
                   label="Softness of the edge"
                   value={drawn.softness}
