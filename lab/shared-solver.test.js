@@ -419,7 +419,7 @@ assert(drag.metrics().pigment_conservation_error < 1, 'dragging colour out must 
 
 /* ---- the tool: a drawn shape must become a brush (first pass) ---------- */
 
-const CELLS_PER_MM = 190 / 120;
+const CELLS_PER_MM = 190 / 80; // the sheet is 80 mm across
 
 // The disc is the default and stays the default. Every material review so far
 // was made with it, and none of them may move because drawn brushes now exist.
@@ -526,17 +526,19 @@ assert(!/watercolor|charcoal|oil(?![A-Za-z])/i.test(
 // Counting peaks alone cannot tell cloth from paper - both have plenty. What
 // separates them is that a weave's threads are EVENLY SPACED. So measure the
 // spacing between peaks and how much it varies.
+const WEAVE_GRID = 500; // 80 mm across 500 cells = 62.5 cells/cm, fine enough to draw 12-20 threads/cm
 const threadSpacing = (substrate, down) => {
-  const solver = new SharedSolver(140, 140, PROFILES.oil, SUBSTRATES[substrate]);
+  const solver = new SharedSolver(WEAVE_GRID, WEAVE_GRID, PROFILES.oil, SUBSTRATES[substrate]);
   const line = [];
-  for (let i = 0; i < 140; i++) line.push(down ? solver.tooth(70, i) : solver.tooth(i, 70));
+  for (let i = 0; i < WEAVE_GRID; i++) line.push(down ? solver.tooth(WEAVE_GRID / 2, i) : solver.tooth(i, WEAVE_GRID / 2));
   const peaks = [];
-  for (let i = 1; i < 139; i++) if (line[i] > line[i - 1] && line[i] >= line[i + 1]) peaks.push(i);
+  for (let i = 1; i < WEAVE_GRID - 1; i++) if (line[i] > line[i - 1] && line[i] >= line[i + 1]) peaks.push(i);
   const gaps = [];
   for (let i = 1; i < peaks.length; i++) gaps.push(peaks[i] - peaks[i - 1]);
   const mean = gaps.reduce((a, b) => a + b, 0) / Math.max(1, gaps.length);
   const spread = Math.sqrt(gaps.reduce((a, g) => a + (g - mean) * (g - mean), 0) / Math.max(1, gaps.length));
-  return { count: peaks.length, mean, wobble: spread / Math.max(.001, mean) };
+  const cellsPerCm = (WEAVE_GRID / 80) * 10;
+  return { count: peaks.length, mean, perCm: cellsPerCm / Math.max(.001, mean), wobble: spread / Math.max(.001, mean) };
 };
 
 for (const cloth of ['roughCanvas', 'linenCanvas']) {
@@ -545,8 +547,8 @@ for (const cloth of ['roughCanvas', 'linenCanvas']) {
     cloth + ' must have evenly spaced threads, which is what makes it cloth rather than noise');
   assert(Math.abs(across.mean - down.mean) < 1.5,
     cloth + ' is a plain weave: warp and weft must be spaced alike');
-  assert(Math.abs(across.mean - SUBSTRATES[cloth].texture.threadPeriod) < 1,
-    cloth + ' must actually weave at the thread spacing its profile states');
+  assert(Math.abs(across.perCm - SUBSTRATES[cloth].texture.threadsPerCm) < 3,
+    cloth + ' must weave at the thread count its profile states (states ' + SUBSTRATES[cloth].texture.threadsPerCm + '/cm, measured ' + across.perCm.toFixed(1) + ')');
   assert(SUBSTRATES[cloth].state['TRAN-002'] < SUBSTRATES.hotPress.state['TRAN-002'] * .5,
     cloth + ' is primed cloth and must drink far less than the least thirsty paper');
   assert(SUBSTRATES[cloth].texture.pattern === 'woven', cloth + ' must use the woven surface');
@@ -561,8 +563,8 @@ for (const cloth of ['roughCanvas', 'linenCanvas']) {
 // higher than the dipped ones. Counting wobbles is not enough; slub variation
 // alone can fake that. Measure the depth of the dip.
 for (const cloth of ['roughCanvas', 'linenCanvas']) {
-  const solver = new SharedSolver(140, 140, PROFILES.oil, SUBSTRATES[cloth]);
-  const period = SUBSTRATES[cloth].texture.threadPeriod;
+  const solver = new SharedSolver(WEAVE_GRID, WEAVE_GRID, PROFILES.oil, SUBSTRATES[cloth]);
+  const period = (WEAVE_GRID / 80) * 10 / SUBSTRATES[cloth].texture.threadsPerCm;
   const overs = [], unders = [];
   for (let i = 0; i < 14; i++) {
     const height = solver.tooth((i + .5) * period, 4 * period);
@@ -581,7 +583,7 @@ for (const paper of ['coldPress', 'rough']) {
 }
 
 // linen is the finer cloth
-assert(threadSpacing('linenCanvas', false).mean < threadSpacing('roughCanvas', false).mean,
+assert(threadSpacing('linenCanvas', false).perCm > threadSpacing('roughCanvas', false).perCm,
   'linen must be woven finer than the rough canvas');
 
 // Cloth sits LOWER on average than paper, and should: a weave is mostly valley
@@ -589,10 +591,10 @@ assert(threadSpacing('linenCanvas', false).mean < threadSpacing('roughCanvas', f
 // bite. What matters is that it stays in a sane band and never drifts to one
 // extreme, where everything would either catch or miss.
 for (const cloth of ['roughCanvas', 'linenCanvas']) {
-  const solver = new SharedSolver(140, 140, PROFILES.oil, SUBSTRATES[cloth]);
+  const solver = new SharedSolver(WEAVE_GRID, WEAVE_GRID, PROFILES.oil, SUBSTRATES[cloth]);
   let sum = 0;
-  for (let y = 0; y < 140; y++) for (let x = 0; x < 140; x++) sum += solver.tooth(x, y);
-  const mean = sum / (140 * 140);
+  for (let y = 0; y < WEAVE_GRID; y++) for (let x = 0; x < WEAVE_GRID; x++) sum += solver.tooth(x, y);
+  const mean = sum / (WEAVE_GRID * WEAVE_GRID);
   assert(mean > .3 && mean < .6, cloth + ' must stay in a usable height band, lower than paper but not collapsed (got ' + mean.toFixed(3) + ')');
 }
 
@@ -625,7 +627,11 @@ const sheetOf = (substrate, id) => {
 // reviewed was made on it. Comparing the engine against itself cannot prove
 // that, so these are fingerprints taken on 2026-08-20. If one of them shifts,
 // a paper has changed underneath work that was already approved.
-const REFERENCE_SHEETS = { pastelWhite: 8292.6483, coldPress: 8482.1659, roughCanvas: 6627.1049 };
+// pastelWhite and coldPress carry approved marks and are pinned to their
+// original 2026-08-20 values. roughCanvas was re-baselined the same day when
+// thread spacing moved from grid cells to threads-per-centimetre: the cloth
+// genuinely changed, and no canvas has ever been reviewed, so nothing was lost.
+const REFERENCE_SHEETS = { pastelWhite: 8292.6483, coldPress: 8482.1659, roughCanvas: 6665.2201 };
 for (const [paper, expected] of Object.entries(REFERENCE_SHEETS)) {
   const solver = new SharedSolver(64, 64, PROFILES.oil, SUBSTRATES[paper]);
   let fingerprint = 0;

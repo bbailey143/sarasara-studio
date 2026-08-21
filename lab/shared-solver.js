@@ -41,11 +41,11 @@
     pastelCream:{id:'substrate.paper.pastel-light-cream.reference-derived.experimental.v0.2',name:'Pastel Paper — Light Cream',version:'0.2.0',state:{'TRAN-002':.014,'SUBI-001':.18,'SUBI-003':.28},texture:{pattern:'fibrous',tooth:.18,absorbency:.18,sizing:.82,capacity:.28,dryBrushBreakup:.32,seed:811,noiseScale:.2,paperColor:'#eeebdf',visualFiberContrast:6.2},provenance:[{status:'reference-derived',note:'Sample-guided from the artist-supplied 5100 px Pastel Light Cream image: sampled mean RGB 238.1/235.0/223.0 and luminance spread 10.30. Color and visible fiber scale are evidence; physical height remains an artist-tested stand-in.'}]},
     roughCanvas:{id:'substrate.canvas.rough.reference-derived.experimental.v0.1',name:'Canvas — Rough',version:'0.1.0',
       state:{'TRAN-002':.004,'SUBI-001':.72,'SUBI-003':.10},
-      texture:{pattern:'woven',tooth:.72,absorbency:.06,sizing:.95,capacity:.10,dryBrushBreakup:.68,seed:1201,noiseScale:1,threadPeriod:6,slub:.22,weaveDrift:.07,paperColor:'#d8d2c6',visualFiberContrast:9},
+      texture:{pattern:'woven',tooth:.72,absorbency:.06,sizing:.95,capacity:.10,dryBrushBreakup:.68,seed:1201,noiseScale:1,threadsPerCm:12,slub:.22,weaveDrift:.07,paperColor:'#d8d2c6',visualFiberContrast:9},
       provenance:[{status:'reference-derived',note:'Eye-guided from an artist-supplied coarse plain-weave canvas photograph. The weave period, thread thickness variation and colour follow that image; permeability, porosity and tooth height remain unmeasured stand-ins. Primed canvas barely absorbs, so permeability is near zero on purpose - it is not paper.'}]},
     linenCanvas:{id:'substrate.canvas.linen.reference-derived.experimental.v0.1',name:'Canvas — Linen',version:'0.1.0',
       state:{'TRAN-002':.006,'SUBI-001':.44,'SUBI-003':.14},
-      texture:{pattern:'woven',tooth:.44,absorbency:.09,sizing:.92,capacity:.14,dryBrushBreakup:.42,seed:733,noiseScale:1,threadPeriod:4,slub:.55,weaveDrift:.10,paperColor:'#d5cfc4',visualFiberContrast:6},
+      texture:{pattern:'woven',tooth:.44,absorbency:.09,sizing:.92,capacity:.14,dryBrushBreakup:.42,seed:733,noiseScale:1,threadsPerCm:20,slub:.55,weaveDrift:.10,paperColor:'#d5cfc4',visualFiberContrast:6},
       provenance:[{status:'reference-derived',note:'Eye-guided from an artist-supplied fine linen photograph. Finer thread period and much stronger slub than the rough canvas, which is what makes linen read as irregular rather than gridded. Physical values are unmeasured stand-ins.'}]}
   };
 
@@ -72,7 +72,12 @@
   /** How much of a real sheet the simulation grid spans. A drawn brush is sized
       in millimetres like a real brush, so its mark keeps its true size when the
       grid gets finer. The disc keeps its old cell-based radius, untouched. */
-  const SHEET_WIDTH_MM=120;
+  const SHEET_WIDTH_MM=80;
+
+  /** Cells per millimetre for a given grid width. Everything physical - brush
+      size, thread spacing - goes through this, so raising the resolution shows
+      more detail rather than shrinking the world. */
+  function cellsPerMm(gridWidth){return gridWidth/SHEET_WIDTH_MM}
 
   const BRUSHES={
     disc:{
@@ -282,7 +287,11 @@
            each thread, not a hard swap at every square. Slub is thick-and-thin
            patches running ALONG a thread, which is what keeps linen from looking
            like a printed grid. */
-        const period=Math.max(2,(a.threadPeriod||6)*sheet.period);
+        /* Canvas is sold by thread count, so that is how it is stated here.
+           The grid may or may not be fine enough to draw it; that is the grid's
+           problem, not the cloth's. */
+        const perCm=Math.max(1,(a.threadsPerCm||12)/Math.max(.2,sheet.period));
+        const period=Math.max(1.6,(cellsPerMm(this.w)*10)/perCm);
         const cord=t=>{const f=t-Math.floor(t);return Math.sin(Math.PI*f)};
         const u=x/period,v=y/period;
         /* Plain weave alternates square by square, so the over-under term is a
@@ -338,9 +347,14 @@
     depositSegment(ax,ay,bx,by,canvasW,canvasH,pressure,pigmentLoad,brushWater,speed,brushAngle=0){
       pressure=this.transformPressure(pressure);
       const tool=this.getBrush(),shape=tool.kind==='shape'?brushSampler(tool,pressure,brushAngle):null;
-      const cellsPerMm=this.w/SHEET_WIDTH_MM;
+      const perMm=cellsPerMm(this.w);
       const sx=this.w/canvasW,sy=this.h/canvasH,x0=ax*sx,y0=ay*sy,x1=bx*sx,y1=by*sy,d=Math.hypot(x1-x0,y1-y0),steps=Math.max(1,Math.ceil(d/.65));
-      const carrier=this.p['COMP-001'],pigmentFraction=this.p['COMP-003'],radius=shape?(tool.widthMm||10)*.5*cellsPerMm:(1.2+pressure*2.6+brushWater*1.8),regime=this.regime(),water=regime==='body'?0:Math.pow(brushWater,1.85)*.36*carrier;
+      const carrier=this.p['COMP-001'],pigmentFraction=this.p['COMP-003'],/* The disc is the frozen reference footprint. It is written in grid cells and
+         has never had a real size, so it changes with the resolution - which is one
+         more reason it is a reference and not a tool. Every material review made
+         before drawn brushes existed used it at 190 cells, and giving it millimetres
+         now would move those results. Drawn brushes carry a real size instead. */
+      radius=shape?(tool.widthMm||10)*.5*perMm:(1.2+pressure*2.6+brushWater*1.8),regime=this.regime(),water=regime==='body'?0:Math.pow(brushWater,1.85)*.36*carrier;
       const availablePigment=regime==='body'?(.03+pressure*.14)*(pigmentFraction||1):carrier>.02?(.05+pressure*.16)*pigmentFraction:(.012+pressure*.04)*(pigmentFraction||1),pigment=availablePigment*pigmentLoad;
       const ux=d>.001?(x1-x0)/d:0,uy=d>.001?(y1-y0)/d:0;const sweep=radius>0?Math.min(1,(d/Math.max(1,steps))/(2*radius)):1;
       for(let s=0;s<=steps;s++){const t=s/steps;this.addDisk(x0+(x1-x0)*t,y0+(y1-y0)*t,radius,water,pigment,pressure,speed,brushWater,ux,uy,sweep,shape)}

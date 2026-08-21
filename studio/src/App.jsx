@@ -4,14 +4,14 @@ import { createEngine, listBrushes, listMaterials, listSubstrates } from './engi
 import { BTN, BTN_PRIMARY, Button, Notes, Select, Slider, ToggleRow } from './components/Controls.jsx';
 import { BOARD_ROWS, BRUSH_ROWS, MARKS, MARK_ORDER, seedBoard } from './data/board.js';
 
-// The grid the material constants were tuned against. Raising it makes the brush
-// physically smaller, because brush radius is measured in cells - that is the
-// unfinished physical-size calibration, not something to change in passing.
-const SIM = { width: 190, height: 140 };
-// The engine sizes its brush in cells, so the coordinate space we hand it must
-// scale with the grid; otherwise a finer grid silently shrinks the tool. Four
-// view units per cell is what the material constants were tuned against.
-const VIEW = { width: SIM.width * 4, height: SIM.height * 4 };
+// Everything physical - brush size, thread spacing - is now stated in
+// millimetres, so a finer grid shows more of the same world rather than
+// shrinking it. That makes resolution a free choice.
+const DETAILS = [
+  { id: 'standard', name: 'Standard · 380 × 280', width: 380, height: 280 },
+  { id: 'fine', name: 'Fine · 475 × 350', width: 475, height: 350 },
+  { id: 'finest', name: 'Finest · 570 × 420', width: 570, height: 420 },
+];
 const CANVAS = { width: 760, height: 560 };
 const ACTIONS = [{ id: 'draw', name: 'Draw' }, { id: 'smudge', name: 'Smudge' }];
 const RATINGS = [
@@ -41,6 +41,87 @@ const materials = listMaterials();
 const substrates = listSubstrates();
 const brushes = listBrushes();
 
+/** One behaviour on the board. The same renderer for paint, tool and surface,
+    so a mark means exactly the same thing wherever it appears. */
+function BoardRow({ row, current, onMark }) {
+  return (
+    <div className="grid grid-cols-[16px_1fr] items-start gap-2.5 border-b border-rule py-2.5 last:border-b-0">
+      <span className="mk mt-1" data-mark={current} />
+      <div>
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="text-[12.5px] font-medium leading-tight">
+            {row.name}
+            <small className="mt-px block text-[11.5px] font-normal text-ink3">{row.hint}</small>
+          </span>
+          <span className="font-mono text-[9.5px] tracking-wide text-ink3">{row.id}</span>
+        </div>
+        <div className="mt-1.5 flex gap-1">
+          {MARK_ORDER.map((key) => (
+            <button
+              type="button"
+              key={key}
+              onClick={() => onMark(row.id, key)}
+              aria-label={`${row.name}: ${MARKS[key].label}`}
+              aria-pressed={current === key}
+              className={`flex cursor-pointer items-center gap-1.5 rounded-sm border bg-panel2 px-1.5 py-1
+                          font-mono text-[9.5px] uppercase tracking-wide ${
+                            current === key ? 'border-ink2 text-ink' : 'border-rule2 text-ink3'
+                          }`}
+            >
+              <span className="mk !h-2.5 !w-2.5" data-mark={key} />
+              {MARKS[key].short}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** A collapsible group, with its tally visible while it is shut. */
+function BoardGroup({ title, subject, rows, marks, onMark, open, onToggle, empty }) {
+  const tally = rows.reduce((count, row) => {
+    const mark = marks[row.id]?.mark || row.seed;
+    count[mark] = (count[mark] || 0) + 1;
+    return count;
+  }, {});
+  return (
+    <section className="border-b border-rule last:border-b-0">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        className="flex w-full cursor-pointer items-center gap-2 py-2.5 text-left"
+      >
+        <span className="font-mono text-[9px] text-ink3">{open ? '▾' : '▸'}</span>
+        <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-ink3">{title}</span>
+        <span className="truncate text-[12px] font-semibold">{subject}</span>
+        <span className="ml-auto flex items-center gap-1.5">
+          {MARK_ORDER.slice().reverse().map((key) =>
+            tally[key] ? (
+              <span key={key} className="flex items-center gap-1 font-mono text-[10px] text-ink3">
+                <span className="mk !h-2.5 !w-2.5" data-mark={key} />
+                {tally[key]}
+              </span>
+            ) : null,
+          )}
+        </span>
+      </button>
+      {open && (
+        empty ? (
+          <p className="pb-3 text-[12px] leading-snug text-ink3">{empty}</p>
+        ) : (
+          <div className="flex flex-col pb-1">
+            {rows.map((row) => (
+              <BoardRow key={row.id} row={row} current={marks[row.id]?.mark || row.seed} onMark={onMark} />
+            ))}
+          </div>
+        )
+      )}
+    </section>
+  );
+}
+
 export default function App() {
   const canvasRef = useRef(null);
   const engineRef = useRef(null);
@@ -53,6 +134,8 @@ export default function App() {
   const [brush, setBrush] = useState('disc');
   const [brushAngle, setBrushAngle] = useState(0);
   const [sheet, setSheet] = useState(0);
+  const [detail, setDetail] = useState('standard');
+  const [openGroups, setOpenGroups] = useState({ paint: true, tool: true, surface: false });
   const [load, setLoad] = useState(0.7);
   const [water, setWater] = useState(0.3);
   const [dampness, setDampness] = useState(0);
@@ -77,9 +160,15 @@ export default function App() {
 
   /* ---------------------------------------------------------- engine */
 
+  const grid = DETAILS.find((d) => d.id === detail) || DETAILS[0];
+  const view = { width: grid.width * 4, height: grid.height * 4 };
+  const viewRef = useRef(view);
+  viewRef.current = view;
+
   useEffect(() => {
     let cancelled = false;
-    createEngine({ ...SIM, material, substrate }).then((engine) => {
+    setReady(false);
+    createEngine({ width: grid.width, height: grid.height, material, substrate }).then((engine) => {
       if (cancelled) return;
       engineRef.current = engine;
       // Dev-only handle so the engine can be inspected from the console while
@@ -87,6 +176,8 @@ export default function App() {
       if (import.meta.env.DEV) window.__studio = { engine, readout: () => engine.readout() };
       engine.setViewGain(viewGain);
       engine.setSmoothing(false);
+      engine.setBrush(brush);
+      engine.newSheet(sheet);
       engine.clear(dampness);
       setRegime(engine.regime());
       setProfileId(engine.profile().id);
@@ -95,7 +186,7 @@ export default function App() {
     });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [detail]);
 
   useEffect(() => {
     const engine = engineRef.current;
@@ -233,8 +324,8 @@ export default function App() {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
     return {
-      x: ((event.clientX - rect.left) / rect.width) * VIEW.width,
-      y: ((event.clientY - rect.top) / rect.height) * VIEW.height,
+      x: ((event.clientX - rect.left) / rect.width) * viewRef.current.width,
+      y: ((event.clientY - rect.top) / rect.height) * viewRef.current.height,
     };
   };
 
@@ -262,7 +353,7 @@ export default function App() {
     state.speed = state.speed * 0.7 + measured * 0.3;
 
     const stylus = event.pointerType === 'pen' && event.pressure > 0;
-    engine.stroke(action, state.last, point, VIEW, {
+    engine.stroke(action, state.last, point, viewRef.current, {
       pressure: stylus ? event.pressure : fallbackPressure,
       speed: state.speed,
       load,
@@ -299,6 +390,7 @@ export default function App() {
         key: material,
       },
       substrate: { ...engine.substrateInfo(), sheet: engine.sheetId() },
+      grid: { width: grid.width, height: grid.height, sheetWidthMm: 80 },
       brush: { ...engine.brushInfo(), heldAt: brush === 'disc' ? null: `${brushAngle}°` },
       regime: snapshot.regime,
       settings: {
@@ -373,6 +465,7 @@ export default function App() {
           <div className="flex flex-col gap-3">
             <Select label="Medium" items={materials} value={material} onChange={setMaterial} />
             <Select label="Paper" items={substrates} value={substrate} onChange={setSubstrate} />
+            <Select label="Detail" items={DETAILS} value={detail} onChange={setDetail} />
             <ToggleRow label="Contact" options={ACTIONS} value={action} onChange={setAction} />
             <Select label="Brush" items={brushes} value={brush} onChange={setBrush} />
             {brush !== 'disc' && (
@@ -462,7 +555,7 @@ export default function App() {
           </div>
           <div className="flex items-center gap-3 font-mono text-[10.5px] tracking-wide text-ink3">
             <span className="text-terre">● live</span>
-            <span>{SIM.width}×{SIM.height} cells</span>
+            <span>{grid.width}×{grid.height} cells · 80 mm sheet</span>
             <span>{action === 'draw' ? 'drawing material' : 'smudging what is there'}</span>
             <span>{sheet === 0 ? 'reference sheet' : `sheet #${sheet}`}</span>
           </div>
@@ -580,92 +673,38 @@ export default function App() {
                 </span>
               ))}
             </div>
-            <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.12em] text-ink3">
-              The paint · {materials.find((m) => m.id === material)?.name}
-            </p>
-            <div className="flex flex-col">
-              {rows.map((row) => {
-                const current = marks[row.id]?.mark || row.seed;
-                return (
-                  <div
-                    key={row.id}
-                    className="grid grid-cols-[16px_1fr] items-start gap-2.5 border-b border-rule py-2.5 last:border-b-0"
-                  >
-                    <span className="mk mt-1" data-mark={current} />
-                    <div>
-                      <div className="flex items-baseline justify-between gap-2">
-                        <span className="text-[12.5px] font-medium leading-tight">
-                          {row.name}
-                          <small className="mt-px block text-[11.5px] font-normal text-ink3">{row.hint}</small>
-                        </span>
-                        <span className="font-mono text-[9.5px] tracking-wide text-ink3">{row.id}</span>
-                      </div>
-                      <div className="mt-1.5 flex gap-1">
-                        {MARK_ORDER.map((key) => (
-                          <button
-                            type="button"
-                            key={key}
-                            onClick={() => setMark(row.id, key)}
-                            aria-label={`${row.name}: ${MARKS[key].label}`}
-                            aria-pressed={current === key}
-                            className={`flex cursor-pointer items-center gap-1.5 rounded-sm border bg-panel2 px-1.5 py-1
-                                        font-mono text-[9.5px] uppercase tracking-wide ${
-                                          current === key ? 'border-ink2 text-ink' : 'border-rule2 text-ink3'
-                                        }`}
-                          >
-                            <span className="mk !h-2.5 !w-2.5" data-mark={key} />
-                            {MARKS[key].short}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <p className="mb-2 mt-5 font-mono text-[9px] uppercase tracking-[0.12em] text-ink3">
-              The tool · {brushes.find((b) => b.id === brush)?.name}
-            </p>
-            <div className="flex flex-col">
-              {brushRows.map((row) => {
-                const current = brushMarks[row.id]?.mark || row.seed;
-                return (
-                  <div
-                    key={row.id}
-                    className="grid grid-cols-[16px_1fr] items-start gap-2.5 border-b border-rule py-2.5 last:border-b-0"
-                  >
-                    <span className="mk mt-1" data-mark={current} />
-                    <div>
-                      <div className="flex items-baseline justify-between gap-2">
-                        <span className="text-[12.5px] font-medium leading-tight">
-                          {row.name}
-                          <small className="mt-px block text-[11.5px] font-normal text-ink3">{row.hint}</small>
-                        </span>
-                        <span className="font-mono text-[9.5px] tracking-wide text-ink3">{row.id}</span>
-                      </div>
-                      <div className="mt-1.5 flex gap-1">
-                        {MARK_ORDER.map((key) => (
-                          <button
-                            type="button"
-                            key={key}
-                            onClick={() => setBrushMark(row.id, key)}
-                            aria-label={`${row.name}: ${MARKS[key].label}`}
-                            aria-pressed={current === key}
-                            className={`flex cursor-pointer items-center gap-1.5 rounded-sm border bg-panel2 px-1.5 py-1
-                                        font-mono text-[9.5px] uppercase tracking-wide ${
-                                          current === key ? 'border-ink2 text-ink' : 'border-rule2 text-ink3'
-                                        }`}
-                          >
-                            <span className="mk !h-2.5 !w-2.5" data-mark={key} />
-                            {MARKS[key].short}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+
+            <BoardGroup
+              title="The paint"
+              subject={materials.find((m) => m.id === material)?.name}
+              rows={rows}
+              marks={marks}
+              onMark={setMark}
+              open={openGroups.paint}
+              onToggle={() => setOpenGroups((g) => ({ ...g, paint: !g.paint }))}
+            />
+
+            <BoardGroup
+              title="The tool"
+              subject={brushes.find((b) => b.id === brush)?.name}
+              rows={brushRows}
+              marks={brushMarks}
+              onMark={setBrushMark}
+              open={openGroups.tool}
+              onToggle={() => setOpenGroups((g) => ({ ...g, tool: !g.tool }))}
+            />
+
+            <BoardGroup
+              title="The surface"
+              subject={substrates.find((p) => p.id === substrate)?.name}
+              rows={[]}
+              marks={{}}
+              onMark={() => {}}
+              open={openGroups.surface}
+              onToggle={() => setOpenGroups((g) => ({ ...g, surface: !g.surface }))}
+              empty="No rows yet. Paper and canvas have never been scored on their own — they have only ever been judged through whatever was painted on them."
+            />
+
             <p className={`${HINT} mt-3`}>
               Green is a claim about what you have seen. Nothing a test does can set it.
             </p>
