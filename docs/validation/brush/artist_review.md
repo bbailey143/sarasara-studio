@@ -96,6 +96,60 @@ simulated — so they are absent rather than sitting in the profile as
 decoration. Runs out of paint, splays and splits, and springs back remain
 unbuilt.
 
+## BRUSH-003 — the artist marks the engine down
+
+- **Recorded:** 2026-08-21, on the board
+- **Said:** "Tested - see comments." The comments were the marks themselves.
+
+Every engine row that stood at machine-checked was moved down by hand:
+
+| Row | Was | Set to |
+| --- | --- | --- |
+| `BR-01` holds its true size | machine-checked | partial |
+| `BR-02` knows how it is held | machine-checked | partial |
+| `BR-03` opens with pressure | machine-checked | partial |
+| `BR-04` feathers its edge | machine-checked | partial |
+| `BR-05` runs out of paint | machine-checked | **not built** |
+| `BR-06` bends and lags | machine-checked | partial |
+
+No notes were left, so **the reasons are unknown**. What follows is one defect
+found by going looking, not an explanation of the marks.
+
+### A defect found while looking
+
+Every measurement behind those machine-checked marks drew the test stroke as
+one long segment. A pen reports hundreds of points per stroke, and each segment
+laid a contact at **both** ends — so every join between pointer moves was
+stamped twice.
+
+The same physical gesture, drawn at different pen rates:
+
+| Pointer moves | Paint laid | Brush left |
+| --- | --- | --- |
+| 1 | 522 | 55% |
+| 60 | 603 | 48% |
+| 150 | 741 | 36% |
+| 400 | 1092 | **5%** |
+
+So in the artist’s hand a brush emptied roughly twice as fast as the bench
+measured, and how hard he appeared to press depended on how fast his hardware
+talked. This is the rate-independence the brush specification has required from
+the start and which was never true.
+
+Fixed two ways: only the first contact after the brush lands starts at zero, so
+joins are no longer double-stamped; and each contact lays paint for the spacing
+actually used rather than a nominal one, so an over-sampled short move does not
+lay a full step. Measured after: 521, 521, 521, 521, 520, 520 across one to a
+thousand pointer moves.
+
+This cost about a tenth of a percent against the old disc reference, which was
+re-baselined. Bit-exactness lost, rate-independence gained.
+
+**Whether this was what the artist saw is unknown.** It is one real defect in
+the path between his hand and the measurements, and it plausibly touches size,
+feathering and the reservoir alike. It is not a claim to have explained the
+marks, and the other rows remain unexplained until he says what he saw.
+
 ### The consequence nobody should forget
 
 Every approved behaviour on the board — five on oil, five on charcoal — was

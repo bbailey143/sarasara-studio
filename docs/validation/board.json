@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-20T21:00:00.000Z",
+  "updatedAt": "2026-08-21T05:43:00.186Z",
   "rows": {
     "watercolor": {
       "WC-01": {
@@ -220,34 +220,34 @@
   },
   "engine": {
     "BR-01": {
-      "mark": "checked",
+      "mark": "partial",
       "note": "",
-      "decidedAt": null
+      "decidedAt": "2026-08-21T05:38:16.580Z"
     },
     "BR-02": {
-      "mark": "checked",
+      "mark": "partial",
       "note": "",
-      "decidedAt": null
+      "decidedAt": "2026-08-21T05:38:34.590Z"
     },
     "BR-03": {
-      "mark": "checked",
+      "mark": "partial",
       "note": "",
-      "decidedAt": null
+      "decidedAt": "2026-08-21T05:38:41.272Z"
     },
     "BR-04": {
-      "mark": "checked",
+      "mark": "partial",
       "note": "",
-      "decidedAt": null
+      "decidedAt": "2026-08-21T05:39:12.026Z"
     },
     "BR-05": {
-      "mark": "checked",
+      "mark": "none",
       "note": "",
-      "decidedAt": null
+      "decidedAt": "2026-08-21T05:41:21.482Z"
     },
     "BR-06": {
-      "mark": "checked",
+      "mark": "partial",
       "note": "",
-      "decidedAt": null
+      "decidedAt": "2026-08-21T05:41:48.483Z"
     },
     "BR-07": {
       "mark": "none",
@@ -262,7 +262,7 @@
     "BR-09": {
       "mark": "checked",
       "note": "",
-      "decidedAt": null
+      "decidedAt": "2026-08-21T05:43:00.186Z"
     }
   }
 }

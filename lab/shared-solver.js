@@ -424,6 +424,15 @@
       const availablePigment=regime==='body'?(.03+pressure*.14)*(pigmentFraction||1):carrier>.02?(.05+pressure*.16)*pigmentFraction:(.012+pressure*.04)*(pigmentFraction||1),pigment=availablePigment*pigmentLoad*charge;
       const ux=d>.001?(x1-x0)/d:0,uy=d>.001?(y1-y0)/d:0;const sweep=radius>0?Math.min(1,(d/Math.max(1,steps))/(2*radius)):1;
       const stepCells=d/Math.max(1,steps);
+      /* Every segment used to lay a contact at BOTH ends, so each join between
+         pointer moves was stamped twice. A pen reporting hundreds of points per
+         stroke therefore laid roughly double the paint of the same gesture drawn
+         as one segment - 1092 against 522 - which made how hard you press depend
+         on how fast your pen talks. Only the very first contact after the brush
+         comes down starts at zero; every segment after joins where the last one
+         ended. */
+      const brushJustLanded=this.headX===null||this.headX===undefined;
+      const firstStep=brushJustLanded?0:1;
       /* Paint is laid per millimetre travelled, not per contact sampled.
          Without this the same gesture lays more paint on a finer grid, simply
          because more discs get stamped along the same path - measured at 454
@@ -434,7 +443,13 @@
          Using the rounded value never lands exactly on 1 at the reference grid,
          which shifts every already-approved mark by a tenth of a percent. */
       const REFERENCE_CELLS_PER_MM=190/SHEET_WIDTH_MM;
-      const perStep=Math.min(4,REFERENCE_CELLS_PER_MM/perMm);
+      /* Scale by the spacing actually used, not the nominal one. A very short
+         pointer move still gets rounded up to two contacts, and if each lays a
+         full nominal step the stroke gets heavier the faster the pen reports.
+         This costs about a tenth of a percent against the old reference, which is
+         a re-baseline rather than a behaviour change. */
+      const REFERENCE_STEP_MM=0.65/REFERENCE_CELLS_PER_MM;
+      const perStep=Math.min(4,(stepCells/perMm)/REFERENCE_STEP_MM);
       /* A physically sized head covers the same millimetres however fine the
          grid is, so a finer grid puts more cells under it and each must take
          proportionally less. The disc is sized in cells and has no real area,
@@ -442,7 +457,7 @@
          undefined, which is what being a frozen reference means. */
       const perArea=shape?Math.pow(REFERENCE_CELLS_PER_MM/perMm,2):1;
       const laidPigment=pigment*perStep*perArea,laidWater=water*perStep*perArea;
-      for(let s=0;s<=steps;s++){
+      for(let s=firstStep;s<=steps;s++){
         const t=s/steps;
         const head=this.headFollow(x0+(x1-x0)*t,y0+(y1-y0)*t,s===0?0:stepCells,speed);
         this.addDisk(head.x,head.y,radius,laidWater,laidPigment,pressure,speed,brushWater,ux,uy,sweep,shape);

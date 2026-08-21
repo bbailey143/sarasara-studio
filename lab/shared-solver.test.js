@@ -427,11 +427,14 @@ const defaultTool = new SharedSolver(60, 60, PROFILES.oil, SUBSTRATES.coldPress)
 assert(defaultTool.getBrush().kind === 'disc', 'a solver must reach for the disc unless told otherwise');
 
 // A golden mark, so any future change to the disc footprint is caught here.
+// Re-baselined 2026-08-21 by a tenth of a percent when contact spacing moved
+// from nominal to actual. That change stopped a stroke getting heavier the
+// faster the pen reported it, which was worth more than an exact reference.
 const goldenDisc = new SharedSolver(190, 140, PROFILES.oil, SUBSTRATES.coldPress); // the disc's own reference grid
 goldenDisc.clear(0);
 goldenDisc.depositSegment(114, 280, 646, 252, 760, 560, .68, 1, .42, .9);
-assert(Math.abs(goldenDisc.metrics().deposited_pigment - 128.4830) < .01,
-  'the disc footprint must keep laying exactly the paint it always has (got ' + goldenDisc.metrics().deposited_pigment.toFixed(4) + ')');
+assert(Math.abs(goldenDisc.metrics().deposited_pigment - 128.4241) < .01,
+  'the disc footprint must keep laying the paint it lays (got ' + goldenDisc.metrics().deposited_pigment.toFixed(4) + ')');
 
 // Geometry only. A brush may never carry a look.
 for (const key of Object.keys(BRUSHES)) {
@@ -896,5 +899,44 @@ for (const brush of ['disc', 'filbert', 'flat']) {
   assert(fine < coarse * 1.35 && fine > coarse * .7,
     brush + ' must lay about the same paint however fine the grid is (' + coarse.toFixed(0) + ' against ' + fine.toFixed(0) + ')');
 }
+
+/* ---- a gesture is a gesture, however fast the pen talks ----------------- */
+
+// Every measurement in this file used to draw one long segment. A real pen
+// reports hundreds of points per stroke, and each segment used to lay a contact
+// at BOTH ends - so the same gesture laid 522 units drawn as one segment and
+// 1092 chopped into four hundred. How hard you appeared to press depended on
+// how fast your hardware talked.
+const drawnAsPieces = (pieces, brush) => {
+  const solver = new SharedSolver(380, 280, PROFILES.oil, SUBSTRATES.coldPress);
+  solver.setBrush(brush);
+  solver.clear(0);
+  solver.liftBrush();
+  const x0 = 380 * 4 * .15, x1 = 380 * 4 * .85, y = 280 * 4 * .5;
+  for (let i = 0; i < pieces; i++)
+    solver.depositSegment(x0 + (x1 - x0) * i / pieces, y, x0 + (x1 - x0) * (i + 1) / pieces, y, 380 * 4, 280 * 4, .75, 1, .3, .8, 0);
+  return solver.metrics().deposited_pigment;
+};
+
+for (const brush of ['disc', 'filbert', 'flat']) {
+  const counts = [1, 20, 150, 400, 1000].map((pieces) => drawnAsPieces(pieces, brush));
+  const low = Math.min(...counts), high = Math.max(...counts);
+  assert(high < low * 1.05,
+    brush + ' must lay the same paint however finely the pen reports the stroke (' + counts.map((v) => v.toFixed(0)).join(', ') + ')');
+}
+
+// and the reservoir must empty at the same rate for the same gesture
+const emptyAfter = (pieces) => {
+  const solver = new SharedSolver(380, 280, PROFILES.oil, SUBSTRATES.coldPress);
+  solver.setBrush('filbert');
+  solver.clear(0);
+  solver.liftBrush();
+  const x0 = 380 * 4 * .15, x1 = 380 * 4 * .85, y = 280 * 4 * .5;
+  for (let i = 0; i < pieces; i++)
+    solver.depositSegment(x0 + (x1 - x0) * i / pieces, y, x0 + (x1 - x0) * (i + 1) / pieces, y, 380 * 4, 280 * 4, .75, 1, .3, .8, 0);
+  return solver.brushCharge();
+};
+assert(Math.abs(emptyAfter(1) - emptyAfter(400)) < .03,
+  'a brush must run down at the same rate however finely the pen reports (' + emptyAfter(1).toFixed(3) + ' against ' + emptyAfter(400).toFixed(3) + ')');
 
 console.log('shared solver checks passed');
