@@ -42,62 +42,55 @@ const materials = listMaterials();
 const substrates = listSubstrates();
 const brushes = listBrushes();
 
-/** One behaviour on the board. The same renderer for paint, tool and surface,
-    so a mark means exactly the same thing wherever it appears. */
+/** One behaviour on the board.
+ *
+ * The four marks are dots, not labelled buttons. A labelled set on every row
+ * turned three columns into ninety-odd words of chrome and buried the thing
+ * that matters, which is the colour of the dot on the left.
+ */
 function BoardRow({ row, current, onMark }) {
   return (
-    <div className="grid grid-cols-[16px_1fr] items-start gap-2.5 border-b border-rule py-2.5 last:border-b-0">
-      <span className="mk mt-1" data-mark={current} />
-      <div>
-        <div className="flex items-baseline justify-between gap-2">
-          <span className="text-[12.5px] font-medium leading-tight">
-            {row.name}
-            <small className="mt-px block text-[11.5px] font-normal text-ink3">{row.hint}</small>
-          </span>
-          <span className="font-mono text-[9.5px] tracking-wide text-ink3">{row.id}</span>
-        </div>
-        <div className="mt-1.5 flex gap-1">
-          {MARK_ORDER.map((key) => (
-            <button
-              type="button"
-              key={key}
-              onClick={() => onMark(row.id, key)}
-              aria-label={`${row.name}: ${MARKS[key].label}`}
-              aria-pressed={current === key}
-              className={`flex cursor-pointer items-center gap-1.5 rounded-sm border bg-panel2 px-1.5 py-1
-                          font-mono text-[9.5px] uppercase tracking-wide ${
-                            current === key ? 'border-ink2 text-ink' : 'border-rule2 text-ink3'
-                          }`}
-            >
-              <span className="mk !h-2.5 !w-2.5" data-mark={key} />
-              {MARKS[key].short}
-            </button>
-          ))}
-        </div>
-      </div>
+    <div className="grid grid-cols-[13px_1fr_auto] items-center gap-2.5 border-b border-rule/60 py-1.5 last:border-b-0">
+      <span className="mk" data-mark={current} />
+      <span className="min-w-0 text-[12px] leading-tight">
+        <span className="font-medium">{row.name}</span>
+        <span className="ml-1.5 text-[11px] text-ink3">{row.hint}</span>
+      </span>
+      <span className="flex items-center gap-1">
+        {MARK_ORDER.map((key) => (
+          <button
+            type="button"
+            key={key}
+            onClick={() => onMark(row.id, key)}
+            title={MARKS[key].label}
+            aria-label={`${row.name}: ${MARKS[key].label}`}
+            aria-pressed={current === key}
+            className={`grid h-[18px] w-[18px] cursor-pointer place-items-center rounded-sm border ${
+              current === key ? 'border-ink2 bg-panel2' : 'border-transparent hover:border-rule2'
+            }`}
+          >
+            <span className="mk !h-2.5 !w-2.5" data-mark={key} />
+          </button>
+        ))}
+        <span className="ml-1 w-9 shrink-0 text-right font-mono text-[9px] text-ink3">{row.id}</span>
+      </span>
     </div>
   );
 }
 
-/** A collapsible group, with its tally visible while it is shut. */
-function BoardGroup({ title, subject, rows, marks, onMark, open, onToggle, empty }) {
+/** A column of the board. Side by side in the drawer, so no collapsing here. */
+function BoardGroup({ title, subject, rows, marks, onMark, empty }) {
   const tally = rows.reduce((count, row) => {
     const mark = marks[row.id]?.mark || row.seed;
     count[mark] = (count[mark] || 0) + 1;
     return count;
   }, {});
   return (
-    <section className="border-b border-rule last:border-b-0">
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={open}
-        className="flex w-full cursor-pointer items-center gap-2 py-2.5 text-left"
-      >
-        <span className="font-mono text-[9px] text-ink3">{open ? '▾' : '▸'}</span>
+    <section className="min-w-0">
+      <header className="mb-1 flex items-baseline gap-2 border-b border-rule pb-1.5">
         <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-ink3">{title}</span>
         <span className="truncate text-[12px] font-semibold">{subject}</span>
-        <span className="ml-auto flex items-center gap-1.5">
+        <span className="ml-auto flex shrink-0 items-center gap-1.5">
           {MARK_ORDER.slice().reverse().map((key) =>
             tally[key] ? (
               <span key={key} className="flex items-center gap-1 font-mono text-[10px] text-ink3">
@@ -107,17 +100,15 @@ function BoardGroup({ title, subject, rows, marks, onMark, open, onToggle, empty
             ) : null,
           )}
         </span>
-      </button>
-      {open && (
-        empty ? (
-          <p className="pb-3 text-[12px] leading-snug text-ink3">{empty}</p>
-        ) : (
-          <div className="flex flex-col pb-1">
-            {rows.map((row) => (
-              <BoardRow key={row.id} row={row} current={marks[row.id]?.mark || row.seed} onMark={onMark} />
-            ))}
-          </div>
-        )
+      </header>
+      {empty ? (
+        <p className="py-2 text-[11.5px] leading-snug text-ink3">{empty}</p>
+      ) : (
+        <div className="flex flex-col">
+          {rows.map((row) => (
+            <BoardRow key={row.id} row={row} current={marks[row.id]?.mark || row.seed} onMark={onMark} />
+          ))}
+        </div>
       )}
     </section>
   );
@@ -136,7 +127,6 @@ export default function App() {
   const [brushAngle, setBrushAngle] = useState(0);
   const [sheet, setSheet] = useState(0);
   const [detail, setDetail] = useState('standard');
-  const [openGroups, setOpenGroups] = useState({ paint: true, tool: true, surface: false });
   const [boardOpen, setBoardOpen] = useState(false);
   const [drawn, setDrawn] = useState(null);
   const [drawnName, setDrawnName] = useState('My filbert');
@@ -585,19 +575,15 @@ export default function App() {
         >
           <span className="font-mono text-[9px] text-ink3">{boardOpen ? '▾' : '▴'}</span>
           <span className="font-mono text-[9px] uppercase tracking-[0.13em] text-ink3">The board</span>
-          <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
-            {[
-              ['paint', materials.find((m) => m.id === material)?.name, rows, marks],
-              ['tool', drawn ? drawnName : brushes.find((b) => b.id === brush)?.name, brushRows, brushMarks],
-            ].map(([key, subject, groupRows, groupMarks]) => {
+          <span className="flex items-center gap-3">
+            {[[rows, marks], [brushRows, brushMarks]].map(([groupRows, groupMarks], i) => {
               const tally = groupRows.reduce((count, row) => {
                 const mark = groupMarks[row.id]?.mark || row.seed;
                 count[mark] = (count[mark] || 0) + 1;
                 return count;
               }, {});
               return (
-                <span key={key} className="flex items-center gap-1.5 text-[11.5px] text-ink2">
-                  <span className="truncate font-semibold">{subject}</span>
+                <span key={i} className="flex items-center gap-1.5">
                   {MARK_ORDER.slice().reverse().map((mk) =>
                     tally[mk] ? (
                       <span key={mk} className="flex items-center gap-1 font-mono text-[10px] text-ink3">
@@ -624,15 +610,13 @@ export default function App() {
                 </span>
               ))}
             </div>
-            <div className="grid gap-x-8 gap-y-0 lg:grid-cols-3">
+            <div className="grid gap-x-7 gap-y-5 lg:grid-cols-3 lg:[&>section+section]:border-l lg:[&>section+section]:border-rule lg:[&>section+section]:pl-7">
               <BoardGroup
                 title="The paint"
                 subject={materials.find((m) => m.id === material)?.name}
                 rows={rows}
                 marks={marks}
                 onMark={setMark}
-                open={openGroups.paint}
-                onToggle={() => setOpenGroups((g) => ({ ...g, paint: !g.paint }))}
               />
 
               <BoardGroup
@@ -641,8 +625,6 @@ export default function App() {
                 rows={brushRows}
                 marks={brushMarks}
                 onMark={setBrushMark}
-                open={openGroups.tool}
-                onToggle={() => setOpenGroups((g) => ({ ...g, tool: !g.tool }))}
               />
 
               <BoardGroup
@@ -651,8 +633,6 @@ export default function App() {
                 rows={[]}
                 marks={{}}
                 onMark={() => {}}
-                open={openGroups.surface}
-                onToggle={() => setOpenGroups((g) => ({ ...g, surface: !g.surface }))}
                 empty="No rows yet. Paper and canvas have never been scored on their own — they have only ever been judged through whatever was painted on them."
               />
 

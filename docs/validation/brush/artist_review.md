@@ -49,6 +49,53 @@ broad sweep that opens and closes. None of that was possible with a disc.
 - There is no board row for any of this. The board records what a *material*
   does; a tool needs rows of its own, and they do not exist.
 
+## BRUSH-002 — hair that bends
+
+- **Recorded:** 2026-08-20, in conversation
+- **Behaviour:**  bends and lags — the head trails the hand and rounds
+  a corner off
+
+**Artist’s words:**
+
+> Okay - it works! […] Green light though for this stage.
+
+**No board mark was set.** The artist said this while also reporting the board
+itself was a mess to use, which is the likeliest reason.  stands at
+machine-checked until he sets it himself; nobody else may.
+
+### What was measured
+
+An L-shaped gesture at speed 1.4, measuring how far the mark reaches past the
+corner before the head turns:
+
+| Stiffness | Reach past the corner |
+| --- | --- |
+| 0.95 | 5.26 mm |
+| 0.78 | 4.84 mm |
+| 0.55 | 4.21 mm |
+| 0.30 | 3.37 mm |
+| the disc | 0.63 mm — its own half-width, no hair |
+
+The trailing distance is measured in millimetres of travel rather than frames,
+so the same gesture drags the same way however finely the pen reports.
+
+### Corrections made on the way
+
+- These numbers were first read backwards, as the softest brush bending least.
+  A lagging head does not run past a corner — it never reaches it, because the
+  hand turns first and the head cuts across.
+- The rate-independence check first asserted the head still trails after 120
+  cells of straight travel. That is wrong: over a long straight it should
+  arrive fully. Re-measured over one trailing length.
+
+### Still absent, deliberately
+
+Only  drives this.  and  are named in the brush
+specification and would govern how a head recovers after lifting, which is not
+simulated — so they are absent rather than sitting in the profile as
+decoration. Runs out of paint, splays and splits, and springs back remain
+unbuilt.
+
 ### The consequence nobody should forget
 
 Every approved behaviour on the board — five on oil, five on charcoal — was
