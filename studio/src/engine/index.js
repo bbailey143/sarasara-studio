@@ -41,7 +41,7 @@ const REGIME_READOUTS = {
   ],
   body: [
     'pigment_area_fraction', 'deposited_pigment', 'relief_peak', 'relief_area_fraction',
-    'carried_pigment', 'relocated_pigment', 'water', 'mobile_pigment', 'pigment_conservation_error',
+    'brush_charge', 'carried_pigment', 'relocated_pigment', 'water', 'mobile_pigment', 'pigment_conservation_error',
   ],
 };
 
@@ -59,7 +59,8 @@ export const READOUT_LABELS = {
   source_remaining_pigment: ['Left on the tool', ''],
   pressure_anchored_pigment: ['Pressed into paper', ''],
   lost_off_canvas_pigment: ['Left the page', ''],
-  carried_pigment: ['Held on the brush', ''],
+  brush_charge: ['Paint left on the brush', ''],
+  carried_pigment: ['Scraped up off the sheet', ''],
   relocated_pigment: ['Pushed by contact (running total)', ''],
   relief_peak: ['Tallest point', ''],
   relief_area_fraction: ['Area standing up', '%'],
@@ -123,6 +124,12 @@ export async function createEngine({ width, height, material, substrate }) {
     /** A brush being edited. Handed in whole each time so the engine rebakes. */
     /** Lift the brush off the sheet, so the next stroke starts where it is put. */
     liftBrush() { solver.liftBrush(); },
+
+    /** Dip the brush. Returns how much paint it took up. */
+    dipBrush(fill = 1) { return solver.dipBrush(fill); },
+    /** 0..1 of capacity, or 1 for a bottomless tool. */
+    brushCharge() { return solver.brushCharge(); },
+    hasReservoir() { return solver.hasReservoir(); },
 
     setBrushDefinition(definition) {
       brushId = 'custom';

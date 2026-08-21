@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Tab, TabList, TabPanel, Tabs } from 'react-aria-components';
 import { createEngine, listBrushes, listMaterials, listSubstrates } from './engine/index.js';
 import { BTN, BTN_PRIMARY, Button, Notes, Select, Slider, ToggleRow } from './components/Controls.jsx';
-import { BOARD_ROWS, BRUSH_ROWS, MARKS, MARK_ORDER, seedBoard } from './data/board.js';
+import { BOARD_ROWS, BRUSH_ROWS, ENGINE_ROWS, MARKS, MARK_ORDER, seedBoard } from './data/board.js';
 import { BellyEditor, FootprintEditor } from './components/BrushShape.jsx';
 
 // Everything physical - brush size, thread spacing - is now stated in
@@ -126,6 +126,7 @@ export default function App() {
   const [brush, setBrush] = useState('disc');
   const [brushAngle, setBrushAngle] = useState(0);
   const [sheet, setSheet] = useState(0);
+  const [charge, setCharge] = useState(null);
   const [detail, setDetail] = useState('standard');
   const [boardOpen, setBoardOpen] = useState(false);
   const [drawn, setDrawn] = useState(null);
@@ -232,7 +233,11 @@ export default function App() {
         engine.step(dt);
         engine.render(canvas.getContext('2d'), canvas);
         sinceReadout += dt;
-        if (sinceReadout > 0.16) { sinceReadout = 0; setReadout(engine.readout()); }
+        if (sinceReadout > 0.16) {
+          sinceReadout = 0;
+          setReadout(engine.readout());
+          setCharge(engine.hasReservoir() ? engine.brushCharge() : null);
+        }
       }
       raf = requestAnimationFrame(frame);
     };
@@ -282,6 +287,17 @@ export default function App() {
     }
   }, []);
 
+  /** The engine's own rows: one shared set, not per brush. */
+  const setEngineMark = (rowId, mark) => {
+    if (!board) return;
+    const now = new Date().toISOString();
+    persistBoard({
+      ...board,
+      updatedAt: now,
+      engine: { ...(board.engine || {}), [rowId]: { ...((board.engine || {})[rowId] || {}), mark, decidedAt: now } },
+    });
+  };
+
   const setBrushMark = (rowId, mark) => {
     if (!board) return;
     const now = new Date().toISOString();
@@ -290,8 +306,8 @@ export default function App() {
       updatedAt: now,
       brushes: {
         ...(board.brushes || {}),
-        [brush]: {
-          ...((board.brushes || {})[brush] || {}),
+        [brushKey]: {
+          ...((board.brushes || {})[brushKey] || {}),
           [rowId]: { ...(((board.brushes || {})[brush] || {})[rowId] || {}), mark, decidedAt: now },
         },
       },
@@ -406,7 +422,11 @@ export default function App() {
       },
       measurements: snapshot.measurements,
       review: { rating, decision, behavior: behavior.trim(), notes: notes.trim() },
-      board: { paint: board?.rows?.[material] || null, tool: board?.brushes?.[brush] || null },
+      board: {
+        paint: board?.rows?.[material] || null,
+        engine: board?.engine || null,
+        tool: board?.brushes?.[brushKey] || null,
+      },
       provenance: engine.profile().provenance,
       image: canvas.toDataURL('image/png'),
     };
@@ -430,8 +450,10 @@ export default function App() {
 
   const rows = BOARD_ROWS[material] || [];
   const marks = board?.rows?.[material] || {};
-  const brushRows = BRUSH_ROWS[brush] || [];
-  const brushMarks = board?.brushes?.[brush] || {};
+  const brushKey = drawn ? 'custom' : brush;
+  const brushRows = BRUSH_ROWS[brushKey] || [];
+  const brushMarks = board?.brushes?.[brushKey] || {};
+  const engineMarks = board?.engine || {};
 
   return (
     <div
@@ -537,6 +559,19 @@ export default function App() {
               Force dry
             </Button>
           </div>
+          <div className="mt-2 flex gap-2">
+            <Button
+              className={BTN + ' flex-1'}
+              isDisabled={!ready}
+              onPress={() => { engineRef.current?.dipBrush(load); setStatus(null); }}
+            >
+              Dip the brush
+            </Button>
+          </div>
+          <p className={HINT + ' mt-2'}>
+            A drawn brush holds a finite amount and runs dry. Pigment load is how
+            much it picks up when you dip. The disc is bottomless, as it always was.
+          </p>
         </section>
       </div>
 
@@ -561,6 +596,7 @@ export default function App() {
             <span>{grid.width}×{grid.height} cells · 80 mm sheet</span>
             <span>{action === 'draw' ? 'drawing material' : 'smudging what is there'}</span>
             <span>{sheet === 0 ? 'reference sheet' : `sheet #${sheet}`}</span>
+            {charge !== null && <span>brush {Math.round(charge * 100)}% loaded</span>}
           </div>
         </div>
       </div>
@@ -576,7 +612,7 @@ export default function App() {
           <span className="font-mono text-[9px] text-ink3">{boardOpen ? '▾' : '▴'}</span>
           <span className="font-mono text-[9px] uppercase tracking-[0.13em] text-ink3">The board</span>
           <span className="flex items-center gap-3">
-            {[[rows, marks], [brushRows, brushMarks]].map(([groupRows, groupMarks], i) => {
+            {[[rows, marks], [ENGINE_ROWS, engineMarks], [brushRows, brushMarks]].map(([groupRows, groupMarks], i) => {
               const tally = groupRows.reduce((count, row) => {
                 const mark = groupMarks[row.id]?.mark || row.seed;
                 count[mark] = (count[mark] || 0) + 1;
@@ -610,7 +646,7 @@ export default function App() {
                 </span>
               ))}
             </div>
-            <div className="grid gap-x-7 gap-y-5 lg:grid-cols-3 lg:[&>section+section]:border-l lg:[&>section+section]:border-rule lg:[&>section+section]:pl-7">
+            <div className="grid gap-x-7 gap-y-5 lg:grid-cols-4 lg:[&>section+section]:border-l lg:[&>section+section]:border-rule lg:[&>section+section]:pl-7">
               <BoardGroup
                 title="The paint"
                 subject={materials.find((m) => m.id === material)?.name}
@@ -620,7 +656,15 @@ export default function App() {
               />
 
               <BoardGroup
-                title="The tool"
+                title="The brush engine"
+                subject="shared by every brush"
+                rows={ENGINE_ROWS}
+                marks={engineMarks}
+                onMark={setEngineMark}
+              />
+
+              <BoardGroup
+                title="This brush"
                 subject={brushes.find((b) => b.id === brush)?.name}
                 rows={brushRows}
                 marks={brushMarks}

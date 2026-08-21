@@ -427,10 +427,10 @@ const defaultTool = new SharedSolver(60, 60, PROFILES.oil, SUBSTRATES.coldPress)
 assert(defaultTool.getBrush().kind === 'disc', 'a solver must reach for the disc unless told otherwise');
 
 // A golden mark, so any future change to the disc footprint is caught here.
-const goldenDisc = new SharedSolver(120, 90, PROFILES.oil, SUBSTRATES.coldPress);
+const goldenDisc = new SharedSolver(190, 140, PROFILES.oil, SUBSTRATES.coldPress); // the disc's own reference grid
 goldenDisc.clear(0);
-goldenDisc.depositSegment(72, 180, 408, 151, 480, 360, .68, 1, .42, .9);
-assert(Math.abs(goldenDisc.metrics().deposited_pigment - 81.7515) < .01,
+goldenDisc.depositSegment(114, 280, 646, 252, 760, 560, .68, 1, .42, .9);
+assert(Math.abs(goldenDisc.metrics().deposited_pigment - 128.4830) < .01,
   'the disc footprint must keep laying exactly the paint it always has (got ' + goldenDisc.metrics().deposited_pigment.toFixed(4) + ')');
 
 // Geometry only. A brush may never carry a look.
@@ -816,5 +816,85 @@ afterLift.headFollow(300, 10, 200, 1);
 afterLift.liftBrush();
 const restart = afterLift.headFollow(50, 200, 0, 1);
 assert(restart.x === 50 && restart.y === 200, 'lifting the brush must let the next stroke start where it is put');
+
+/* ---- the brush holds paint, and runs out -------------------------------- */
+
+const strokeOn = (solver, row) => {
+  const before = solver.metrics().deposited_pigment;
+  solver.depositSegment(380 * 4 * .15, 280 * 4 * row, 380 * 4 * .85, 280 * 4 * row, 380 * 4, 280 * 4, .75, 1, .3, .8, 0);
+  return solver.metrics().deposited_pigment - before;
+};
+
+const loaded = new SharedSolver(380, 280, PROFILES.oil, SUBSTRATES.coldPress);
+loaded.setBrush('filbert');
+loaded.clear(0);
+assert(loaded.hasReservoir(), 'a drawn brush must hold a finite amount of paint');
+assert(loaded.brushCharge() === 1, 'a brush must come to the sheet loaded, not dry');
+
+const laid = [.25, .36, .47, .58].map((row) => strokeOn(loaded, row));
+assert(laid[0] > 400, 'the first stroke must lay a full load of paint');
+assert(laid[2] < laid[0] * .5, 'a brush running low must lay less (' + laid.map((v) => v.toFixed(0)).join(', ') + ')');
+assert(laid[3] === 0, 'an empty brush must lay nothing at all');
+assert(loaded.brushCharge() === 0, 'an empty brush must read empty');
+assert(loaded.metrics().pigment_conservation_error < 1, 'running a brush dry must still conserve pigment');
+
+// dipping brings it back, and brings paint into the world rather than conjuring it
+const beforeDip = loaded.metrics().deposited_pigment + loaded.charge;
+const taken = loaded.dipBrush(1);
+assert(taken > 0 && loaded.brushCharge() === 1, 'dipping must refill the brush');
+assert(Math.abs(loaded.metrics().pigment_conservation_error) < 1, 'dipping must keep the ledger honest');
+assert(strokeOn(loaded, .69) > 400, 'a freshly dipped brush must paint at full strength again');
+assert(beforeDip < loaded.metrics().deposited_pigment + loaded.charge, 'dipping must add paint, not move it');
+
+// Dipping brings paint into the world from the palette, so the ledger has to
+// grow by exactly what was taken up. The conservation error alone cannot catch
+// this: with nothing yet on the sheet it divides by zero and reads clean.
+const ledgerOnDip=new SharedSolver(120,90,PROFILES.oil,SUBSTRATES.coldPress);
+ledgerOnDip.setBrush('filbert');
+ledgerOnDip.clear(0);
+assert(Math.abs(ledgerOnDip.initialPigment-ledgerOnDip.charge)<1e-6,
+  'a dipped brush must put its paint on the books ('+ledgerOnDip.initialPigment.toFixed(2)+' on the books, '+ledgerOnDip.charge.toFixed(2)+' on the hair)');
+const booksBefore=ledgerOnDip.initialPigment;
+ledgerOnDip.charge=0;
+const tookUp=ledgerOnDip.dipBrush(1);
+assert(Math.abs((ledgerOnDip.initialPigment-booksBefore)-tookUp)<1e-6,
+  'a second dip must add exactly what it took up to the books');
+
+// a half dip is half a brush
+const half = new SharedSolver(380, 280, PROFILES.oil, SUBSTRATES.coldPress);
+half.setBrush('filbert');
+half.clear(0);
+half.charge = 0;
+half.dipBrush(.5);
+assert(Math.abs(half.brushCharge() - .5) < 1e-9, 'a half dip must leave the brush half full');
+
+// the disc is bottomless, exactly as every earlier review found it
+const bottomless = new SharedSolver(380, 280, PROFILES.oil, SUBSTRATES.coldPress);
+bottomless.clear(0);
+assert(!bottomless.hasReservoir(), 'the disc must declare no capacity rather than a fake one');
+assert(bottomless.brushCapacity() === Infinity, 'the disc must never run out');
+const discLaid = [.25, .36, .47, .58].map((row) => strokeOn(bottomless, row));
+assert(discLaid[3] > discLaid[0] * .8, 'the disc must lay the same paint on its fourth stroke as its first');
+
+/* ---- and paint is laid per millimetre, not per contact ------------------ */
+
+// The same gesture used to lay 454 units on a 190-cell grid and 9674 on a
+// 570-cell one, purely because a finer grid stamps more contacts along the same
+// path. Marks got heavier every time the resolution went up.
+const paintFor = (grid, brush) => {
+  const height = Math.round(grid * .737);
+  const solver = new SharedSolver(grid, height, PROFILES.oil, SUBSTRATES.coldPress);
+  solver.setBrush(brush);
+  solver.clear(0);
+  solver.dipBrush(1);
+  solver.charge = Infinity; // measure the gesture, not the reservoir
+  solver.depositSegment(grid * 4 * .15, height * 4 * .5, grid * 4 * .85, height * 4 * .5, grid * 4, height * 4, .75, 1, .3, .8, 0);
+  return solver.metrics().deposited_pigment;
+};
+for (const brush of ['disc', 'filbert', 'flat']) {
+  const coarse = paintFor(190, brush), fine = paintFor(570, brush);
+  assert(fine < coarse * 1.35 && fine > coarse * .7,
+    brush + ' must lay about the same paint however fine the grid is (' + coarse.toFixed(0) + ' against ' + fine.toFixed(0) + ')');
+}
 
 console.log('shared solver checks passed');

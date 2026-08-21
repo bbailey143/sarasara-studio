@@ -88,14 +88,14 @@
       id:'brush.filbert.drawn.v0.1',name:'Filbert',version:'0.1.0',kind:'shape',
       outline:[[1,0],[0.9791,0.1258],[0.9168,0.2194],[0.8146,0.2968],[0.6746,0.3584],[0.4987,0.4034],[0.2859,0.4308],[0,0.44],[-0.2859,0.4308],[-0.4987,0.4034],[-0.6746,0.3584],[-0.8146,0.2968],[-0.9168,0.2194],[-0.9791,0.1258],[-1,0],[-0.9791,-0.1258],[-0.9168,-0.2194],[-0.8146,-0.2968],[-0.6746,-0.3584],[-0.4987,-0.4034],[-0.2859,-0.4308],[0,-0.44],[0.2859,-0.4308],[0.4987,-0.4034],[0.6746,-0.3584],[0.8146,-0.2968],[0.9168,-0.2194],[0.9791,-0.1258]],
       widthMm:12,belly:[{p:0,contact:.30},{p:.35,contact:.58},{p:.7,contact:.86},{p:1,contact:1}],
-      softness:.52,stiffness:.55,
+      softness:.52,stiffness:.55,capacity:1150,
       provenance:[{status:'stand-in',note:'Hand-authored outline for the first drawn-brush pass. Shape only; the belly curve and edge softness are unmeasured.'}]
     },
     flat:{
       id:'brush.flat.drawn.v0.1',name:'Flat',version:'0.1.0',kind:'shape',
       outline:[[1,0],[0.9936,0.116],[0.974,0.1452],[0.9403,0.1644],[0.8909,0.1782],[0.8221,0.1881],[0.726,0.1948],[0.58,0.1987],[0,0.2],[-0.58,0.1987],[-0.726,0.1948],[-0.8221,0.1881],[-0.8909,0.1782],[-0.9403,0.1644],[-0.974,0.1452],[-0.9936,0.116],[-1,0],[-0.9936,-0.116],[-0.974,-0.1452],[-0.9403,-0.1644],[-0.8909,-0.1782],[-0.8221,-0.1881],[-0.726,-0.1948],[-0.58,-0.1987],[0,-0.2],[0.58,-0.1987],[0.726,-0.1948],[0.8221,-0.1881],[0.8909,-0.1782],[0.9403,-0.1644],[0.974,-0.1452],[0.9936,-0.116]],
       widthMm:12,belly:[{p:0,contact:.34},{p:.4,contact:.66},{p:1,contact:1}],
-      softness:.30,stiffness:.78,
+      softness:.30,stiffness:.78,capacity:520,
       provenance:[{status:'stand-in',note:'Hand-authored outline for the first drawn-brush pass. Deliberately far from round so direction is obvious.'}]
     }
   };
@@ -200,7 +200,7 @@
     getCalibration(){return calibrationCopy(this.calibration)}
     transformPressure(value){return interpolatePressure(this.calibration.curve,value)}
     calibratedSpeed(value){return Math.max(.1,Math.min(2,.1+(Math.max(.1,Math.min(2,Number(value)||.1))-.1)*this.calibration.speed))}
-    setProfile(profile){this.profile=validateProfile(profile);this.p=profile.state;this.displayGain=profile.display?.pigment_visibility_gain||1;this.water=new Float32Array(this.n);this.mobile=new Float32Array(this.n);this.deposited=new Float32Array(this.n);this.loose=new Float32Array(this.n);this.looseVx=new Float32Array(this.n);this.looseVy=new Float32Array(this.n);this.nextLoose=new Float32Array(this.n);this.nextLooseMx=new Float32Array(this.n);this.nextLooseMy=new Float32Array(this.n);this.coarse=new Float32Array(this.n);this.coarseVx=new Float32Array(this.n);this.coarseVy=new Float32Array(this.n);this.nextCoarse=new Float32Array(this.n);this.nextCoarseMx=new Float32Array(this.n);this.nextCoarseMy=new Float32Array(this.n);this.fineDust=new Float32Array(this.n);this.fineDustVx=new Float32Array(this.n);this.fineDustVy=new Float32Array(this.n);this.nextFineDust=new Float32Array(this.n);this.nextFineDustMx=new Float32Array(this.n);this.nextFineDustMy=new Float32Array(this.n);this.absorbed=new Float32Array(this.n);this.nextWater=new Float32Array(this.n);this.nextMobile=new Float32Array(this.n);this.nextDeposited=new Float32Array(this.n);this.initialPigment=0;this.lostPigment=0;this.relocatedPigment=0;this.pressureAnchoredPigment=0;this.sourceOfferedPigment=0;this.sourceRemainingPigment=0;this.coarseCreatedPigment=0;this.fineCreatedPigment=0;this.carriedPigment=0;this.dryBoost=1;this.elapsed=0}
+    setProfile(profile){this.profile=validateProfile(profile);this.p=profile.state;this.displayGain=profile.display?.pigment_visibility_gain||1;this.water=new Float32Array(this.n);this.mobile=new Float32Array(this.n);this.deposited=new Float32Array(this.n);this.loose=new Float32Array(this.n);this.looseVx=new Float32Array(this.n);this.looseVy=new Float32Array(this.n);this.nextLoose=new Float32Array(this.n);this.nextLooseMx=new Float32Array(this.n);this.nextLooseMy=new Float32Array(this.n);this.coarse=new Float32Array(this.n);this.coarseVx=new Float32Array(this.n);this.coarseVy=new Float32Array(this.n);this.nextCoarse=new Float32Array(this.n);this.nextCoarseMx=new Float32Array(this.n);this.nextCoarseMy=new Float32Array(this.n);this.fineDust=new Float32Array(this.n);this.fineDustVx=new Float32Array(this.n);this.fineDustVy=new Float32Array(this.n);this.nextFineDust=new Float32Array(this.n);this.nextFineDustMx=new Float32Array(this.n);this.nextFineDustMy=new Float32Array(this.n);this.absorbed=new Float32Array(this.n);this.nextWater=new Float32Array(this.n);this.nextMobile=new Float32Array(this.n);this.nextDeposited=new Float32Array(this.n);this.initialPigment=0;this.lostPigment=0;this.relocatedPigment=0;this.pressureAnchoredPigment=0;this.sourceOfferedPigment=0;this.sourceRemainingPigment=0;this.coarseCreatedPigment=0;this.fineCreatedPigment=0;this.carriedPigment=0;this.charge=0;this.dryBoost=1;this.elapsed=0}
     /**
      * Every sheet off the pad is a little different. Sheet 0 is the reference
      * sheet - bit-for-bit what this paper has always been - so nothing already
@@ -221,6 +221,35 @@
      * is not simulated - so they are deliberately absent rather than present
      * and inert.
      */
+    /**
+     * The reservoir.
+     *
+     * A brush holds paint and runs out.
+     *
+     * Loaded paint lives in `charge`, separately from `carriedPigment`, which is
+     * material scraped up off the sheet. Physically they are the same paint on the
+     * same hair and should be one store - but the smear path lays carried material
+     * back down on every contact, so uniting them empties a loaded brush through
+     * the wrong door. Merging them properly means reworking how a body lays paint,
+     * and that is its own piece of work. Recorded as a simplification, not a fact.
+     *
+     * A brush that declares no capacity is bottomless - which is what the disc
+     * has always been, and what every material review before now was painted
+     * with. Dipping brings paint into the world; painting moves it from the hair
+     * to the sheet and creates nothing.
+     */
+    hasReservoir(){const c=Number(this.getBrush().capacity);return Number.isFinite(c)&&c>0}
+    brushCapacity(){const c=Number(this.getBrush().capacity);return Number.isFinite(c)&&c>0?c:Infinity}
+    dipBrush(fill=1){
+      if(!this.hasReservoir()){this.charge=0;return 0}
+      const want=this.brushCapacity()*Math.max(0,Math.min(1,fill));
+      const taken=Math.max(0,want-this.charge);
+      this.charge+=taken;
+      this.initialPigment+=taken;
+      return taken;
+    }
+    /** 0..1, for a readout and for fading a stroke as the hair empties. */
+    brushCharge(){return this.hasReservoir()?Math.max(0,Math.min(1,this.charge/this.brushCapacity())):1}
     liftBrush(){this.headX=null;this.headY=null}
     headFollow(targetX,targetY,stepCells,speed){
       const tool=this.getBrush(),stiffness=Number(tool.stiffness);
@@ -255,13 +284,13 @@
         slub:1+roll(4)*.22     /* this bolt was spun a bit unevenly */
       };
     }
-    setBrush(brush){this.brush=brush&&BRUSHES[brush]?BRUSHES[brush]:(brush&&brush.kind?brush:BRUSHES.disc);if(this.brush.kind==='shape')bakeBrush(this.brush);return this.brush}
+    setBrush(brush){this.brush=brush&&BRUSHES[brush]?BRUSHES[brush]:(brush&&brush.kind?brush:BRUSHES.disc);if(this.brush.kind==='shape')bakeBrush(this.brush);this.dipBrush(1);return this.brush}
     getBrush(){return this.brush||BRUSHES.disc}
     setSubstrate(substrate){this.substrate=validateSubstrate(substrate);this.s=substrate.state;this.buildPaperSurface()}
     getSheet(){return this.sheetSeed||0}
     setSmoothing(enabled){this.smoothing=enabled!==false}
     setDisplayGain(value){this.displayGain=Math.max(1,Math.min(12,Number(value)||1))}
-    clear(substrateDampness=0){const saturation=this.regime()==='flowing'?Math.max(0,Math.min(1,substrateDampness))*this.s['SUBI-003']:0;this.water.fill(0);this.mobile.fill(0);this.deposited.fill(0);this.loose.fill(0);this.looseVx.fill(0);this.looseVy.fill(0);this.coarse.fill(0);this.coarseVx.fill(0);this.coarseVy.fill(0);this.fineDust.fill(0);this.fineDustVx.fill(0);this.fineDustVy.fill(0);this.absorbed.fill(saturation);this.initialPigment=0;this.lostPigment=0;this.relocatedPigment=0;this.pressureAnchoredPigment=0;this.sourceOfferedPigment=0;this.sourceRemainingPigment=0;this.coarseCreatedPigment=0;this.fineCreatedPigment=0;this.carriedPigment=0;this.dryBoost=1;this.elapsed=0}
+    clear(substrateDampness=0){const saturation=this.regime()==='flowing'?Math.max(0,Math.min(1,substrateDampness))*this.s['SUBI-003']:0;this.water.fill(0);this.mobile.fill(0);this.deposited.fill(0);this.loose.fill(0);this.looseVx.fill(0);this.looseVy.fill(0);this.coarse.fill(0);this.coarseVx.fill(0);this.coarseVy.fill(0);this.fineDust.fill(0);this.fineDustVx.fill(0);this.fineDustVy.fill(0);this.absorbed.fill(saturation);this.initialPigment=0;this.lostPigment=0;this.relocatedPigment=0;this.pressureAnchoredPigment=0;this.sourceOfferedPigment=0;this.sourceRemainingPigment=0;this.coarseCreatedPigment=0;this.fineCreatedPigment=0;this.carriedPigment=0;this.charge=0;this.dryBoost=1;this.elapsed=0;this.dipBrush(1)}
     regime(){const yieldStress=Number(this.p['RHEO-002']);if(Number.isFinite(yieldStress)&&yieldStress>0)return'body';return this.p['COMP-001']<.02?'granular':'flowing'}
     hasYieldingBody(){return this.regime()==='body'}
     reliefHeight(index){const packing=Math.max(.05,Math.min(1,Number(this.p['DEPO-004'])||.05)),density=Math.max(.05,Math.min(1,Number(this.p['PART-002'])||.05));return this.deposited[index]/(packing*density)}
@@ -350,6 +379,9 @@
     addDisk(cx,cy,radius,water,pigment,pressure,speed,brushMoisture,strokeX=0,strokeY=0,sweep=1,shape=null){
       const regime=this.regime(),body=regime==='body',dry=regime==='granular',rough=this.s['SUBI-001'];
       let addedPigment=0;
+      /* Infinity for a bottomless tool, so its path is exactly as it always was. */
+      let budget=this.hasReservoir()?Math.max(0,this.charge):Infinity;
+      if(budget<=0)return;
       const x0=Math.max(0,Math.floor(cx-radius)),x1=Math.min(this.w-1,Math.ceil(cx+radius)),y0=Math.max(0,Math.floor(cy-radius)),y1=Math.min(this.h-1,Math.ceil(cy+radius));
       for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
         const dx=(x-cx)/radius,dy=(y-cy)/radius;
@@ -359,19 +391,23 @@
         if(cover<=0)continue;
         const k=cover*this.p['DEPO-001'],i=y*this.w+x;
         if(body){
-          const relief=this.reliefHeight(i),amount=pigment*k/(1+relief*.55);
+          const relief=this.reliefHeight(i);
+          const amount=Math.min(budget,pigment*k/(1+relief*.55));
+          budget-=amount;
           this.deposited[i]+=amount;addedPigment+=amount;
           this.smearBody(i,pressure,sweep);
         }
-        else if(dry){const tooth=this.tooth(x,y),texturePressure=Math.max(0,Math.min(1,pressure*this.calibration.paperTexture)),gestureSpeed=this.calibratedSpeed(speed),contact=tooth*.72+texturePressure*.48,potential=pigment*k,particleDensity=Math.max(0,Math.min(1,Number(this.p['PART-002'])||0)),shape=Math.max(0,Math.min(1,Number(this.p['PART-003'])||0)),grain=this.noise(x*1.91,y*2.37,this.substrate.texture.seed+1231),coverage=Math.max(.12,Math.min(.92,.02+texturePressure*.34+particleDensity*.18+tooth*.5-shape*.08));this.sourceOfferedPigment+=potential;if(contact<.34||grain>coverage||(gestureSpeed>1.05&&contact<.58&&((x+y)%3===0))){this.sourceRemainingPigment+=potential;continue}const captureVariation=.58+grain*.78,amount=Math.min(potential,potential*(.16+tooth*.32+particleDensity*.14)*captureVariation),split=this.fractureSplit(pressure,speed,tooth),coarseMass=amount*split.coarse,fineMass=amount*split.fine,settledMass=Math.max(0,amount-coarseMass-fineMass),side=this.noise(x,y,this.substrate.texture.seed+997)*2-1,normalX=-strokeY,normalY=strokeX,coarseSpeed=.7+pressure*.85+gestureSpeed*.45,fineSpeed=2+pressure*1.3+gestureSpeed*2.1;this.sourceRemainingPigment+=potential-amount;this.deposited[i]+=settledMass;this.addParticlePopulation(coarseMass,i,strokeX*coarseSpeed+normalX*side*.35,strokeY*coarseSpeed+normalY*side*.35,this.coarse,this.coarseVx,this.coarseVy);this.addParticlePopulation(fineMass,i,strokeX*fineSpeed+normalX*side,strokeY*fineSpeed+normalY*side,this.fineDust,this.fineDustVx,this.fineDustVy);this.coarseCreatedPigment+=coarseMass;this.fineCreatedPigment+=fineMass;addedPigment+=amount}
+        else if(dry){const tooth=this.tooth(x,y),texturePressure=Math.max(0,Math.min(1,pressure*this.calibration.paperTexture)),gestureSpeed=this.calibratedSpeed(speed),contact=tooth*.72+texturePressure*.48,potential=pigment*k,particleDensity=Math.max(0,Math.min(1,Number(this.p['PART-002'])||0)),shape=Math.max(0,Math.min(1,Number(this.p['PART-003'])||0)),grain=this.noise(x*1.91,y*2.37,this.substrate.texture.seed+1231),coverage=Math.max(.12,Math.min(.92,.02+texturePressure*.34+particleDensity*.18+tooth*.5-shape*.08));this.sourceOfferedPigment+=potential;if(contact<.34||grain>coverage||(gestureSpeed>1.05&&contact<.58&&((x+y)%3===0))){this.sourceRemainingPigment+=potential;continue}const captureVariation=.58+grain*.78,amount=Math.min(budget,Math.min(potential,potential*(.16+tooth*.32+particleDensity*.14)*captureVariation)),split=this.fractureSplit(pressure,speed,tooth),coarseMass=amount*split.coarse,fineMass=amount*split.fine,settledMass=Math.max(0,amount-coarseMass-fineMass),side=this.noise(x,y,this.substrate.texture.seed+997)*2-1,normalX=-strokeY,normalY=strokeX,coarseSpeed=.7+pressure*.85+gestureSpeed*.45,fineSpeed=2+pressure*1.3+gestureSpeed*2.1;this.sourceRemainingPigment+=potential-amount;this.deposited[i]+=settledMass;this.addParticlePopulation(coarseMass,i,strokeX*coarseSpeed+normalX*side*.35,strokeY*coarseSpeed+normalY*side*.35,this.coarse,this.coarseVx,this.coarseVy);this.addParticlePopulation(fineMass,i,strokeX*fineSpeed+normalX*side,strokeY*fineSpeed+normalY*side,this.fineDust,this.fineDustVx,this.fineDustVy);this.coarseCreatedPigment+=coarseMass;this.fineCreatedPigment+=fineMass;budget-=amount;addedPigment+=amount}
         else{
           const tooth=this.tooth(x,y),capacity=Math.max(.001,this.s['SUBI-003']),surfaceMobility=Math.max(0,Math.min(1,(this.water[i]+water*k)/.12)),paperMobility=.6*Math.max(0,Math.min(1,this.absorbed[i]/capacity)),contactWetness=1-(1-surfaceMobility)*(1-paperMobility),dryShare=Math.pow(1-contactWetness,1.35);
           const texturePressure=Math.max(0,Math.min(1,pressure*this.calibration.paperTexture)),gestureSpeed=this.calibratedSpeed(speed),toothContact=Math.max(0,Math.min(1,(tooth+texturePressure*.45-.5)/.45)),speedContact=Math.max(.35,Math.min(1,1.08-Math.max(0,gestureSpeed-.4)*.12+pressure*.08)),contact=(1-dryShare)+dryShare*toothContact*speedContact;
-          const amount=pigment*k*contact,mobileAmount=amount*contactWetness;
+          const amount=Math.min(budget,pigment*k*contact),mobileAmount=amount*contactWetness;
+          budget-=amount;
           this.water[i]=Math.min(2.5,this.water[i]+water*k);this.mobile[i]+=mobileAmount;this.deposited[i]+=amount-mobileAmount;addedPigment+=amount;
         }
       }
-      this.initialPigment+=addedPigment;
+      if(this.hasReservoir())this.charge=Math.max(0,this.charge-addedPigment);
+      else this.initialPigment+=addedPigment;
     }
     depositSegment(ax,ay,bx,by,canvasW,canvasH,pressure,pigmentLoad,brushWater,speed,brushAngle=0){
       pressure=this.transformPressure(pressure);
@@ -384,13 +420,32 @@
          before drawn brushes existed used it at 190 cells, and giving it millimetres
          now would move those results. Drawn brushes carry a real size instead. */
       radius=shape?(tool.widthMm||10)*.5*perMm:(1.2+pressure*2.6+brushWater*1.8),regime=this.regime(),water=regime==='body'?0:Math.pow(brushWater,1.85)*.36*carrier;
-      const availablePigment=regime==='body'?(.03+pressure*.14)*(pigmentFraction||1):carrier>.02?(.05+pressure*.16)*pigmentFraction:(.012+pressure*.04)*(pigmentFraction||1),pigment=availablePigment*pigmentLoad;
+      const charge=this.hasReservoir()?Math.min(1,this.brushCharge()/.3):1;
+      const availablePigment=regime==='body'?(.03+pressure*.14)*(pigmentFraction||1):carrier>.02?(.05+pressure*.16)*pigmentFraction:(.012+pressure*.04)*(pigmentFraction||1),pigment=availablePigment*pigmentLoad*charge;
       const ux=d>.001?(x1-x0)/d:0,uy=d>.001?(y1-y0)/d:0;const sweep=radius>0?Math.min(1,(d/Math.max(1,steps))/(2*radius)):1;
       const stepCells=d/Math.max(1,steps);
+      /* Paint is laid per millimetre travelled, not per contact sampled.
+         Without this the same gesture lays more paint on a finer grid, simply
+         because more discs get stamped along the same path - measured at 454
+         units on a 190-cell grid against 9674 on a 570-cell one. The reference
+         is the 190-cell grid the material constants were tuned on, so that
+         resolution is unchanged and every finer one now matches it. */
+      /* Nominal contact spacing, not the spacing after rounding to whole steps.
+         Using the rounded value never lands exactly on 1 at the reference grid,
+         which shifts every already-approved mark by a tenth of a percent. */
+      const REFERENCE_CELLS_PER_MM=190/SHEET_WIDTH_MM;
+      const perStep=Math.min(4,REFERENCE_CELLS_PER_MM/perMm);
+      /* A physically sized head covers the same millimetres however fine the
+         grid is, so a finer grid puts more cells under it and each must take
+         proportionally less. The disc is sized in cells and has no real area,
+         so it gets no such correction - off its own reference grid it is simply
+         undefined, which is what being a frozen reference means. */
+      const perArea=shape?Math.pow(REFERENCE_CELLS_PER_MM/perMm,2):1;
+      const laidPigment=pigment*perStep*perArea,laidWater=water*perStep*perArea;
       for(let s=0;s<=steps;s++){
         const t=s/steps;
         const head=this.headFollow(x0+(x1-x0)*t,y0+(y1-y0)*t,s===0?0:stepCells,speed);
-        this.addDisk(head.x,head.y,radius,water,pigment,pressure,speed,brushWater,ux,uy,sweep,shape);
+        this.addDisk(head.x,head.y,radius,laidWater,laidPigment,pressure,speed,brushWater,ux,uy,sweep,shape);
       }
     }
     smudgeSegment(ax,ay,bx,by,canvasW,canvasH,pressure,speed){
@@ -453,7 +508,7 @@
       if(this.dryBoost>1)this.dryBoost=Math.max(1,this.dryBoost-dt*4);
     }
     dry(){this.dryBoost=35}
-    metrics(){let water=0,mobile=0,deposited=0,loose=0,coarse=0,fine=0,absorbed=0,wetCells=0,pigmentCells=0;for(let i=0;i<this.n;i++){water+=this.water[i];mobile+=this.mobile[i];deposited+=this.deposited[i];loose+=this.loose[i];coarse+=this.coarse[i];fine+=this.fineDust[i];absorbed+=this.absorbed[i];if(this.water[i]>.008||this.absorbed[i]>.008)wetCells++;if(this.mobile[i]+this.deposited[i]+this.loose[i]+this.coarse[i]+this.fineDust[i]>.0001)pigmentCells++}const pigment=mobile+deposited+loose+coarse+fine+this.carriedPigment,error=this.initialPigment?Math.abs(this.initialPigment-pigment-this.lostPigment)/this.initialPigment:0;return{water,wet_area_fraction:wetCells/this.n,pigment_area_fraction:pigmentCells/this.n,mobile_pigment:mobile,deposited_pigment:deposited,settled_pigment:deposited,loose_pigment:loose,coarse_fragment_pigment:coarse,fine_dust_pigment:fine,coarse_fragment_created:this.coarseCreatedPigment,fine_dust_created:this.fineCreatedPigment,source_offered_pigment:this.sourceOfferedPigment,source_remaining_pigment:this.sourceRemainingPigment,lost_off_canvas_pigment:this.lostPigment,absorbed_water:absorbed,carried_pigment:this.carriedPigment,relocated_pigment:this.relocatedPigment,pressure_anchored_pigment:this.pressureAnchoredPigment,pigment_conservation_error:error}}
+    metrics(){let water=0,mobile=0,deposited=0,loose=0,coarse=0,fine=0,absorbed=0,wetCells=0,pigmentCells=0;for(let i=0;i<this.n;i++){water+=this.water[i];mobile+=this.mobile[i];deposited+=this.deposited[i];loose+=this.loose[i];coarse+=this.coarse[i];fine+=this.fineDust[i];absorbed+=this.absorbed[i];if(this.water[i]>.008||this.absorbed[i]>.008)wetCells++;if(this.mobile[i]+this.deposited[i]+this.loose[i]+this.coarse[i]+this.fineDust[i]>.0001)pigmentCells++}const pigment=mobile+deposited+loose+coarse+fine+this.carriedPigment+(this.charge||0),error=this.initialPigment?Math.abs(this.initialPigment-pigment-this.lostPigment)/this.initialPigment:0;return{water,wet_area_fraction:wetCells/this.n,pigment_area_fraction:pigmentCells/this.n,mobile_pigment:mobile,deposited_pigment:deposited,settled_pigment:deposited,loose_pigment:loose,coarse_fragment_pigment:coarse,fine_dust_pigment:fine,coarse_fragment_created:this.coarseCreatedPigment,fine_dust_created:this.fineCreatedPigment,source_offered_pigment:this.sourceOfferedPigment,source_remaining_pigment:this.sourceRemainingPigment,lost_off_canvas_pigment:this.lostPigment,absorbed_water:absorbed,carried_pigment:this.carriedPigment,brush_charge:this.charge||0,relocated_pigment:this.relocatedPigment,pressure_anchored_pigment:this.pressureAnchoredPigment,pigment_conservation_error:error}}
     render(target,canvas){
       const data=this.image.data,renderRegime=this.regime(),body=renderRegime==='body',dry=renderRegime==='granular';
       for(let i=0;i<this.n;i++){
