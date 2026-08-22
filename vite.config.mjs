@@ -136,6 +136,15 @@ function studioBridge() {
 export default defineConfig({
   root: 'studio',
   plugins: [react(), tailwindcss(), studioBridge()],
-  server: { port: 5173, open: true },
+  server: {
+    port: 5173,
+    open: true,
+    // Bind to every interface so an iPad on the same Wi-Fi can reach the lab,
+    // and accept the hostname a Cloudflare quick tunnel hands out. Note that
+    // the bridge below writes to the repository, so anything that can reach
+    // this server can write board marks, sessions and brushes.
+    host: true,
+    allowedHosts: ['.trycloudflare.com'],
+  },
   build: { outDir: '../dist', emptyOutDir: true },
 });

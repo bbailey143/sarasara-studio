@@ -507,6 +507,54 @@ goldenDisc.depositSegment(114, 280, 646, 252, 760, 560, .68, 1, .42, .9);
 assert(Math.abs(goldenDisc.metrics().deposited_pigment - 128.4923) < .01,
   'the disc footprint must keep laying the paint it lays (got ' + goldenDisc.metrics().deposited_pigment.toFixed(4) + ')');
 
+/* ---- work that is skipped must be work there was none of ------------------
+
+   The frame loop no longer runs the water solve on a sheet with no water, or
+   the crumb and dust passes when there are no crumbs and no dust. That is a
+   large saving and a real risk: get the bookkeeping wrong and a wash quietly
+   stops moving halfway through. Both checks below are absolute - they say the
+   sheet keeps changing - rather than comparing two sheets against each other,
+   which is what let the first version of this slip through. */
+
+// a wash keeps working long after the brush has left it
+const keepsMoving = new SharedSolver(120, 90, PROFILES.watercolor, SUBSTRATES.rough);
+keepsMoving.clear(0);
+keepsMoving.depositSegment(30, 45, 90, 45, 120, 90, .6, 1, 1, .5);
+keepsMoving.step(1 / 60);
+const soakedAfterOneFrame = keepsMoving.metrics().absorbed_water;
+for (let i = 0; i < 60; i++) keepsMoving.step(1 / 60);
+const soakedAfterASecond = keepsMoving.metrics().absorbed_water;
+assert(soakedAfterASecond > soakedAfterOneFrame * 1.5,
+  'a wash must keep soaking into the paper after the brush has gone (' +
+  soakedAfterOneFrame.toFixed(3) + ' -> ' + soakedAfterASecond.toFixed(3) + ')');
+
+// and a sheet that really is dry must be left alone rather than churned
+const bone = new SharedSolver(60, 60, PROFILES.oil, SUBSTRATES.coldPress);
+bone.clear(0);
+assert(bone.wetLive === false, 'oil cannot wet the sheet, so its water solve must never run');
+const damp = new SharedSolver(60, 60, PROFILES.watercolor, SUBSTRATES.rough);
+damp.clear(1);
+assert(damp.wetLive === true, 'a sheet damped on purpose must be simulated as damp');
+
+/* ---- the paper is mixed once, so it must be re-mixed when it changes ------ */
+
+const paintedPaper = (substrate, sheet) => {
+  const solver = new SharedSolver(64, 48, PROFILES.oil, SUBSTRATES[substrate]);
+  solver.clear(0);
+  if (sheet) solver.newSheet(sheet);
+  solver.render({ save() {}, restore() {}, clearRect() {}, drawImage() {} }, { width: 64, height: 48 });
+  return Uint8ClampedArray.from(solver.image.data);
+};
+const differingChannels = (a, b) => { let n = 0; for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) n++; return n; };
+
+const onHotPress = paintedPaper("hotPress", 0), onCanvas = paintedPaper("roughCanvas", 0);
+assert(differingChannels(onHotPress, onCanvas) > onHotPress.length * .5,
+  'changing the paper must change what is on screen (' + differingChannels(onHotPress, onCanvas) + ' channels)');
+
+const firstSheet = paintedPaper("roughCanvas", 0), anotherSheet = paintedPaper("roughCanvas", 9);
+assert(differingChannels(firstSheet, anotherSheet) > firstSheet.length * .1,
+  'taking a new sheet must change what is on screen (' + differingChannels(firstSheet, anotherSheet) + ' channels)');
+
 // Geometry only. A brush may never carry a look.
 for (const key of Object.keys(BRUSHES)) {
   const brush = BRUSHES[key];
