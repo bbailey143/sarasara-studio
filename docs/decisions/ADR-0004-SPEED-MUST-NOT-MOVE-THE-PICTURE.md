@@ -77,6 +77,21 @@ on screen.
 | watercolour, standard | 55 fps | **97 fps** |
 | watercolour, finest | 18 fps | **28 fps** |
 
+## Confirmed on the device it was failing on
+
+2026-08-22, the artist, on the iPad over a tunnel to the same dev server that
+had been unusable an hour earlier:
+
+> It tests exactly how you said it would.
+
+Oil smooth, watercolour still dragging. That is the shape the desktop numbers
+predicted, which matters for more than the frame rate: it means the diagnosis
+was right. The iPad was never short of horsepower. It was doing the same
+enormous amount of nothing the desktop was, on a smaller budget.
+
+Evidence status: `artist_accepted_limited_scope`. One device, one session, not
+a range of hardware.
+
 ## What this says about the GPU
 
 Watercolour at the finest sheet is still 28 fps, and that is the honest number:
