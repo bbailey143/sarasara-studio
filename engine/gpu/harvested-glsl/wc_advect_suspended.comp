@@ -1,0 +1,91 @@
+#version 450
+// Binding watercolor Phase B: conservative suspended-pigment transport, GPU
+// half. The sequential/sign-sensitive work (the wet-boundary distance
+// transform, the drying-edge-biased flow direction, and the wetness gate) is
+// done CPU-side and handed in as a per-cell transport plan — fx, fy (the split
+// weights, already zero-gated) and hdir, vdir (+1 / -1 flow directions). This
+// shader is the pure GATHER: each output cell collects its own remainder, its
+// own reflected border share, and the shares its neighbours push into it, then
+// applies that fixed contribution list to all 19 channels (8-band K, 8-band S,
+// 3 property sums). Equal to the CPU scatter in exact arithmetic; float32 here.
+
+layout(local_size_x = 16, local_size_y = 16) in;
+
+layout(std430, binding = 0) readonly buffer Fx { float fx[]; };
+layout(std430, binding = 1) readonly buffer Fy { float fy[]; };
+layout(std430, binding = 2) readonly buffer Hdir { float hdir[]; };
+layout(std430, binding = 3) readonly buffer Vdir { float vdir[]; };
+layout(std430, binding = 4) readonly buffer KIn { float ksusIn[]; };
+layout(std430, binding = 5) readonly buffer SIn { float ssusIn[]; };
+layout(std430, binding = 6) readonly buffer PIn { float propsIn[]; };
+layout(std430, binding = 7) writeonly buffer KOut { float ksusOut[]; };
+layout(std430, binding = 8) writeonly buffer SOut { float ssusOut[]; };
+layout(std430, binding = 9) writeonly buffer POut { float propsOut[]; };
+
+layout(push_constant) uniform Push { int size; } pc;
+
+const int BANDS = 8;
+const int PROPS = 3;
+
+void main() {
+  int s = pc.size;
+  int x = int(gl_GlobalInvocationID.x);
+  int y = int(gl_GlobalInvocationID.y);
+  if (x >= s || y >= s) return;
+  int j = y * s + x;
+
+  // Build the fixed contribution list (source cell, weight) shared by every
+  // channel: at most remainder + 2 border reflections + 4 incoming = 5.
+  int src[8];
+  float wgt[8];
+  int n = 0;
+
+  src[n] = j;
+  wgt[n] = 1.0 - fx[j] - fy[j];
+  n++;
+
+  if ((x == 0 && hdir[j] < 0.0) || (x == s - 1 && hdir[j] >= 0.0)) {
+    src[n] = j;
+    wgt[n] = fx[j];
+    n++;
+  }
+  if ((y == 0 && vdir[j] < 0.0) || (y == s - 1 && vdir[j] >= 0.0)) {
+    src[n] = j;
+    wgt[n] = fy[j];
+    n++;
+  }
+  if (x > 0) {
+    int L = j - 1;
+    if (hdir[L] >= 0.0) { src[n] = L; wgt[n] = fx[L]; n++; }
+  }
+  if (x < s - 1) {
+    int R = j + 1;
+    if (hdir[R] < 0.0) { src[n] = R; wgt[n] = fx[R]; n++; }
+  }
+  if (y > 0) {
+    int D = j - s;
+    if (vdir[D] >= 0.0) { src[n] = D; wgt[n] = fy[D]; n++; }
+  }
+  if (y < s - 1) {
+    int U = j + s;
+    if (vdir[U] < 0.0) { src[n] = U; wgt[n] = fy[U]; n++; }
+  }
+
+  for (int b = 0; b < BANDS; b++) {
+    float kacc = 0.0;
+    float sacc = 0.0;
+    for (int m = 0; m < n; m++) {
+      kacc += ksusIn[src[m] * BANDS + b] * wgt[m];
+      sacc += ssusIn[src[m] * BANDS + b] * wgt[m];
+    }
+    ksusOut[j * BANDS + b] = kacc;
+    ssusOut[j * BANDS + b] = sacc;
+  }
+  for (int c = 0; c < PROPS; c++) {
+    float pacc = 0.0;
+    for (int m = 0; m < n; m++) {
+      pacc += propsIn[src[m] * PROPS + c] * wgt[m];
+    }
+    propsOut[j * PROPS + c] = pacc;
+  }
+}

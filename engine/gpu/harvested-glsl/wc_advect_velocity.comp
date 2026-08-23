@@ -1,0 +1,51 @@
+#version 450
+// Binding watercolor Phase B1: velocity carries itself forward through a
+// semi-Lagrangian bilinear backtrace. Each output cell reads only the old
+// velocity pair, so the pass is naturally parallel and uses ping-pong buffers.
+
+layout(local_size_x = 16, local_size_y = 16) in;
+
+layout(std430, binding = 0) readonly buffer UIn { float uIn[]; };
+layout(std430, binding = 1) readonly buffer VIn { float vIn[]; };
+layout(std430, binding = 2) writeonly buffer UOut { float uOut[]; };
+layout(std430, binding = 3) writeonly buffer VOut { float vOut[]; };
+
+layout(push_constant) uniform Push {
+  int size;
+} pc;
+
+float bilinearU(vec2 point) {
+  float upper = float(pc.size) - 1.5;
+  vec2 clamped = clamp(point, vec2(0.5), vec2(upper));
+  ivec2 p0 = ivec2(floor(clamped));
+  ivec2 p1 = min(p0 + ivec2(1), ivec2(pc.size - 1));
+  vec2 fraction = clamped - vec2(p0);
+  float top = mix(uIn[p0.y * pc.size + p0.x],
+                  uIn[p0.y * pc.size + p1.x], fraction.x);
+  float bottom = mix(uIn[p1.y * pc.size + p0.x],
+                     uIn[p1.y * pc.size + p1.x], fraction.x);
+  return mix(top, bottom, fraction.y);
+}
+
+float bilinearV(vec2 point) {
+  float upper = float(pc.size) - 1.5;
+  vec2 clamped = clamp(point, vec2(0.5), vec2(upper));
+  ivec2 p0 = ivec2(floor(clamped));
+  ivec2 p1 = min(p0 + ivec2(1), ivec2(pc.size - 1));
+  vec2 fraction = clamped - vec2(p0);
+  float top = mix(vIn[p0.y * pc.size + p0.x],
+                  vIn[p0.y * pc.size + p1.x], fraction.x);
+  float bottom = mix(vIn[p1.y * pc.size + p0.x],
+                     vIn[p1.y * pc.size + p1.x], fraction.x);
+  return mix(top, bottom, fraction.y);
+}
+
+void main() {
+  int x = int(gl_GlobalInvocationID.x);
+  int y = int(gl_GlobalInvocationID.y);
+  if (x >= pc.size || y >= pc.size) return;
+  int i = y * pc.size + x;
+  vec2 backtrace = vec2(x, y) - vec2(uIn[i], vIn[i]);
+  uOut[i] = bilinearU(backtrace);
+  vOut[i] = bilinearV(backtrace);
+}

@@ -1,0 +1,41 @@
+#version 450
+// Binding watercolor Phase B: shallow-water height force. High water pushes
+// toward lower neighbours — the velocity gains a nudge down the (waterH +
+// saturation) gradient. Each cell updates only its own velocity from
+// read-only water fields, so the pass is naturally parallel (ping-pong
+// velocity slots, in slot 0 -> out slot 1).
+
+layout(local_size_x = 16, local_size_y = 16) in;
+
+layout(std430, binding = 0) readonly buffer UIn { float uIn[]; };
+layout(std430, binding = 1) readonly buffer VIn { float vIn[]; };
+layout(std430, binding = 2) writeonly buffer UOut { float uOut[]; };
+layout(std430, binding = 3) writeonly buffer VOut { float vOut[]; };
+layout(std430, binding = 4) readonly buffer WaterH { float waterH[]; };
+layout(std430, binding = 5) readonly buffer Saturation { float saturation[]; };
+
+layout(push_constant) uniform Push {
+  float force; // params.heightForce
+  int size;
+} pc;
+
+int cl(int v, int lo, int hi) { return v < lo ? lo : (v > hi ? hi : v); }
+
+void main() {
+  int s = pc.size;
+  int x = int(gl_GlobalInvocationID.x);
+  int y = int(gl_GlobalInvocationID.y);
+  if (x >= s || y >= s) return;
+  int i = y * s + x;
+
+  int l = y * s + cl(x - 1, 0, s - 1);
+  int r = y * s + cl(x + 1, 0, s - 1);
+  int d = cl(y - 1, 0, s - 1) * s + x;
+  int up = cl(y + 1, 0, s - 1) * s + x;
+
+  float gx = 0.5 * ((waterH[r] + saturation[r]) - (waterH[l] + saturation[l]));
+  float gy = 0.5 * ((waterH[up] + saturation[up]) - (waterH[d] + saturation[d]));
+
+  uOut[i] = clamp(uIn[i] - pc.force * gx, -3.0, 3.0);
+  vOut[i] = clamp(vIn[i] - pc.force * gy, -3.0, 3.0);
+}

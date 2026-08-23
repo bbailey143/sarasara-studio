@@ -134,7 +134,7 @@ function studioBridge() {
 }
 
 export default defineConfig({
-  root: 'studio',
+  root: 'app',
   plugins: [react(), tailwindcss(), studioBridge()],
   server: {
     port: 5173,

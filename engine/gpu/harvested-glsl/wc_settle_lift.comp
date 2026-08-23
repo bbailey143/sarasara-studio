@@ -1,0 +1,141 @@
+#version 450
+// Binding watercolor Phase-B settle / lift / finalize (GPU). Per-cell and
+// in-place: as the local film dries, suspended pigment settles into the
+// deposited layer (granulation- and drying-edge-weighted); still-wet pigment
+// can be lifted back from the unprotected deposit; and once a cell has held
+// below mobility for dryHoldSeconds its deposit is frozen into the protected
+// dry substrate and its velocity is pinned. Only the four mobility neighbours
+// are read across cells (read-only), so every write touches this cell alone.
+// float32 here; matches the double CPU/Dart within rounding (the parity fixture
+// seeds mobility / dry-clock clear of the branch thresholds).
+
+layout(local_size_x = 16, local_size_y = 16) in;
+
+layout(std430, binding = 0) buffer Ksus { float ksus[]; };
+layout(std430, binding = 1) buffer Ssus { float ssus[]; };
+layout(std430, binding = 2) buffer Props { float props[]; };     // stride 3
+layout(std430, binding = 3) buffer Kdep { float kdep[]; };
+layout(std430, binding = 4) buffer Sdep { float sdep[]; };
+layout(std430, binding = 5) buffer PropsDep { float pdep[]; };    // stride 4
+layout(std430, binding = 6) buffer Kdry { float kDry[]; };
+layout(std430, binding = 7) buffer Sdry { float sDry[]; };
+layout(std430, binding = 8) buffer PropsDry { float pDry[]; };    // stride 4
+layout(std430, binding = 9) readonly buffer WaterM { float m[]; };
+layout(std430, binding = 10) readonly buffer PaperH { float paperHeight[]; };
+layout(std430, binding = 11) buffer VelU { float velU[]; };
+layout(std430, binding = 12) buffer VelV { float velV[]; };
+
+layout(push_constant) uniform Push {
+  float settle;
+  float lift;
+  float edge;
+  float wetOff;
+  float wetOn;
+  float dryHoldSeconds;
+  float stepSeconds;
+  int size;
+} pc;
+
+const int BANDS = 8;
+const int SP = 3;
+const int DP = 4;
+const int DRY_CLOCK = 3;
+
+int cl(int v, int lo, int hi) { return v < lo ? lo : (v > hi ? hi : v); }
+float clampf(float v, float lo, float hi) {
+  return v < lo ? lo : (v > hi ? hi : v);
+}
+
+void main() {
+  int s = pc.size;
+  int x = int(gl_GlobalInvocationID.x);
+  int y = int(gl_GlobalInvocationID.y);
+  if (x >= s || y >= s) return;
+  int i = y * s + x;
+  int ps = i * SP;
+  int pd = i * DP;
+
+  float loadSus = props[ps];
+  float granSus = props[ps + 1];
+  float stainSus = props[ps + 2];
+
+  float mC = m[i];
+  float dryness = 1.0 - mC;
+  float mL = m[y * s + cl(x - 1, 0, s - 1)];
+  float mR = m[y * s + cl(x + 1, 0, s - 1)];
+  float mD = m[cl(y - 1, 0, s - 1) * s + x];
+  float mU = m[cl(y + 1, 0, s - 1) * s + x];
+  float gx = 0.5 * (mR - mL);
+  float gy = 0.5 * (mU - mD);
+  float grad = sqrt(gx * gx + gy * gy);
+
+  float activeDeposit = max(0.0, pdep[pd] - pDry[pd]);
+  bool hasActivePigment = loadSus > 1e-10 || activeDeposit > 1e-10;
+  float dryClock = pdep[pd + DRY_CLOCK];
+  if (!hasActivePigment) {
+    dryClock = 0.0;
+  } else if (mC <= pc.wetOff) {
+    dryClock += pc.stepSeconds;
+  } else if (mC >= pc.wetOn) {
+    dryClock = 0.0;
+  } else {
+    dryClock = max(0.0, dryClock - pc.stepSeconds);
+  }
+  pdep[pd + DRY_CLOCK] = dryClock;
+  bool dryLocked = hasActivePigment && dryClock >= pc.dryHoldSeconds;
+
+  float granAverage = granSus / max(loadSus, 1e-4);
+  float valley = 1.0 - clampf(paperHeight[i], 0.0, 1.0);
+  float granulationBias = clampf(1.0 + granAverage * (valley - 0.5), 0.65, 1.35);
+  float settleFrac = dryLocked
+      ? 1.0
+      : pc.settle * dryness * granulationBias * (1.0 + pc.edge * grad * 0.35);
+  settleFrac = clampf(settleFrac, 0.0, 1.0);
+
+  float loadDep = pdep[pd];
+  float liftableLoad = max(0.0, loadDep - pDry[pd]);
+  float liftableGran = max(0.0, pdep[pd + 1] - pDry[pd + 1]);
+  float liftableStain = max(0.0, pdep[pd + 2] - pDry[pd + 2]);
+  float stnDep = liftableStain / max(liftableLoad, 1e-4);
+  float stainResistance = clampf(1.0 - stnDep * (1.0 - mC) * 0.85, 0.0, 1.0);
+  float liftFrac = dryLocked ? 0.0 : pc.lift * mC * 0.10 * stainResistance;
+  liftFrac = clampf(liftFrac, 0.0, 1.0);
+
+  int kb = i * BANDS;
+  for (int b = 0; b < BANDS; b++) {
+    float ksO = ksus[kb + b];
+    float kdO = kdep[kb + b];
+    float kdLiftable = max(0.0, kdO - kDry[kb + b]);
+    kdep[kb + b] = max(0.0, kdO + settleFrac * ksO - liftFrac * kdLiftable);
+    ksus[kb + b] = max(0.0, ksO - settleFrac * ksO + liftFrac * kdLiftable);
+    float ssO = ssus[kb + b];
+    float sdO = sdep[kb + b];
+    float sdLiftable = max(0.0, sdO - sDry[kb + b]);
+    sdep[kb + b] = max(0.0, sdO + settleFrac * ssO - liftFrac * sdLiftable);
+    ssus[kb + b] = max(0.0, ssO - settleFrac * ssO + liftFrac * sdLiftable);
+  }
+
+  props[ps] = max(0.0, loadSus - settleFrac * loadSus + liftFrac * liftableLoad);
+  props[ps + 1] =
+      max(0.0, granSus - settleFrac * granSus + liftFrac * liftableGran);
+  props[ps + 2] =
+      max(0.0, stainSus - settleFrac * stainSus + liftFrac * liftableStain);
+  pdep[pd] = max(0.0, loadDep + settleFrac * loadSus - liftFrac * liftableLoad);
+  pdep[pd + 1] =
+      max(0.0, pdep[pd + 1] + settleFrac * granSus - liftFrac * liftableGran);
+  pdep[pd + 2] =
+      max(0.0, pdep[pd + 2] + settleFrac * stainSus - liftFrac * liftableStain);
+
+  if (dryLocked && pdep[pd] > 0.0) {
+    for (int b = 0; b < BANDS; b++) {
+      kDry[kb + b] = kdep[kb + b];
+      sDry[kb + b] = sdep[kb + b];
+    }
+    pDry[pd] = pdep[pd];
+    pDry[pd + 1] = pdep[pd + 1];
+    pDry[pd + 2] = pdep[pd + 2];
+    pDry[pd + DRY_CLOCK] = 0.0;
+    velU[i] = 0.0;
+    velV[i] = 0.0;
+  }
+}

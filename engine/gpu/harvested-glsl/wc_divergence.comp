@@ -1,0 +1,26 @@
+#version 450
+// Binding watercolor Phase B: velocity divergence (central differences), the
+// right-hand side of the pressure Poisson solve.
+
+layout(local_size_x = 16, local_size_y = 16) in;
+
+layout(std430, binding = 0) readonly buffer UIn { float uIn[]; };
+layout(std430, binding = 1) readonly buffer VIn { float vIn[]; };
+layout(std430, binding = 2) writeonly buffer Div { float divOut[]; };
+
+layout(push_constant) uniform Push { int size; } pc;
+
+int cl(int v, int lo, int hi) { return v < lo ? lo : (v > hi ? hi : v); }
+
+void main() {
+  int s = pc.size;
+  int x = int(gl_GlobalInvocationID.x);
+  int y = int(gl_GlobalInvocationID.y);
+  if (x >= s || y >= s) return;
+  int i = y * s + x;
+  int l = y * s + cl(x - 1, 0, s - 1);
+  int r = y * s + cl(x + 1, 0, s - 1);
+  int d = cl(y - 1, 0, s - 1) * s + x;
+  int up = cl(y + 1, 0, s - 1) * s + x;
+  divOut[i] = 0.5 * ((uIn[r] - uIn[l]) + (vIn[up] - vIn[d]));
+}

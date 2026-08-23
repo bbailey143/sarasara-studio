@@ -1,0 +1,100 @@
+#version 450
+//
+// Watercolor wet-into-wet diffusion (the `_bleed` pass) as a GPU compute
+// kernel. This is the GATHER form of the CPU scatter in `wc_core.c`: every
+// output cell reads its own value plus its 4 neighbours from the OLD buffers
+// and computes its new value, so all cells run in parallel with no write
+// races. In exact arithmetic this equals the CPU's equal-and-opposite face
+// fluxes; on the GPU everything is float32 (no double intermediates), so the
+// result matches the CPU/Dart baseline within float rounding, not bit-for-bit.
+//
+// Regenerate the embedded SPIR-V after editing:
+//   glslc native/wc_bleed.comp -O -mfmt=c -o native/wc_bleed_spv.h
+// (see native/wc_vulkan.c).
+
+layout(local_size_x = 16, local_size_y = 16) in;
+
+const int BANDS = 8; // WatercolorField.bands
+const int PROPS = 3; // WatercolorField.susProps
+
+layout(std430, binding = 0) readonly buffer WaterH { float waterH[]; };
+layout(std430, binding = 1) readonly buffer Saturation { float saturation[]; };
+layout(std430, binding = 2) readonly buffer KIn { float ksusIn[]; };
+layout(std430, binding = 3) readonly buffer SIn { float ssusIn[]; };
+layout(std430, binding = 4) readonly buffer PIn { float propsIn[]; };
+layout(std430, binding = 5) writeonly buffer KOut { float ksusOut[]; };
+layout(std430, binding = 6) writeonly buffer SOut { float ssusOut[]; };
+layout(std430, binding = 7) writeonly buffer POut { float propsOut[]; };
+
+layout(push_constant) uniform Push {
+  float rate;         // clamp(params.bleed * scale, 0, 0.24), precomputed on host
+  float wetThreshold; // params.wetThreshold
+  int size;           // grid size (cells per side)
+} pc;
+
+float smoothstep3(float e0, float e1, float x) {
+  float t = clamp((x - e0) / (e1 - e0), 0.0, 1.0);
+  return t * t * (3.0 - 2.0 * t);
+}
+
+float wetMobility(float surfaceWater, float paperSaturation, float thr) {
+  float threshold = max(thr, 1e-6);
+  float surface = smoothstep3(threshold * 0.35, threshold * 1.5, surfaceWater);
+  float paper = smoothstep3(threshold * 0.20, threshold * 1.10, paperSaturation);
+  const float dampMobility = 0.60;
+  return 1.0 - (1.0 - surface) * (1.0 - dampMobility * paper);
+}
+
+void main() {
+  int s = pc.size;
+  int x = int(gl_GlobalInvocationID.x);
+  int y = int(gl_GlobalInvocationID.y);
+  if (x >= s || y >= s) {
+    return;
+  }
+  int c = y * s + x;
+
+  float wetC = wetMobility(waterH[c], saturation[c], pc.wetThreshold);
+
+  float kAcc[BANDS];
+  float sAcc[BANDS];
+  float pAcc[PROPS];
+  for (int b = 0; b < BANDS; b++) {
+    kAcc[b] = ksusIn[c * BANDS + b];
+    sAcc[b] = ssusIn[c * BANDS + b];
+  }
+  for (int p = 0; p < PROPS; p++) {
+    pAcc[p] = propsIn[c * PROPS + p];
+  }
+
+  const ivec2 offs[4] =
+      ivec2[4](ivec2(1, 0), ivec2(-1, 0), ivec2(0, 1), ivec2(0, -1));
+  for (int i = 0; i < 4; i++) {
+    int nx = x + offs[i].x;
+    int ny = y + offs[i].y;
+    if (nx < 0 || ny < 0 || nx >= s || ny >= s) {
+      continue;
+    }
+    int n = ny * s + nx;
+    float wetN = wetMobility(waterH[n], saturation[n], pc.wetThreshold);
+    if (wetC <= 1e-4 || wetN <= 1e-4) {
+      continue;
+    }
+    float ex = pc.rate * sqrt(wetC * wetN);
+    for (int b = 0; b < BANDS; b++) {
+      kAcc[b] += ex * (ksusIn[n * BANDS + b] - ksusIn[c * BANDS + b]);
+      sAcc[b] += ex * (ssusIn[n * BANDS + b] - ssusIn[c * BANDS + b]);
+    }
+    for (int p = 0; p < PROPS; p++) {
+      pAcc[p] += ex * (propsIn[n * PROPS + p] - propsIn[c * PROPS + p]);
+    }
+  }
+
+  for (int b = 0; b < BANDS; b++) {
+    ksusOut[c * BANDS + b] = kAcc[b];
+    ssusOut[c * BANDS + b] = sAcc[b];
+  }
+  for (int p = 0; p < PROPS; p++) {
+    propsOut[c * PROPS + p] = pAcc[p];
+  }
+}

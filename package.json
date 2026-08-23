@@ -7,7 +7,7 @@
     "lab": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node lab/shared-solver.test.js"
+    "test": "node engine/tests/solver.test.js"
   },
   "dependencies": {
     "react": "^18.3.1",

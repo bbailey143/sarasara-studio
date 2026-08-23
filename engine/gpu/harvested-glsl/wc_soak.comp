@@ -1,0 +1,52 @@
+#version 450
+// Increment 9 soak, evaporation, and mobility-mask recomputation.
+
+layout(local_size_x = 16, local_size_y = 16) in;
+
+layout(std430, binding = 0) readonly buffer WaterIn { float waterHIn[]; };
+layout(std430, binding = 1) buffer Saturation { float saturation[]; };
+layout(std430, binding = 2) readonly buffer PaperCapacity { float paperCapacity[]; };
+layout(std430, binding = 3) writeonly buffer WaterOut { float waterHOut[]; };
+layout(std430, binding = 4) writeonly buffer MobilityOut { float waterMOut[]; };
+
+layout(push_constant) uniform Push {
+  float soak;
+  float dry;
+  float paperDry;
+  float wetThreshold;
+  int size;
+} pc;
+
+float smoothstep3(float e0, float e1, float x) {
+  float t = clamp((x - e0) / (e1 - e0), 0.0, 1.0);
+  return t * t * (3.0 - 2.0 * t);
+}
+
+float wetMobility(float surfaceWater, float paperSaturation, float thr) {
+  float threshold = max(thr, 1e-6);
+  float surface = smoothstep3(threshold * 0.35, threshold * 1.5, surfaceWater);
+  float paper = smoothstep3(threshold * 0.20, threshold * 1.10, paperSaturation);
+  const float dampMobility = 0.60;
+  return 1.0 - (1.0 - surface) * (1.0 - dampMobility * paper);
+}
+
+void main() {
+  int s = pc.size;
+  int x = int(gl_GlobalInvocationID.x);
+  int y = int(gl_GlobalInvocationID.y);
+  if (x >= s || y >= s) return;
+  int i = y * s + x;
+
+  float oldSaturation = saturation[i];
+  float room = max(0.0, paperCapacity[i] - oldSaturation);
+  float absorb = min(waterHIn[i] * pc.soak, room);
+  float h = max(0.0, waterHIn[i] - absorb - pc.dry);
+  bool belowMobilePaper =
+      oldSaturation <= pc.wetThreshold * 0.20 && h <= 1e-6;
+  float exposedDry = belowMobilePaper ? pc.paperDry * 3.0 : pc.paperDry;
+  float sat = max(0.0, oldSaturation + absorb - exposedDry);
+
+  waterHOut[i] = h;
+  saturation[i] = sat;
+  waterMOut[i] = wetMobility(h, sat, pc.wetThreshold);
+}

@@ -1,0 +1,72 @@
+#version 450
+// Binding watercolor Phase B: conservative surface-water transport. The CPU
+// reference is a SCATTER (each cell keeps a remainder and pushes a
+// velocity-weighted share to one downwind horizontal + one downwind vertical
+// neighbour; a border cell whose share would leave the grid keeps it). This is
+// the equivalent GATHER: each output cell collects its own remainder, its own
+// reflected border share, and the shares its neighbours push into it — so every
+// invocation writes only its own cell and the pass is race-free. Equal to the
+// scatter in exact arithmetic; float32 on the GPU, so it matches the CPU/Dart
+// baseline within rounding.
+
+layout(local_size_x = 16, local_size_y = 16) in;
+
+layout(std430, binding = 0) readonly buffer HIn { float hIn[]; };
+layout(std430, binding = 1) readonly buffer UIn { float uIn[]; };
+layout(std430, binding = 2) readonly buffer VIn { float vIn[]; };
+layout(std430, binding = 3) writeonly buffer HOut { float hOut[]; };
+
+layout(push_constant) uniform Push { int size; } pc;
+
+// (fx, fy) share pushed by cell `idx`, matching the CPU clamp + rescale.
+vec2 fluxOf(int idx) {
+  float fx = clamp(abs(uIn[idx]) * 0.42, 0.0, 0.42);
+  float fy = clamp(abs(vIn[idx]) * 0.42, 0.0, 0.42);
+  float moved = fx + fy;
+  if (moved > 0.78) {
+    float sc = 0.78 / moved;
+    fx *= sc;
+    fy *= sc;
+  }
+  return vec2(fx, fy);
+}
+
+void main() {
+  int s = pc.size;
+  int x = int(gl_GlobalInvocationID.x);
+  int y = int(gl_GlobalInvocationID.y);
+  if (x >= s || y >= s) return;
+  int j = y * s + x;
+
+  vec2 fj = fluxOf(j);
+  float acc = hIn[j] * (1.0 - fj.x - fj.y); // remainder kept at home
+
+  // Border reflection: a share aimed off-grid clamps back onto this cell.
+  if ((x == 0 && uIn[j] < 0.0) || (x == s - 1 && uIn[j] >= 0.0)) {
+    acc += hIn[j] * fj.x;
+  }
+  if ((y == 0 && vIn[j] < 0.0) || (y == s - 1 && vIn[j] >= 0.0)) {
+    acc += hIn[j] * fj.y;
+  }
+
+  // Incoming horizontal share: left neighbour moving right, or right moving left.
+  if (x > 0) {
+    int L = y * s + (x - 1);
+    if (uIn[L] >= 0.0) acc += hIn[L] * fluxOf(L).x;
+  }
+  if (x < s - 1) {
+    int R = y * s + (x + 1);
+    if (uIn[R] < 0.0) acc += hIn[R] * fluxOf(R).x;
+  }
+  // Incoming vertical share: lower neighbour moving up, or upper moving down.
+  if (y > 0) {
+    int D = (y - 1) * s + x;
+    if (vIn[D] >= 0.0) acc += hIn[D] * fluxOf(D).y;
+  }
+  if (y < s - 1) {
+    int U = (y + 1) * s + x;
+    if (vIn[U] < 0.0) acc += hIn[U] * fluxOf(U).y;
+  }
+
+  hOut[j] = acc;
+}

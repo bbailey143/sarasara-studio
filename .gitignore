@@ -10,3 +10,17 @@ tmp/
 # Node
 node_modules/
 dist/
+
+# Leftovers from the archived Flutter project. The source lives on
+# feat/native-core-increment-* and archive/legacy-main; this is build output
+# sitting in the working directory, not part of the official branch.
+.dart_tool/
+build/
+android/
+ios/
+windows/
+web/
+*.iml
+*.log
+skills-lock.json
+.agents/

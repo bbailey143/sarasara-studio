@@ -1,0 +1,36 @@
+#version 450
+// Binding watercolor Phase B: implicit-style viscosity Jacobi. One dispatch is
+// one Jacobi iteration reading the old velocity pair and writing the relaxed
+// pair; the host loops `viscosityIters` dispatches, ping-ponging the velocity
+// slots with a barrier between each.
+
+layout(local_size_x = 16, local_size_y = 16) in;
+
+layout(std430, binding = 0) readonly buffer UIn { float uIn[]; };
+layout(std430, binding = 1) readonly buffer VIn { float vIn[]; };
+layout(std430, binding = 2) writeonly buffer UOut { float uOut[]; };
+layout(std430, binding = 3) writeonly buffer VOut { float vOut[]; };
+
+layout(push_constant) uniform Push {
+  float nu; // params.viscosity
+  int size;
+} pc;
+
+int cl(int v, int lo, int hi) { return v < lo ? lo : (v > hi ? hi : v); }
+
+void main() {
+  int s = pc.size;
+  int x = int(gl_GlobalInvocationID.x);
+  int y = int(gl_GlobalInvocationID.y);
+  if (x >= s || y >= s) return;
+  int i = y * s + x;
+
+  int l = y * s + cl(x - 1, 0, s - 1);
+  int r = y * s + cl(x + 1, 0, s - 1);
+  int d = cl(y - 1, 0, s - 1) * s + x;
+  int up = cl(y + 1, 0, s - 1) * s + x;
+
+  float denom = 1.0 + 4.0 * pc.nu;
+  uOut[i] = (uIn[i] + pc.nu * (uIn[l] + uIn[r] + uIn[d] + uIn[up])) / denom;
+  vOut[i] = (vIn[i] + pc.nu * (vIn[l] + vIn[r] + vIn[d] + vIn[up])) / denom;
+}

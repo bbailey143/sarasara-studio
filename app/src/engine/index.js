@@ -7,21 +7,21 @@
  * else.
  *
  * Today that interface is backed by the JavaScript reference solver in
- * `lab/shared-solver.js`. When the engine moves to a compiled/wasm build, only
+ * `engine/reference/solver.js`. When the engine moves to a compiled/wasm build, only
  * this file changes: `createEngine` stays async, every other method stays
  * synchronous, and no panel notices the swap.
  *
  * Rules for anyone extending this:
- *   - The UI must never import `shared-solver.js` directly.
+ *   - The UI must never import `solver.js` directly.
  *   - The UI must never read a canonical property id out of a profile to make a
  *     decision. Ask the engine what a material is; do not infer it.
  *   - Nothing here may branch on a material name.
  */
 
-import '../../../lab/shared-solver.js';
+import '../../../engine/reference/solver.js';
 
 const lab = globalThis.window?.SarasaraLab;
-if (!lab) throw new Error('The shared solver did not register. Check lab/shared-solver.js.');
+if (!lab) throw new Error('The shared solver did not register. Check engine/reference/solver.js.');
 
 const { SharedSolver, PROFILES, SUBSTRATES, BRUSHES } = lab;
 

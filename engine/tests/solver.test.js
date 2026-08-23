@@ -2,7 +2,7 @@
 
 global.window={};
 global.document={createElement(){return{width:0,height:0,getContext(){return{createImageData(w,h){return{data:new Uint8ClampedArray(w*h*4)}},putImageData(){}}}}}};
-require('./shared-solver.js');
+require('../reference/solver.js');
 
 const {SharedSolver,PROFILES,SUBSTRATES,BRUSHES,DEFAULT_CALIBRATION,validateCalibration,interpolatePressure}=window.SarasaraLab;
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};

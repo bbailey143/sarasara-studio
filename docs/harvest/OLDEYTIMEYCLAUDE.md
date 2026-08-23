@@ -1,10 +1,5 @@
 # CLAUDE.md
 
-> **This project has its own guidepost. Read [`docs/GUIDEPOST.md`](docs/GUIDEPOST.md)
-> before anything below.** It states what is already decided, what is forbidden,
-> and what to build next. Three previous branches drifted; that document exists
-> to stop a fourth.
-
 Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
 
 **Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.

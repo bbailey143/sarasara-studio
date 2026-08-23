@@ -1,0 +1,40 @@
+#version 450
+// Increment 9 capillary surface-water spread. Each output cell gathers the
+// symmetric exchanges with its four neighbours; paper valleys set conductance.
+
+layout(local_size_x = 16, local_size_y = 16) in;
+
+layout(std430, binding = 0) readonly buffer WaterIn { float waterHIn[]; };
+layout(std430, binding = 1) readonly buffer PaperHeight { float paperHeight[]; };
+layout(std430, binding = 2) writeonly buffer WaterOut { float waterHOut[]; };
+
+layout(push_constant) uniform Push {
+  float spread;
+  int size;
+} pc;
+
+float contribution(int from, int to) {
+  float delta = waterHIn[from] - waterHIn[to];
+  if (abs(delta) < 1e-8) return 0.0;
+  float valleyFrom = 1.0 - clamp(paperHeight[from], 0.0, 1.0);
+  float valleyTo = 1.0 - clamp(paperHeight[to], 0.0, 1.0);
+  float valleyConnection = clamp(valleyFrom * valleyTo, 0.0, 1.0);
+  float connection = valleyConnection * valleyConnection;
+  float conductance = 0.12 + 0.88 * connection;
+  return delta * pc.spread * 0.20 * conductance;
+}
+
+void main() {
+  int s = pc.size;
+  int x = int(gl_GlobalInvocationID.x);
+  int y = int(gl_GlobalInvocationID.y);
+  if (x >= s || y >= s) return;
+  int j = y * s + x;
+
+  float value = waterHIn[j];
+  if (x > 0) value += contribution(j - 1, j);
+  if (x < s - 1) value += contribution(j + 1, j);
+  if (y > 0) value += contribution(j - s, j);
+  if (y < s - 1) value += contribution(j + s, j);
+  waterHOut[j] = value;
+}

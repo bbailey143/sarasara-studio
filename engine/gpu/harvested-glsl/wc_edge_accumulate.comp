@@ -1,0 +1,68 @@
+#version 450
+// Increment 8 drying-edge pigment accumulation. The CPU supplies the exact
+// donor and fraction decisions; this shader gathers the conservative gain and
+// losses for all 19 suspended-pigment channels in parallel.
+
+layout(local_size_x = 16, local_size_y = 16) in;
+
+layout(std430, binding = 0) readonly buffer Frac { float frac[]; };
+layout(std430, binding = 1) readonly buffer DonorIdx { float donorIdx[]; };
+layout(std430, binding = 2) readonly buffer KIn { float ksusIn[]; };
+layout(std430, binding = 3) readonly buffer SIn { float ssusIn[]; };
+layout(std430, binding = 4) readonly buffer PIn { float propsIn[]; };
+layout(std430, binding = 5) writeonly buffer KOut { float ksusOut[]; };
+layout(std430, binding = 6) writeonly buffer SOut { float ssusOut[]; };
+layout(std430, binding = 7) writeonly buffer POut { float propsOut[]; };
+
+layout(push_constant) uniform Push { int size; } pc;
+
+const int BANDS = 8;
+const int PROPS = 3;
+
+bool drawsFrom(int target, int donor) {
+  return int(donorIdx[target]) == donor;
+}
+
+void main() {
+  int s = pc.size;
+  int x = int(gl_GlobalInvocationID.x);
+  int y = int(gl_GlobalInvocationID.y);
+  if (x >= s || y >= s) return;
+  int j = y * s + x;
+
+  float loss = 0.0;
+  if (x > 0) {
+    int left = j - 1;
+    if (drawsFrom(left, j)) loss += frac[left];
+  }
+  if (x < s - 1) {
+    int right = j + 1;
+    if (drawsFrom(right, j)) loss += frac[right];
+  }
+  if (y > 0) {
+    int down = j - s;
+    if (drawsFrom(down, j)) loss += frac[down];
+  }
+  if (y < s - 1) {
+    int up = j + s;
+    if (drawsFrom(up, j)) loss += frac[up];
+  }
+
+  int donor = int(donorIdx[j]);
+  float gain = frac[j];
+  for (int b = 0; b < BANDS; b++) {
+    int channel = j * BANDS + b;
+    float k = ksusIn[channel];
+    float sv = ssusIn[channel];
+    float kout = k + gain * ksusIn[donor * BANDS + b] - loss * k;
+    float sout = sv + gain * ssusIn[donor * BANDS + b] - loss * sv;
+    ksusOut[channel] = max(kout, 0.0);
+    ssusOut[channel] = max(sout, 0.0);
+  }
+  for (int c = 0; c < PROPS; c++) {
+    int channel = j * PROPS + c;
+    float value = propsIn[channel];
+    float outValue = value + gain * propsIn[donor * PROPS + c] - loss * value;
+    propsOut[channel] = max(outValue, 0.0);
+  }
+}

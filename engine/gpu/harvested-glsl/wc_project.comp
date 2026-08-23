@@ -1,0 +1,52 @@
+#version 450
+// Binding watercolor Phase B: partial free-surface projection with canvas tilt.
+// Subtracts most of the pressure gradient from the velocity, keeps a bounded
+// height-force residual, then adds tilt (after projection). Dry cells and the
+// outer border are pinned to zero velocity.
+
+layout(local_size_x = 16, local_size_y = 16) in;
+
+layout(std430, binding = 0) readonly buffer UIn { float uIn[]; };
+layout(std430, binding = 1) readonly buffer VIn { float vIn[]; };
+layout(std430, binding = 2) readonly buffer P { float pressure[]; };
+layout(std430, binding = 3) readonly buffer WaterH { float waterH[]; };
+layout(std430, binding = 4) readonly buffer Saturation { float saturation[]; };
+layout(std430, binding = 5) writeonly buffer UOut { float uOut[]; };
+layout(std430, binding = 6) writeonly buffer VOut { float vOut[]; };
+
+layout(push_constant) uniform Push {
+  float force;        // params.heightForce
+  float gravityX;
+  float gravityY;
+  float wetThreshold; // params.wetThreshold
+  int size;
+} pc;
+
+int cl(int v, int lo, int hi) { return v < lo ? lo : (v > hi ? hi : v); }
+
+void main() {
+  int s = pc.size;
+  int x = int(gl_GlobalInvocationID.x);
+  int y = int(gl_GlobalInvocationID.y);
+  if (x >= s || y >= s) return;
+  int i = y * s + x;
+  int l = y * s + cl(x - 1, 0, s - 1);
+  int r = y * s + cl(x + 1, 0, s - 1);
+  int d = cl(y - 1, 0, s - 1) * s + x;
+  int up = cl(y + 1, 0, s - 1) * s + x;
+
+  bool wet = (waterH[i] + saturation[i]) > pc.wetThreshold * 0.35;
+  if (!wet || x == 0 || y == 0 || x == s - 1 || y == s - 1) {
+    uOut[i] = 0.0;
+    vOut[i] = 0.0;
+    return;
+  }
+
+  float projectionStrength = 0.68;
+  float projectedU = uIn[i] - projectionStrength * 0.5 * (pressure[r] - pressure[l]);
+  float projectedV = vIn[i] - projectionStrength * 0.5 * (pressure[up] - pressure[d]);
+  float gx = 0.5 * ((waterH[r] + saturation[r]) - (waterH[l] + saturation[l]));
+  float gy = 0.5 * ((waterH[up] + saturation[up]) - (waterH[d] + saturation[d]));
+  uOut[i] = clamp(projectedU - pc.force * 0.28 * gx + pc.gravityX, -3.0, 3.0) * 0.985;
+  vOut[i] = clamp(projectedV - pc.force * 0.28 * gy + pc.gravityY, -3.0, 3.0) * 0.985;
+}
